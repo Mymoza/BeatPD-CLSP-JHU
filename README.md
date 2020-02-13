@@ -4,14 +4,17 @@
 
 
 ```
-conda create -n BeatPD python=3.5 pip
+conda create -n BeatPD python=3.5
 
 source activate BeatPD 
 
-pip install -r requirements.txt
+conda install --file requirements.txt
 ```
 
-If the conda environment isn't in Jupyter kernels, run: 
+Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
+
+If the conda environment isn't showing in Jupyter kernels (Kernel > Change Kernel > BeatPD), run: 
 ```
 ipython kernel install --user --name=BeatPD
 ```
+You will then be able to select `BeatPD` as your kernel. 
