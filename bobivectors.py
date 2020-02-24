@@ -22,7 +22,6 @@ import bob.bio.gmm
 import numpy
 import pandas as pd
 import numpy as np
-get_ipython().system('which python; python -V;')
 
 
 # ```
@@ -132,7 +131,7 @@ ivector_machine = bob.learn.em.IVectorMachine(
         prior_gmm, subspace_dimension_of_t, 10e-5)
 
 import multiprocessing.pool
-pool = multiprocessing.ThreadPool(4)
+pool = multiprocessing.ThreadPool(8)
 
 # train IVector model
 bob.learn.em.train(ivector_trainer, ivector_machine,
