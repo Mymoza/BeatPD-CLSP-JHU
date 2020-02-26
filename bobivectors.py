@@ -93,6 +93,9 @@ nd_train_data = np.empty((0,3), float)
 list_train_data = []
 for idx in df_train_label.index:
     df_train_data=pd.read_csv(path_train_data+df_train_label["measurement_id"][idx]+'.csv')
+    # TODO apply mask on df_train_data
+    # load the velocity 
+    # add velocity to regular data
     x = df_train_data.iloc[:,-3:]
     normed_x = (x - x.mean(axis=0)) / x.std(axis=0)
     list_train_data.append(normed_x.to_numpy())
