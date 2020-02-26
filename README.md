@@ -17,6 +17,34 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
+## Directory structure 
+
+```
+|--cis-pd.ancillary_data : Extra data given by the challenge
+|--cis-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
+|   |
+|   |------ CIS-PD_Demographics.csv
+|   |------ CIS-PD_UPDRS_Part3.csv
+|   |------ CIS-PD_UPDRS_Part1_2_4.csv
+|  
+|--cis-pd.data_labels
+|--cis-pd.training_data : Original training data without any edits 
+|--cis-pd.training_data.high_pass_mask : Mask with [0,1] of where the high pass filter identified inactivity 
+|--cis-pd.training_data.k_fold : Labels divided in 5 folds from which we can read the measurement_id 
+|--cis-pd.training_data.no_silence : Silence removed with pct_change technique 
+|--cis-pd.training_data.velocity_original_data : Training data where we found velocity with first derivative of     accelerometer.
+|   High pass filter was also applied so inactivty is removed in these files. 
+
+
+|--real-pd.ancillary_data : Extra data given by the challenge
+|--real-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
+|--real-pd.data_labels
+|--real-pd.training_data : Original training data without any edits 
+|--real-pd.training_data.k_fold : Labels divided in 5 folds from which we can read the measurement_id 
+|
+|-- ubm.dat
+|-- gmm.hdf5
+```
 
 # I-vector training 
 
