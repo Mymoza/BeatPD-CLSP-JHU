@@ -1,3 +1,9 @@
+# ivectors training
+*.dat
+
+# out errors 
+out_* 
+
 .ipynb_checkpoints/
 accelerometer_plots/
 
