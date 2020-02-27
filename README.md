@@ -1,8 +1,6 @@
 # BEATPD 
 
 ## Set up the environment : 
-
-
 ```
 $ conda create -n BeatPD python=3.5
 $ source activate BeatPD 
@@ -64,6 +62,38 @@ You will then be able to select `BeatPD` as your kernel.
 |-- ubm.dat
 |-- gmm.hdf5
 ```
+
+# Databases
+
+<table class="tg">
+  <tr>
+    <th class="tg-0pky"></th>
+    <th class="tg-0pky">CIS-PD</th>
+    <th class="tg-0pky">REAL-PD</th>
+  </tr>
+  <tr>
+    <td class="tg-0pky"># of subject_id training</td>
+    <td class="tg-c3ow">16</td>
+    <td class="tg-c3ow">12</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"># of female training</td>
+    <td class="tg-c3ow">5</td>
+    <td class="tg-c3ow">7</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"># of male training</td>
+    <td class="tg-c3ow">11</td>
+    <td class="tg-c3ow">5</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Age average (std deviation)</td>
+    <td class="tg-c3ow">62.8125 (10.857)</td>
+    <td class="tg-c3ow">59.833 (5.828)</td>
+  </tr>
+</table>
+
+
 
 # I-vector training 
 
