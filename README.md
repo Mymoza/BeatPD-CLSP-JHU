@@ -40,6 +40,11 @@ You will then be able to select `BeatPD` as your kernel.
 |--real-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
 |--real-pd.data_labels
 |--real-pd.training_data : Original training data without any edits 
+|   |
+|   |------ smartphone_accelerometer : 526 files
+|   |------ smartwatch_accelerometer : 535 files
+|   |------ smartwatch_gyroscope : 535 files
+|
 |--real-pd.training_data.k_fold : Labels divided in 5 folds from which we can read the measurement_id 
 |
 |-- ubm.dat
