@@ -21,6 +21,8 @@ You will then be able to select `BeatPD` as your kernel.
 
 ```
 |--cis-pd.ancillary_data : 352 extra files given by the challenge. 
+|--cis-pd.ancillary_data.high_pass_mask : Mask with [0,1] of where the high pass filter identified inactivity on ancillary data
+|
 |--cis-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
 |   |
 |   |------ CIS-PD_Demographics.csv
@@ -28,17 +30,29 @@ You will then be able to select `BeatPD` as your kernel.
 |   |------ CIS-PD_UPDRS_Part1_2_4.csv
 |  
 |--cis-pd.data_labels
-|--cis-pd.training_data : Original training data without any edits 
+|   |
+|   |------ CIS-PD_Ancillary_Data_IDs_Labels.csv
+|   |------ CIS-PD_Training_Data_IDs_Labels.csv
+|
+|
+|--cis-pd.training_data : 1858 files - Original training data without any edits 
 |--cis-pd.training_data.high_pass_mask : Mask with [0,1] of where the high pass filter identified inactivity 
 |--cis-pd.training_data.k_fold : Labels divided in 5 folds from which we can read the measurement_id 
 |--cis-pd.training_data.no_silence : Silence removed with pct_change technique 
-|--cis-pd.training_data.velocity_original_data : Training data where we found velocity with first derivative of     accelerometer.
+|--cis-pd.training_data.velocity_original_data : Training data where we found velocity with first derivative of accelerometer.
 |   High pass filter was also applied so inactivty is removed in these files. 
-
-
+|
+|--cis-pd.testing_data
+|
 |--real-pd.ancillary_data : Extra data given by the challenge
+|--real-pd.ancillary_data.high_pass_mask
+|
 |--real-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
 |--real-pd.data_labels
+|   |
+|   |------ REAL-PD_Ancillary_Data_IDs_Labels.csv
+|   |------ REAL-PD_Training_Data_IDs_Labels.csv
+|
 |--real-pd.training_data : Original training data without any edits 
 |   |
 |   |------ smartphone_accelerometer : 526 files
