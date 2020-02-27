@@ -20,7 +20,7 @@ You will then be able to select `BeatPD` as your kernel.
 ## Directory structure 
 
 ```
-|--cis-pd.ancillary_data : Extra data given by the challenge
+|--cis-pd.ancillary_data : 352 extra files given by the challenge. 
 |--cis-pd.clinical_data : Demographics data about the subjects_id and measurement_id 
 |   |
 |   |------ CIS-PD_Demographics.csv
