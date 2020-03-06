@@ -1,3 +1,6 @@
+resx*
+*.pkl
+
 # ivectors training
 *.dat
 
