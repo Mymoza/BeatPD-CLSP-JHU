@@ -3,6 +3,7 @@ import pickle
 import re 
 import numpy as np
 import glob
+import argparse
 from sklearn.metrics import mean_squared_error
 from math import sqrt 
 
@@ -11,7 +12,7 @@ def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test='')
     denominator = np.sum(np.sqrt(nb_files_per_subject_id))
     print(training_or_test+'Final score : ', np.divide(numerator, denominator))
 
-def read_pickle(sFilePath, bKnn):
+def get_final_scores_accuracy(sFilePath, bKnn):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -19,13 +20,13 @@ def read_pickle(sFilePath, bKnn):
     - sFilePath: Path to where the resx* folders are. 
     - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
     """
-    lResxFolders = [f for f in glob.glob(sFilePath + "resx*")]
+    # Building the list of folders we have to open 
+    sFolderName = ("resi*" if bKnn else "resx*")
+    print(sFolderName)
+    lResxFolders = [f for f in glob.glob(sFilePath + sFolderName)]
     sPatternFold = '(?<=[Ff]old)\d+'
     lComponents = [] 
     lNeighbors = [] 
-
-    # Building the list of folders we have to open 
-    lResxFolders = [f for f in glob.glob(sFilePath + "resx*")]
 
     # Get a list of all files starting with objs
     for fold_folder in lResxFolders:
@@ -35,16 +36,19 @@ def read_pickle(sFilePath, bKnn):
     for objsFile in lObjsFiles:
         # Get a list of all iComponents
         sPatternComponents = r'\d+(?=[_|.])'
-        lComponents.append(re.findall(sPatternComponents, objsFile)[0])
+        # Only add it to the list if it's not already there 
+        noToAdd = re.findall(sPatternComponents, objsFile)[0]
+        lComponents.append(noToAdd) if noToAdd not in lComponents else lComponents
         
         if bKnn:
             # Get a list of all iNeighbors
             sPatternNeighbors = r'(?<=k_)\d+'
-            lNeighbors.append(re.findall(sPatternNeighbors, objsFile)[0])
+            noToAdd = re.findall(sPatternNeighbors, objsFile)[0]
+            lNeighbors.append(noToAdd) if noToAdd not in lNeighbors else lNeighbors
         else:
             # Quickfix to ignore the Neighbors loop if an algorithm other than KNN is used 
             lNeighbors = [1]
-
+    
     print('Components found : ', lComponents)
     (print('Neighbors found : ', lNeighbors) if bKnn else '')
     
@@ -118,9 +122,9 @@ if __name__ == "__main__":
         description='Get Mean Accuracy and Final Score for the BeatPD Challenge.')
 
     parser.add_argument('--file-path',dest='sFilePath', required=True)
-    parser.add_argument('--is-knn',dest='bKnn', required=True)
+    parser.add_argument('--is-knn',dest='bKnn', default=False, required=False, action='store_true')
 
     args=parser.parse_args()
     
-    pca_knn_bpd(**vars(args))
+    get_final_scores_accuracy(**vars(args))
                                     
