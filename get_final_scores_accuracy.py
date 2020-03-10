@@ -6,11 +6,13 @@ import glob
 import argparse
 from sklearn.metrics import mean_squared_error
 from math import sqrt 
+import pandas as pd 
 
 def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test=''):
-    numerator = np.sum([a * b for a, b in zip(np.sqrt(nb_files_per_subject_id), mse_per_subjectid)])
+    numerator = np.sum([nb_file * mse for nb_file, mse in zip(np.sqrt(nb_files_per_subject_id), mse_per_subjectid)])
     denominator = np.sum(np.sqrt(nb_files_per_subject_id))
     print(training_or_test+'Final score : ', np.divide(numerator, denominator))
+    return np.divide(numerator, denominator)
 
 def get_final_scores_accuracy(sFilePath, bKnn):
     """
@@ -35,7 +37,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     # Get a list of all no of components 
     for objsFile in lObjsFiles:
         # Get a list of all iComponents
-        sPatternComponents = r'\d+(?=[_|.])'
+        sPatternComponents = r'(?<=objs_)\d+(?=[_|.])'
         # Only add it to the list if it's not already there 
         noToAdd = re.findall(sPatternComponents, objsFile)[0]
         lComponents.append(noToAdd) if noToAdd not in lComponents else lComponents
@@ -51,6 +53,12 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     
     print('Components found : ', lComponents)
     (print('Neighbors found : ', lNeighbors) if bKnn else '')
+    
+    best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
+                                                                    'Global training accuracy',
+                                                                    'Global testing accuracy',
+                                                                    'Train Final score',
+                                                                    'Test Final score'])
     
     for neighbor in lNeighbors:
         (print('------ FOR NEIGHBOR ', neighbor, '------') if bKnn else '')
@@ -73,9 +81,9 @@ def get_final_scores_accuracy(sFilePath, bKnn):
                 print(fold_folder)
 
                 if bKnn:
-                    sFileName = fold_folder+'/objs_'+component+'_k_'+neighbor+'.pkl'
+                    sFileName = '/objs_'+component+'_k_'+neighbor+'.pkl'
                 else:
-                    sFileName = fold_folder+'/objs_'+component+'.pkl'
+                    sFileName = '/objs_'+component+'.pkl'
 
                 # Retrieve DataFrames from Pickle file 
                 [glob_trai_pred,glob_trai_true, \
@@ -83,7 +91,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
                  mse_training_per_subjectid, \
                  mse_test_per_subjectid, \
                  train_nb_files_per_subjectid, \
-                 test_nb_files_per_subjectid] = pickle.load(open(sFileName, "rb" ) )
+                 test_nb_files_per_subjectid] = pickle.load(open(fold_folder+sFileName, "rb" ) )
 
                 # Build the DataFrames for all folds 
                 allfolds_glob_trai_pred = np.append(allfolds_glob_trai_pred, glob_trai_pred)
@@ -100,16 +108,27 @@ def get_final_scores_accuracy(sFilePath, bKnn):
                 allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
                                                                 test_nb_files_per_subjectid)
             
-            print('Global training accuracy: {}'.format((allfolds_glob_trai_true == allfolds_glob_trai_pred).mean()))
-            print('Global testing accuracy: {}'.format((allfolds_glob_test_true == allfolds_glob_test_pred).mean()))
+            global_training_accuracy = (allfolds_glob_trai_true == allfolds_glob_trai_pred).mean()
+            global_testing_accuracy = (allfolds_glob_test_true == allfolds_glob_test_pred).mean()
+            print('Global training accuracy: {}'.format(global_training_accuracy))
+            print('Global testing accuracy: {}'.format(global_testing_accuracy))
             
-            final_score(allfolds_mse_training_per_subjectid,
+            global_training_final_score = final_score(allfolds_mse_training_per_subjectid,
                         allfolds_train_nb_files_per_subjectid,
                         training_or_test='Train ')
-            final_score(allfolds_mse_test_per_subjectid,
+            global_testing_final_score = final_score(allfolds_mse_test_per_subjectid,
                         allfolds_test_nb_files_per_subjectid,
                         training_or_test='Test ')
-            
+
+            if best_result.loc[0,'Test Final score'] > global_testing_final_score:
+                best_result.update({'Filename': [sFileName],
+                                    'Global training accuracy':[global_training_accuracy],
+                                    'Global testing accuracy':[global_testing_accuracy],
+                                    'Train Final score':[global_training_final_score],
+                                    'Test Final score':[global_testing_final_score]})
+    
+    print('------ GLOBAL WINNER PARAMETERS ------')
+    print(best_result.transpose()[0].to_string())
 
 
 if __name__ == "__main__":
