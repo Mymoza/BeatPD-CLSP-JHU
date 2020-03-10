@@ -24,7 +24,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     """
     # Building the list of folders we have to open 
     sFolderName = ("resi*" if bKnn else "resx*")
-    print(sFolderName)
+    print('Looking for folder : ', sFolderName)
     lResxFolders = [f for f in glob.glob(sFilePath + sFolderName)]
     sPatternFold = '(?<=[Ff]old)\d+'
     lComponents = [] 
@@ -54,6 +54,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     print('Components found : ', lComponents)
     (print('Neighbors found : ', lNeighbors) if bKnn else '')
     
+    # DataFrame which is going to contain the info of the best hyperparameters combination 
     best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
                                                                     'Global training accuracy',
                                                                     'Global testing accuracy',

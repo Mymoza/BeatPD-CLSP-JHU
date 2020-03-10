@@ -719,7 +719,15 @@ def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
 
 
 def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis"):
-
+    """
+    Create wav files for the CIS-PD database 
+    
+    Keyword arguments:
+    - data_subset: {'training_data', 'ancillary_data', 'testing_data'}
+    - data_dir:
+    - sAxis: {'X', 'Y', 'Z'}
+    - data_type="cis" 
+    """
     path_train_data, df_train_label = define_data_type(data_type,
                                                        data_dir,
                                                        data_subset)
@@ -731,15 +739,19 @@ def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis"):
         mask_path=data_dir+'cis-pd.'+data_subset+'.high_pass_mask/'
     )
 
-    num_jobs = 6
+    num_jobs = 8
     with ProcessPoolExecutor(num_jobs) as ex:
         results = list(ex.map(do_work, df_train_label['measurement_id']))
     
 def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real"): 
     """
+    Create wav files for the REAL-PD database 
+    
     Keyword arguments:
     - data_subset: {'training_data', 'ancillary_data', 'testing_data'}
+    - data_dir:
     - sAxis: {'X', 'Y', 'Z'}
+    - data_type="real" 
     """
     for data_real_subtype in ['smartphone_accelerometer', 'smartwatch_accelerometer', 'smartwatch_gyroscope']:
         path_train_data, df_train_label = define_data_type(data_type, data_dir, data_subset, data_real_subtype)
