@@ -61,7 +61,18 @@ def define_data_type(data_type, data_dir, data_subset='training_data', data_real
     If data_type is real, data_real_subtype will have to be declared as well 
     data_real_subtype={smartphone_accelerometer, smartwatch_accelerometer, smartwatch_gyroscope}
     """
-    if data_type == "cis":
+    if data_subset == "testing_data": 
+        path_train_labels = (
+            data_dir
+            + data_type
+            + "-pd.data_labels/"
+            + data_type.upper()
+            + "-PD_"
+            + "Test_Data"
+            +"_IDs_Labels.csv"
+        )  
+        path_train_data = data_dir + data_type + "-pd."+data_subset+"/"
+    elif data_type == "cis" or data_type == "real":
         # CIS-PD_Training_Data_IDs_Labels.csv
         # CIS-PD_Ancillary_Data_IDs_Labels.csv
         path_train_labels = (
@@ -75,18 +86,13 @@ def define_data_type(data_type, data_dir, data_subset='training_data', data_real
         )
         path_train_data = data_dir + data_type + "-pd."+data_subset+"/"
         
-    elif data_type == "real":
-        path_train_labels = (
-            data_dir
-            + data_type
-            + "-pd.data_labels/"
-            + data_type.upper()
-            + "-PD_"
-            + ("Training_Data" if data_subset == 'training_data' else "Ancillary_Data")
-            +"_IDs_Labels.csv"
-        )
+    if data_type == "real":
+        print('data_dir : ', data_dir)
+        print('data_type : ', data_type)
+        print('data_subset : ', data_subset)
+        print('data_real_subtype :', data_real_subtype)
         path_train_data = data_dir + data_type + "-pd."+data_subset+"/" + data_real_subtype + "/"
-
+        
     # Display labels
     df_train_label = pd.read_csv(path_train_labels)
     return path_train_data, df_train_label
@@ -308,8 +314,7 @@ def remove_inactivity_highpass(
             print('Working on ', df_train_label["measurement_id"][idx])
         except FileNotFoundError:
             print('Skipping ' + df_train_label["measurement_id"][idx] +
-                  ' as it doesn\'t exist for ' +
-                  data_real_subtype)
+                  ' as it doesn\'t exist for the subtype')
             continue
         # Set the time axis. It's not the same name for the two databases
         x_axis_data_type = "t" if data_type == "real" else "Timestamp"
@@ -711,3 +716,54 @@ def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
             df_train_data_axis = df_train_data.iloc[:,3:4]
         write(wav_path +
               measurement_id + '.wav', samplerate, df_train_data_axis.to_numpy())
+
+
+def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis"):
+
+    path_train_data, df_train_label = define_data_type(data_type,
+                                                       data_dir,
+                                                       data_subset)
+    do_work = partial(
+        write_wav, 
+        path_train_data=path_train_data,
+        wav_path=data_dir+'cis-pd.'+data_subset+'.wav_'+sAxis+'/',
+        sAxis=sAxis,
+        mask_path=data_dir+'cis-pd.'+data_subset+'.high_pass_mask/'
+    )
+
+    num_jobs = 6
+    with ProcessPoolExecutor(num_jobs) as ex:
+        results = list(ex.map(do_work, df_train_label['measurement_id']))
+    
+def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real"): 
+    """
+    Keyword arguments:
+    - data_subset: {'training_data', 'ancillary_data', 'testing_data'}
+    - sAxis: {'X', 'Y', 'Z'}
+    """
+    for data_real_subtype in ['smartphone_accelerometer', 'smartwatch_accelerometer', 'smartwatch_gyroscope']:
+        path_train_data, df_train_label = define_data_type(data_type, data_dir, data_subset, data_real_subtype)
+    #     list_mesurement_id=['33f5a031-43a8-496a-89ee-0b9d99019617']
+        # Filter df_train_label according to the measurement_id we are most interested in
+    #     df_train_label = interesting_patients(df_train_label=df_train_label, list_measurement_id=list_measurement_id)
+
+        for idx in df_train_label.index:
+            try:            
+                df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + ".csv")
+            except FileNotFoundError:
+                print('Removing ' + df_train_label["measurement_id"][idx] +
+                      ' as it doesn\'t exist for ' +
+                      data_real_subtype)
+                df_train_label = df_train_label.drop(idx)
+
+        do_work = partial(
+            write_wav, 
+            path_train_data=path_train_data,
+            wav_path=data_dir+'real-pd.'+data_subset+'.wav_'+sAxis+'/'+data_real_subtype+'/',
+            sAxis=sAxis,
+            mask_path=data_dir+'/real-pd.'+data_subset+'.high_pass_mask/'+data_real_subtype+'/'
+        )
+
+        num_jobs = 8
+        with ProcessPoolExecutor(num_jobs) as ex:
+            results = list(ex.map(do_work, df_train_label['measurement_id']))
