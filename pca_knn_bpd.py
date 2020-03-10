@@ -88,7 +88,7 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors):
 
     for subject_id in np.unique(vTraiSubjectId):
         print('----- ' + str(subject_id) + '----- ')
-        knn = KNeighborsClassifier(n_neighbors=6)
+        knn = KNeighborsClassifier(n_neighbors=iNeighbors)
 
         # Filter vTraiPCA and vLTraiPCA for one subject_id
         indices_subject_id = np.where(vTraiSubjectId == subject_id) # HAPPY
@@ -119,9 +119,9 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors):
 
         # Building a list of the MSEk
         mse_training_per_subjectid = np.append(mse_training_per_subjectid,
-                                               (mean_squared_error(vLTrai_subjectid, predictionsTrai) /  len(vLTrai_subjectid)))
+                                               (mean_squared_error(vLTrai_subjectid, predictionsTrai)))
         mse_test_per_subjectid = np.append(mse_test_per_subjectid,
-                                            (mean_squared_error(vLTest_subjectid, predictions) / len(vLTest_subjectid)))
+                                            (mean_squared_error(vLTest_subjectid, predictions)))
         train_nb_files_per_subjectid.append(len(vLTrai_subjectid))
         test_nb_files_per_subjectid.append(len(vLTest_subjectid))
 

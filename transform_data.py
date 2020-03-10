@@ -49,13 +49,13 @@ def prepro_missing_values(df_train_label):
 ############ Processing the data ############
 ############################################
 
-def define_data_type(data_type, data_dir, training_or_ancillary='training_data', data_real_subtype=None):
+def define_data_type(data_type, data_dir, data_subset='training_data', data_real_subtype=None):
     """
     Setup file names
     
     Keyword arguments:
     - data_type = {cis , real}
-    - training_or_ancillary: {'training_data', 'ancillary_data'} to switch between both
+    - data_subset: {'training_data', 'ancillary_data', 'testing_data'} to switch between subsets
     - data_real_subtype: only provided for REAL-PD 
 
     If data_type is real, data_real_subtype will have to be declared as well 
@@ -70,25 +70,22 @@ def define_data_type(data_type, data_dir, training_or_ancillary='training_data',
             + "-pd.data_labels/"
             + data_type.upper()
             + "-PD_"
-            + ("Training_Data" if training_or_ancillary == 'training_data' else "Ancillary_Data")
+            + ("Training_Data" if data_subset == 'training_data' else "Ancillary_Data")
             +"_IDs_Labels.csv"
         )
-        path_train_data = data_dir + data_type + "-pd."+training_or_ancillary+"/"
-
-    if data_type == "real":
+        path_train_data = data_dir + data_type + "-pd."+data_subset+"/"
+        
+    elif data_type == "real":
         path_train_labels = (
             data_dir
             + data_type
             + "-pd.data_labels/"
             + data_type.upper()
             + "-PD_"
-            + ("Training_Data" if training_or_ancillary == 'training_data' else "Ancillary_Data")
+            + ("Training_Data" if data_subset == 'training_data' else "Ancillary_Data")
             +"_IDs_Labels.csv"
         )
-        print('path_train_labels : ', path_train_labels)
-        path_train_data = (
-            data_dir + data_type + "-pd."+training_or_ancillary+"/" + data_real_subtype + "/"
-        )
+        path_train_data = data_dir + data_type + "-pd."+data_subset+"/" + data_real_subtype + "/"
 
     # Display labels
     df_train_label = pd.read_csv(path_train_labels)
@@ -498,7 +495,7 @@ def apply_mask(path_train_data, measurement_id, mask_path):
         # smartwatch_accelerometer and smartwatch_gyroscope have an additional device_id column
         # in the training data and we want to remove it 
         df_train_data = df_train_data.drop(['device_id'], axis=1, errors='ignore')
-#         print('PATH : ', mask_path + measurement_id + ".csv")
+        print('PATH !!! : ', mask_path + measurement_id + ".csv")
         df_mask = pd.read_csv(mask_path + measurement_id + ".csv", header=None)
         # multiply df_train_data by mask so the values to be removed are at 0
         df_train_data.iloc[:, -3:] = np.multiply(df_train_data.iloc[:, -3:], df_mask)#[:, -1:])
@@ -693,6 +690,7 @@ def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
     """
     
     file_path= wav_path + measurement_id + '.wav'
+    print('File path : ', file_path)
     if os.path.isfile(file_path):
         # FIX ME: it doesn't go here?
         print ("File exist : ", file_path)
