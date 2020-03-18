@@ -20,7 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import mean_squared_error
 
 
-def pca(sFileTrai, sFileTest, iComponents, bTestingData):
+def pca(sFileTrai, sFileTest, iComponents):
     """
     Performs PCA 
     
@@ -28,7 +28,6 @@ def pca(sFileTrai, sFileTest, iComponents, bTestingData):
     - sFileTrai: Path to training ivector.scp file 
     - sFileTest: Path to testing ivector.scp file 
     - iComponents: No of components to perform 
-    - bTestingData: Flag to say if it is the testing phase 
     
     Returns: 
     - vTraiPCA: Training data transformed by PCA for all subject_id 
@@ -70,7 +69,7 @@ def pca(sFileTrai, sFileTest, iComponents, bTestingData):
         
     return vTraiPCA, vLTrai, vTraiSubjectId, vTestPCA, vLTest, vTestSubjectId, vTestMeasurementId
 
-def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors, bTestingData):
+def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors):
     """
     Performs PCA, then KNN and dumps the results in a pickle file 
     
@@ -80,13 +79,12 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors, bTestingDat
     - sOut: TODO
     - iComponents: TODO
     - iNeighbors: TODO
-    - bTestingData: Flag to say if it is the testing phase 
     - sFileTestSubset: Path to the real files for testing subset 
     """
     vTraiPCA, vLTrai, \
     vTraiSubjectId, vTestPCA, \
     vLTest, vTestSubjectId, \
-    vTestMeasurementId = pca(sFileTrai, sFileTest, iComponents, bTestingData)
+    vTestMeasurementId = pca(sFileTrai, sFileTest, iComponents)
 
     # To compute the mean accuracy
     glob_trai_pred=[]
@@ -189,7 +187,6 @@ if __name__ == "__main__":
     parser.add_argument('--output-file', dest='sOut', required=True)
     parser.add_argument('--iComponents', dest='iComponents', required=True)
     parser.add_argument('--iNeighbors', dest='iNeighbors', required=True)
-    parser.add_argument('--is-testing-data',dest='bTestingData', default=False, required=False, action='store_true')
     
     args=parser.parse_args()
     
