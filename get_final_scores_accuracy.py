@@ -168,7 +168,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     # not the development one from the folds 
     
     # Loading the file with that obtained the best results
-#     lNeighbors, lComponents = find_components_neighbors([sFilePath+best_result.Filename[0]], bKnn)
+#     lNeighbors, lComponents = find_cogmponents_neighbors([sFilePath+best_result.Filename[0]], bKnn)
     # iComponents = best_result 
 #     for neighbor in lNeighbors:
 #         (print('------ FOR NEIGHBOR ', neighbor, '------') if bKnn else '')
