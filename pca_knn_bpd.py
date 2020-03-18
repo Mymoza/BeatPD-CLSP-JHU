@@ -116,41 +116,37 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors, bTestingDat
         # Filter vTestPCA and vLTestPCA for one subject_id
         indices_subject_id = np.where(vTestSubjectId == subject_id)
         vTestPCA_subjectid = vTestPCA[indices_subject_id]
-        if not bTestingData:
-            vLTest_subjectid = vLTest[indices_subject_id]
-            vLTest_subjectid = vLTest_subjectid.astype(int)
+        vLTest_subjectid = vLTest[indices_subject_id]
+        vLTest_subjectid = vLTest_subjectid.astype(int)
         
         # We train the KNN only on the data for one subject_id 
         knn.fit(vTraiPCA_subjectid, vLTrai_subjectid)
         print('Training accuracy: ', knn.score(vTraiPCA_subjectid, vLTrai_subjectid))
-        if not bTestingData:
-            print('Testing accuracy: ', knn.score(vTestPCA_subjectid, vLTest_subjectid))
+        print('Testing accuracy: ', knn.score(vTestPCA_subjectid, vLTest_subjectid))
         
         # Predicting on the training and test data
-        if bTestingData:
-            predictions = knn.predict(vTestPCA_subjectid)
-            glob_test_pred=np.append(glob_test_pred,predictions,axis=0)
-        else:
-            predictionsTrai = knn.predict(vTraiPCA_subjectid)
-            predictions = knn.predict(vTestPCA_subjectid)
+        predictionsTrai = knn.predict(vTraiPCA_subjectid)
+        predictions = knn.predict(vTestPCA_subjectid)
 
-            # Computing the accuracy
-            glob_trai_pred=np.append(glob_trai_pred,predictionsTrai,axis=0)
-            glob_test_pred=np.append(glob_test_pred,predictions,axis=0)
-            glob_trai_true=np.append(glob_trai_true,vLTrai_subjectid,axis=0)
-            glob_test_true=np.append(glob_test_true,vLTest_subjectid,axis=0)
+        # Computing the accuracy
+        glob_trai_pred=np.append(glob_trai_pred,predictionsTrai,axis=0)
+        glob_test_pred=np.append(glob_test_pred,predictions,axis=0)
+        glob_trai_true=np.append(glob_trai_true,vLTrai_subjectid,axis=0)
+        glob_test_true=np.append(glob_test_true,vLTest_subjectid,axis=0)
 
-            # Building a list of the MSEk
-            mse_training_per_subjectid = np.append(mse_training_per_subjectid,
-                                                   (mean_squared_error(vLTrai_subjectid, predictionsTrai)))
-            mse_test_per_subjectid = np.append(mse_test_per_subjectid,
-                                                (mean_squared_error(vLTest_subjectid, predictions)))
-            train_nb_files_per_subjectid.append(len(vLTrai_subjectid))
-            test_nb_files_per_subjectid.append(len(vLTest_subjectid))
+        # Building a list of the MSEk
+        mse_training_per_subjectid = np.append(mse_training_per_subjectid,
+                                               (mean_squared_error(vLTrai_subjectid, predictionsTrai)))
+        mse_test_per_subjectid = np.append(mse_test_per_subjectid,
+                                            (mean_squared_error(vLTest_subjectid, predictions)))
+        train_nb_files_per_subjectid.append(len(vLTrai_subjectid))
+        test_nb_files_per_subjectid.append(len(vLTest_subjectid))
+        
+#         print('mean_squared_error train for subject id: ', mean_squared_error(vLTrai_subjectid, np.repeat(np.mean(vLTrai_subjectid), len(vLTrai_subjectid)))) 
+#         print('mean_squared_error test for subject id: ', mean_squared_error(vLTest_subjectid, np.repeat(np.mean(vLTest_subjectid), len(vLTest_subjectid)))) 
 
-    if not bTestingData:
-        print('Global training accuracy: {}'.format((glob_trai_true == glob_trai_pred).mean()))
-        print('Global testing accuracy: {}'.format((glob_test_true == glob_test_pred).mean()))
+    print('Global training accuracy: {}'.format((glob_trai_true == glob_trai_pred).mean()))
+    print('Global testing accuracy: {}'.format((glob_test_true == glob_test_pred).mean()))
     print('PCAComponents: {}'.format((iComponents)))
     print('iNeighbors: {}'.format((iNeighbors)))
     # print('True Labels Training:')
@@ -171,25 +167,11 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors, bTestingDat
     # print('#')
     if not  os.path.isdir(sOut):
         os.mkdir(sOut)
-        
-    if not bTestingData:
-        sObjname='objs_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
-        with open(os.path.join(sOut,sObjname), 'wb') as f:  # Python 3: open(..., 'wb')
-            pickle.dump([glob_trai_pred,glob_trai_true,glob_test_pred,glob_test_true, \
-                        mse_training_per_subjectid,mse_test_per_subjectid, \
-                        train_nb_files_per_subjectid,test_nb_files_per_subjectid], f)
-    else:
-        print('vTestMeasurementId : ', type(vTestMeasurementId))
-        print('predictions : ', type(predictions))
-        sObjname='preds_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
-        with open(os.path.join(sOut,sObjname), 'wb') as f:  # Python 3: open(..., 'wb')
-            # Creating a DataFrame of the template measurement_id, prediction
-            pdTestPredictions = pd.concat([pd.DataFrame(vTestMeasurementId), pd.DataFrame(glob_test_pred)], axis=1)
-            pdTestPredictions.to_csv(
-                sOut + 'predictions_'+str(iComponents)+'_k_'+str(iNeighbors)+".csv",
-                index=False,
-                header=["measurement_id","prediction"],
-            )
+    sObjname='objs_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
+    with open(os.path.join(sOut,sObjname), 'wb') as f:  # Python 3: open(..., 'wb')
+        pickle.dump([glob_trai_pred,glob_trai_true,glob_test_pred,glob_test_true, \
+                    mse_training_per_subjectid,mse_test_per_subjectid, \
+                    train_nb_files_per_subjectid,test_nb_files_per_subjectid, vTestMeasurementId], f)
         
 
 if __name__ == "__main__":

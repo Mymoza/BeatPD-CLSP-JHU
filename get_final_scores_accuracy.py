@@ -14,14 +14,7 @@ def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test='')
     print(training_or_test+'Final score : ', np.divide(numerator, denominator))
     return np.divide(numerator, denominator)
 
-def get_final_scores_accuracy(sFilePath, bKnn):
-    """
-    Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
-    
-    Keyword arguments:
-    - sFilePath: Path to where the resx* folders are. 
-    - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
-    """
+def find_components_neighbors(sFilePath, bKnn):
     # Building the list of folders we have to open 
     sFolderName = ("resi*" if bKnn else "resx*")
     print('Looking for folder : ', sFolderName)
@@ -53,6 +46,19 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     
     print('Components found : ', lComponents)
     (print('Neighbors found : ', lNeighbors) if bKnn else '')
+    
+    return lNeighbors, lComponents, lResxFolders
+
+def get_final_scores_accuracy(sFilePath, bKnn):
+    """
+    Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
+    
+    Keyword arguments:
+    - sFilePath: Path to where the resx* folders are. 
+    - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
+    """
+    
+    lNeighbors, lComponents, lResxFolders = find_components_neighbors(sFilePath, bKnn)
     
     # DataFrame which is going to contain the info of the best hyperparameters combination 
     best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
@@ -93,6 +99,7 @@ def get_final_scores_accuracy(sFilePath, bKnn):
                  mse_test_per_subjectid, \
                  train_nb_files_per_subjectid, \
                  test_nb_files_per_subjectid] = pickle.load(open(fold_folder+sFileName, "rb" ) )
+                 # vTestMeasurementId] = pickle.load(open(fold_folder+sFileName, "rb" ) )
 
                 # Build the DataFrames for all folds 
                 allfolds_glob_trai_pred = np.append(allfolds_glob_trai_pred, glob_trai_pred)
@@ -127,10 +134,54 @@ def get_final_scores_accuracy(sFilePath, bKnn):
                                     'Global testing accuracy':[global_testing_accuracy],
                                     'Train Final score':[global_training_final_score],
                                     'Test Final score':[global_testing_final_score]})
+                
     
     print('------ GLOBAL WINNER PARAMETERS ------')
     print(best_result.transpose()[0].to_string())
+    
+    
+    # Loading the file with that obtained the best results 
+    # iNeighbor = best_result 
+    # iComponents = best_result 
+    for neighbor in lNeighbors:
+        (print('------ FOR NEIGHBOR ', neighbor, '------') if bKnn else '')
+        for component in lComponents:
+            print('---- FOR COMPONENT ', component, '----')
+            
+            for fold_folder in lResxFolders:
+            
+                [glob_trai_pred,glob_trai_true, \
+                             glob_test_pred,glob_test_true, \
+                             mse_training_per_subjectid, \
+                             mse_test_per_subjectid, \
+                             train_nb_files_per_subjectid, \
+                             test_nb_files_per_subjectid] = pickle.load(open(fold_folder+best_result.Filename[0], "rb" ) )
+                             #vTestMeasurementId] = pickle.load(open(fold_folder+best_result.Filename[0], "rb" ) )
 
+             # Build the DataFrames for all folds 
+                allfolds_glob_trai_pred = np.append(allfolds_glob_trai_pred, glob_trai_pred)
+                allfolds_glob_trai_true = np.append(allfolds_glob_trai_true, glob_trai_true)
+                allfolds_glob_test_pred = np.append(allfolds_glob_test_pred, glob_test_pred)
+#                 allfolds_glob_test_true = np.append(allfolds_glob_test_true, glob_test_true)
+
+                allfolds_mse_training_per_subjectid = np.append(allfolds_mse_training_per_subjectid, 
+                                                                mse_training_per_subjectid)
+#                 allfolds_mse_test_per_subjectid = np.append(allfolds_mse_test_per_subjectid,
+#                                                            mse_test_per_subjectid)
+                allfolds_train_nb_files_per_subjectid = np.append(allfolds_train_nb_files_per_subjectid, 
+                                                                 train_nb_files_per_subjectid)
+                allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
+                                                                test_nb_files_per_subjectid)
+    
+    # Concatenating the measurement_id and the predictions 
+    pdTestPredictions = pd.concat([pd.DataFrame(vTestMeasurementId),
+                                   pd.DataFrame(allfolds_glob_test_pred)], axis=1)
+    
+    pdTestPredictions.to_csv(
+        sOut + 'predictions_'+str(iComponents)+'_k_'+str(iNeighbors)+".csv",
+        index=False,
+        header=["measurement_id","prediction"],
+    )
 
 if __name__ == "__main__":
     # Usage example : 
