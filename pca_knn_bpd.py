@@ -72,7 +72,7 @@ def pca(sFileTrai, sFileTest, iComponents):
         
     return vTraiPCA, vLTrai, vTraiSubjectId, vTestPCA, vLTest, vTestSubjectId, vTestMeasurementId
 
-def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel=None, c_value=None, epsilon_value=None):
+def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKernel=None, fCValue=None, fEpsilon=None):
     """
     Performs PCA, then KNN and dumps the results in a pickle file 
     
@@ -84,6 +84,15 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel
     - iNeighbors: TODO
     - sFileTestSubset: Path to the real files for testing subset 
     """
+    if isinstance(iComponents, str):
+        iComponents=int(iComponents)
+    if isinstance(iNeighbors, str):
+        iNeighbors=int(iNeighbors)
+    if isinstance(fCValue, str):
+        fCValue=float(fCValue)
+    if isinstance(fEpsilon, str):
+        fEpsilon=float(fEpsilon)
+        
     vTraiPCA, vLTrai, \
     vTraiSubjectId, vTestPCA, \
     vLTest, vTestSubjectId, \
@@ -100,12 +109,7 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel
     mse_test_per_subjectid=[]
     train_nb_files_per_subjectid=[]
     test_nb_files_per_subjectid=[]
-
-    # KNN uses Accuracy while SVR uses R2 metric 
-    sScoreType = ('accuracy' if iNeighbors is not None else 'R2')
     
-    if isinstance(iNeighbors, str):
-        iNeighbors=int(iNeighbors)
         
     lScoreTrai = []
     lScoreTest = []
@@ -114,9 +118,11 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel
         if iNeighbors is not None:
             print('Using KNN') 
             knn = KNeighborsClassifier(n_neighbors=iNeighbors)
+            sScoreType = 'accuracy'
         else: 
             print('Using SVR')
-            knn = SVR(kernel=kernel, C=c_value, epsilon=epsilon_value, gamma='auto')
+            knn = SVR(kernel=sKernel, C=fCValue, epsilon=fEpsilon, gamma='auto')
+            sScoreType = 'R2'
 
         # Filter vTraiPCA and vLTraiPCA for one subject_id
         indices_subject_id = np.where(vTraiSubjectId == subject_id) 
@@ -182,9 +188,9 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel
     if iNeighbors is not None:
         sObjname='objs_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
     else: 
-        sObjname='objs_'+str(iComponents)+'_kernel_'+str(kernel)+
-                                          '_c_'+str(c_value)+
-                                          '_eps_'+str(epsilon_value)+'.pkl'
+        sObjname='objs_'+str(iComponents)+'_kernel_'+str(sKernel)+ \
+                                          '_c_'+str(fCValue)+ \
+                                          '_eps_'+str(fEpsilon)+'.pkl'
                 
     with open(os.path.join(sOut,sObjname), 'wb') as f:  # Python 3: open(..., 'wb')
         pickle.dump([glob_trai_pred,glob_trai_true,glob_test_pred,glob_test_true, \
@@ -199,16 +205,6 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, kernel
     else:
         print('Global training R2: {}'.format((sum(lScoreTrai) / len(lScoreTrai))))
         print('Global testing R2: {}'.format((sum(lScoreTest) / len(lScoreTest))))
-    
-        
-def pca_svr_bpd(sFileTrai, sFileTest, sOut, iComponents):
-    """
-    TODO
-    """
-    vTraiPCA, vLTrai, \
-    vTraiSubjectId, vTestPCA, \
-    vLTest, vTestSubjectId, \
-    vTestMeasurementId = pca(sFileTrai, sFileTest, iComponents)
 
 
 if __name__ == "__main__":
@@ -216,6 +212,7 @@ if __name__ == "__main__":
     # sFileTrai = '/export/c08/lmorove1/kaldi/egs/beatPDivec/v1/exp/ivectors_Training_Fold0/ivector.scp'
     # sFileTest = '/export/c08/lmorove1/kaldi/egs/beatPDivec/v1/exp/ivectors_Testing_Fold0/ivector.scp'
     # iComponents = 50 
+    
     parser=argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         fromfile_prefix_chars='@',
@@ -225,8 +222,14 @@ if __name__ == "__main__":
     parser.add_argument('--input-test',dest='sFileTest', required=True)
     parser.add_argument('--output-file', dest='sOut', required=True)
     parser.add_argument('--iComponents', dest='iComponents', required=True)
-    parser.add_argument('--iNeighbors', dest='iNeighbors', required=True)
+    # KNN
+    parser.add_argument('--iNeighbors', dest='iNeighbors')
     
+    # SVR 
+    parser.add_argument('--sKernel', dest='sKernel')
+    parser.add_argument('--fCValue', dest='fCValue')
+    parser.add_argument('--fEpsilon', dest='fEpsilon')
+
     args=parser.parse_args()
     
     pca_knn_bpd(**vars(args))
