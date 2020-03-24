@@ -110,7 +110,7 @@ if [ $stage -le 3 ]; then
 fi
 
 # KNN
-if [ $stage -le 4 ]; then
+if [ $stage -eq 4 ]; then
 	sOut=$expDir/ivec_${ivecDim}/resiVecKNN_Fold${foldN}
 
 
@@ -124,7 +124,11 @@ if [ $stage -le 4 ]; then
 	done
 fi
 
-if [ $stage -le 5 ]; then  # Just SVR
+echo STAGE IS 
+echo $stage
+echo END STAGE 
+
+if [ $stage -eq 5 ]; then  # Just SVR
 	sOut=$expDir/ivec_${ivecDim}/resiVecSVR_Fold${foldN}
 	echo 1
 	echo $sFileTrain
@@ -132,12 +136,13 @@ if [ $stage -le 5 ]; then  # Just SVR
 	echo $sFileTest
 	echo 3 
 	echo $sOut
-	for iNumComponents in 50; do
-		for sKernel in 'rbf'; do
-			for fCValue in 0.00002; do #0.0002 0.002 0.02 0.2; do
-			    for fEpsilon in 0 0.01 0.1 0.5 1 2 4; do
+	for iNumComponents in 15 30 50 100 125 150 175 200 225 250 275; do
+		for sKernel in 'rbf' 'linear'; do # 'poly' 'sigmoid'; do
+			for fCValue in 0.00002 0.0002 0.002; do # 0.02 0.2; do
+			    for fEpsilon in 0 0.01 0.1; do # 0.5 1 2 4; do
 
 				if [ $iNumComponents -le $ivecDim ]; then
+					echo Component is ${iNumComponents}
 					local/pca_svr_bpd.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fCValue $fEpsilon
 				fi
 			    done

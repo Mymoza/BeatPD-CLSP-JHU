@@ -14,9 +14,16 @@ def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test='')
     print(training_or_test+'Final score : ', np.divide(numerator, denominator))
     return np.divide(numerator, denominator)
 
-def find_components_neighbors(lObjsFiles, bKnn): 
+def find_components_neighbors(lObjsFiles, bKnn, bSVR): 
     lComponents = [] 
-    lNeighbors = [] 
+    
+    #KNN
+    lNeighbors = []
+    
+    # SVR 
+    lKernel = []
+    lCValue = [] 
+    lEpsilon = []
     
     # Get a list of all no of components 
     for objsFile in lObjsFiles:
@@ -29,18 +36,39 @@ def find_components_neighbors(lObjsFiles, bKnn):
         if bKnn:
             # Get a list of all iNeighbors
             sPatternNeighbors = r'(?<=k_)\d+'
+            print('no To Add : ', re.findall(sPatternNeighbors, objsFile))
             noToAdd = re.findall(sPatternNeighbors, objsFile)[0]
             lNeighbors.append(noToAdd) if noToAdd not in lNeighbors else lNeighbors
+        elif bSVR:
+            sPatternKernel = r'(?<=kernel_).*(?=_c)'
+            kernelToAdd = re.findall(sPatternKernel, objsFile)[0]
+            lKernel.append(kernelToAdd) if kernelToAdd not in lKernel else lKernel
+
+            sPatternC = r'(?<=_c_).*(?=_eps)'
+            cToAdd = re.findall(sPatternC, objsFile)[0]
+            lCValue.append(cToAdd) if cToAdd not in lCValue else lCValue
+            
+            sPatternEpsilon = r'(?<=eps_).*(?=\.)'
+            epsToAdd = re.findall(sPatternEpsilon, objsFile)[0]
+            lEpsilon.append(epsToAdd) if epsToAdd not in lEpsilon else lEpsilon
+            
         else:
             # Quickfix to ignore the Neighbors loop if an algorithm other than KNN is used 
             lNeighbors = [1]
     
     print('Components found : ', lComponents)
-    (print('Neighbors found : ', lNeighbors) if bKnn else '')
-    
+    if bKnn:
+        print('Neighbors found : ', lNeighbors)
+    elif bSVR:
+        print('Kernels found : ', lKernel)
+        print('C Values found : ', lCValue) 
+        print('Epsilon found : ', lEpsilon) 
+
+        return lComponents, lKernel, lCValue, lEpsilon
+        
     return lNeighbors, lComponents
     
-def find_res_folders(sFilePath, bKnn):
+def find_res_folders(sFilePath, bKnn, bSVR):
     """
     Keyword arguments: 
     - sFilePath: Path to where the res* folders are. 
@@ -58,20 +86,79 @@ def find_res_folders(sFilePath, bKnn):
        example: ['/home/sjoshi/codes/python/BeatPD/code/resxVecFold2/objs_50.pkl']
     """
     # Building the list of folders we have to open 
-    sFolderName = ("resi*" if bKnn else "resx*")
+    if bKnn:
+        sFolderName = "resiVecKNN*"
+    elif bSVR: 
+        sFolderName = "resiVecSVR*"
+    else:
+        sFolderName = "resx"
+    
     print('Looking for folder : ', sFolderName)
     lResxFolders = [f for f in glob.glob(sFilePath + sFolderName)]
     sPatternFold = '(?<=[Ff]old)\d+'
 
     # Get a list of all files starting with objs
+    lObjsFiles = []
     for fold_folder in lResxFolders:
-        lObjsFiles = glob.glob(fold_folder + "/objs*")
+        if bKnn:
+            lObjsFiles.extend(glob.glob(fold_folder + "/objs*k_*"))
+        elif bSVR: 
+            lObjsFiles.extend(glob.glob(fold_folder + "/objs*kernel_*"))
 
     print('lResxFolders : ', lResxFolders)
     print('lObjsFiles : ', lObjsFiles)
     return lResxFolders, lObjsFiles
 
-def get_final_scores_accuracy(sFilePath, bKnn):
+def get_all_folds(lResxFolders, sFileName):
+    # To compute mean accuracy accross all folds
+    allfolds_glob_trai_pred = []
+    allfolds_glob_trai_true = []
+    allfolds_glob_test_pred = []
+    allfolds_glob_test_true = [] 
+
+    # To compute final score across all folds 
+    allfolds_mse_training_per_subjectid = []
+    allfolds_mse_test_per_subjectid = []
+    allfolds_train_nb_files_per_subjectid = []
+    allfolds_test_nb_files_per_subjectid = []
+            
+    for fold_folder in lResxFolders:
+#         print(fold_folder)
+#         print('Filename : ', fold_folder+sFileName)
+        # Retrieve DataFrames from Pickle file 
+        [glob_trai_pred,glob_trai_true, \
+         glob_test_pred,glob_test_true, \
+         mse_training_per_subjectid, \
+         mse_test_per_subjectid, \
+         train_nb_files_per_subjectid, \
+         test_nb_files_per_subjectid, \
+         vTestMeasurementId] = pickle.load(open(fold_folder+sFileName, "rb" ) )
+
+        # Build the DataFrames for all folds 
+        allfolds_glob_trai_pred = np.append(allfolds_glob_trai_pred, glob_trai_pred)
+        allfolds_glob_trai_true = np.append(allfolds_glob_trai_true, glob_trai_true)
+        allfolds_glob_test_pred = np.append(allfolds_glob_test_pred, glob_test_pred)
+        allfolds_glob_test_true = np.append(allfolds_glob_test_true, glob_test_true)
+
+        allfolds_mse_training_per_subjectid = np.append(allfolds_mse_training_per_subjectid, 
+                                                        mse_training_per_subjectid)
+        allfolds_mse_test_per_subjectid = np.append(allfolds_mse_test_per_subjectid,
+                                                   mse_test_per_subjectid)
+        allfolds_train_nb_files_per_subjectid = np.append(allfolds_train_nb_files_per_subjectid, 
+                                                         train_nb_files_per_subjectid)
+        allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
+                                                        test_nb_files_per_subjectid)
+    return allfolds_glob_trai_pred, \
+           allfolds_glob_trai_true, \
+           allfolds_glob_test_pred, \
+           allfolds_glob_test_true, \
+           allfolds_mse_training_per_subjectid, \
+           allfolds_mse_test_per_subjectid, \
+           allfolds_train_nb_files_per_subjectid, \
+           allfolds_test_nb_files_per_subjectid
+        
+    
+def get_final_scores_accuracy(sFilePath, bKnn, bSVR):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -80,8 +167,8 @@ def get_final_scores_accuracy(sFilePath, bKnn):
     - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
     """
     
-    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn)
-    lNeighbors, lComponents = find_components_neighbors(lObjsFiles, bKnn)
+    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR)
+    lNeighbors, lComponents = find_components_neighbors(lObjsFiles, bKnn, bSVR)
     
     # DataFrame which is going to contain the info of the best hyperparameters combination 
     best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
@@ -100,44 +187,27 @@ def get_final_scores_accuracy(sFilePath, bKnn):
             allfolds_glob_trai_true = []
             allfolds_glob_test_pred = []
             allfolds_glob_test_true = [] 
-            
+
             # To compute final score across all folds 
             allfolds_mse_training_per_subjectid = []
             allfolds_mse_test_per_subjectid = []
             allfolds_train_nb_files_per_subjectid = []
             allfolds_test_nb_files_per_subjectid = []
             
-            for fold_folder in lResxFolders:
-                print(fold_folder)
-
-                if bKnn:
-                    sFileName = '/objs_'+component+'_k_'+neighbor+'.pkl'
-                else:
-                    sFileName = '/objs_'+component+'.pkl'
-
-                # Retrieve DataFrames from Pickle file 
-                [glob_trai_pred,glob_trai_true, \
-                 glob_test_pred,glob_test_true, \
-                 mse_training_per_subjectid, \
-                 mse_test_per_subjectid, \
-                 train_nb_files_per_subjectid, \
-                 test_nb_files_per_subjectid] = pickle.load(open(fold_folder+sFileName, "rb" ) )
-                 # vTestMeasurementId] = pickle.load(open(fold_folder+sFileName, "rb" ) )
-
-                # Build the DataFrames for all folds 
-                allfolds_glob_trai_pred = np.append(allfolds_glob_trai_pred, glob_trai_pred)
-                allfolds_glob_trai_true = np.append(allfolds_glob_trai_true, glob_trai_true)
-                allfolds_glob_test_pred = np.append(allfolds_glob_test_pred, glob_test_pred)
-                allfolds_glob_test_true = np.append(allfolds_glob_test_true, glob_test_true)
-
-                allfolds_mse_training_per_subjectid = np.append(allfolds_mse_training_per_subjectid, 
-                                                                mse_training_per_subjectid)
-                allfolds_mse_test_per_subjectid = np.append(allfolds_mse_test_per_subjectid,
-                                                           mse_test_per_subjectid)
-                allfolds_train_nb_files_per_subjectid = np.append(allfolds_train_nb_files_per_subjectid, 
-                                                                 train_nb_files_per_subjectid)
-                allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
-                                                                test_nb_files_per_subjectid)
+            if bKnn:
+                sFileName = '/objs_'+component+'_k_'+neighbor+'.pkl'
+            else:
+                sFileName = '/objs_'+component+'.pkl'
+            
+            #To compute mean accuracy accross all folds
+            # To compute final score across all folds
+            allfolds_glob_trai_pred, allfolds_glob_trai_true, \
+            allfolds_glob_test_pred, \
+            allfolds_glob_test_true, \
+            allfolds_mse_training_per_subjectid, \
+            allfolds_mse_test_per_subjectid, \
+            allfolds_train_nb_files_per_subjectid, \
+            allfolds_test_nb_files_per_subjectid = get_all_folds(lResxFolders, sFileName)
             
             global_training_accuracy = (allfolds_glob_trai_true == allfolds_glob_trai_pred).mean()
             global_testing_accuracy = (allfolds_glob_test_true == allfolds_glob_test_pred).mean()
@@ -210,6 +280,81 @@ def get_final_scores_accuracy(sFilePath, bKnn):
 #         header=["measurement_id","prediction"],
 #     )
 
+def get_final_scores_SVR(sFilePath, bKnn, bSVR):
+    """
+    Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
+    
+    Keyword arguments:
+    - sFilePath: Path to where the res* folders are. 
+    - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
+    """
+    
+    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR)
+    lComponents, lKernel, lCValue, lEpsilon = find_components_neighbors(lObjsFiles, bKnn, bSVR)
+    
+    # DataFrame which is going to contain the info of the best hyperparameters combination 
+    best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
+                                                                    'Global training r2',
+                                                                    'Global testing r2',
+                                                                    'Train Final score',
+                                                                    'Test Final score'])
+    for kernel in lKernel:
+        print('------ FOR KERNEL ', kernel, '------')
+        for c_value in lCValue:
+            print('------ FOR C VALUE ', c_value, '------')
+            for epsilon in lEpsilon:
+                print('------ FOR EPSILON ', epsilon, '------')
+                for component in lComponents:
+                    print('---- FOR COMPONENT ', component, '----')
+
+                    # To compute mean accuracy accross all folds
+                    allfolds_glob_trai_pred = []
+                    allfolds_glob_trai_true = []
+                    allfolds_glob_test_pred = []
+                    allfolds_glob_test_true = [] 
+
+                    # To compute final score across all folds 
+                    allfolds_mse_training_per_subjectid = []
+                    allfolds_mse_test_per_subjectid = []
+                    allfolds_train_nb_files_per_subjectid = []
+                    allfolds_test_nb_files_per_subjectid = []
+
+                    sFileName = '/objs_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
+                    print('sFileName : ', sFileName)
+
+                    #To compute mean accuracy accross all folds
+                    # To compute final score across all folds
+                    allfolds_glob_trai_pred, allfolds_glob_trai_true, \
+                    allfolds_glob_test_pred, \
+                    allfolds_glob_test_true, \
+                    allfolds_mse_training_per_subjectid, \
+                    allfolds_mse_test_per_subjectid, \
+                    allfolds_train_nb_files_per_subjectid, \
+                    allfolds_test_nb_files_per_subjectid = get_all_folds(lResxFolders, sFileName)
+
+                    global_training_accuracy = (allfolds_glob_trai_true == allfolds_glob_trai_pred).mean()
+                    global_testing_accuracy = (allfolds_glob_test_true == allfolds_glob_test_pred).mean()
+                    print('Global training R2: {}'.format(global_training_accuracy))
+                    print('Global testing R2: {}'.format(global_testing_accuracy))
+
+                    global_training_final_score = final_score(allfolds_mse_training_per_subjectid,
+                                allfolds_train_nb_files_per_subjectid,
+                                training_or_test='Train ')
+                    global_testing_final_score = final_score(allfolds_mse_test_per_subjectid,
+                                allfolds_test_nb_files_per_subjectid,
+                                training_or_test='Test ')
+
+                    if best_result.loc[0,'Test Final score'] > global_testing_final_score:
+                        best_result.update({'Filename': [sFileName],
+                                            'Global training r2':[global_training_accuracy],
+                                            'Global testing r2':[global_testing_accuracy],
+                                            'Train Final score':[global_training_final_score],
+                                            'Test Final score':[global_testing_final_score]})
+                
+    
+    print('------ GLOBAL WINNER PARAMETERS ------')
+    print(best_result.transpose()[0].to_string())
+    
 if __name__ == "__main__":
     # Usage example : 
     # sFilePath = '/home/sjoshi/codes/python/BeatPD/code/'
@@ -221,8 +366,14 @@ if __name__ == "__main__":
 
     parser.add_argument('--file-path',dest='sFilePath', required=True)
     parser.add_argument('--is-knn',dest='bKnn', default=False, required=False, action='store_true')
-
+    parser.add_argument('--is-svr',dest='bSVR', default=False, required=False, action='store_true')
     args=parser.parse_args()
     
-    get_final_scores_accuracy(**vars(args))
+    if args.bSVR:
+        print('yayyyyyyyyy good if') 
+        get_final_scores_SVR(**vars(args))
+    else:
+        print('KNN SIDE YAY')
+        print(args)
+        get_final_scores_accuracy(**vars(args))
                                     
