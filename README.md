@@ -132,9 +132,9 @@ Questions:
 - `v1_3ax_10mfcc_dysk` : dysk using the three axis and 10 mfcc
 - `v1_3ax_10mfcc_tr`: tremor using the three axis and 10 mfcc
 
-- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE), 20 mfcc 
-- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE), 20 mfcc
-- `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE), 20 mfcc
+- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE) 
+- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
+- `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
 
 
 ### Step-By-Step guide 
