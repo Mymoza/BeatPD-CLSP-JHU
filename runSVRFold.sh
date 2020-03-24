@@ -7,14 +7,15 @@ eval "$(conda shell.bash hook)"
 conda activate BeatPD 
 
 # Path to the features we want to use 
-sDirFeats=/export/b03/sbhati/PD/BeatPD/AE_feats
+#sDirFeats=/export/b03/sbhati/PD/BeatPD/AE_feats
 #sOut=$expDir/ivec_${ivecDim}/resiVecKNN_Fold${foldN}
 
 # Path to where we want to log file about this script 
 sOut=$1 
-
+ivecDim=$2
+sDirFeats=$3
 # Only do the nomber of components that we have the corresponding ivectors
-ivecDim=300
+#ivecDim=300
 
 # Only run stage 5 which means only the SVR step 
 stage=5

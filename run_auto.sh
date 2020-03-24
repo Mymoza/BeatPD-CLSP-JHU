@@ -14,7 +14,7 @@
 
 num_components=256 # Larger than this doesn't make much of a difference.
 #expDir=`pwd`/exp
-expDir=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp
+#expDir=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp
 
 #if [ -f path.sh ]; then . ./path.sh; fi
 #. parse_options.sh || exit 1;
@@ -23,6 +23,8 @@ foldN=$1
 sDirFeats=$2
 ivecDim=$3
 stage=$4
+
+expDir=${sDirFeats}/exp
 
 trials=data/Testing_Fold${foldN}/trials
 
