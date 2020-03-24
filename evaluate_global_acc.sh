@@ -2,8 +2,6 @@
 
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate BeatPD
-echo 'salut'
-#cmd=run.pl
 
 export PATH="$HOME/anaconda3/bin:$PATH"
 export PATH="./local:$PATH"

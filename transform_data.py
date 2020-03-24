@@ -253,12 +253,56 @@ def apply_highpass_filter(df_train_data):
     # Get the filter coefficients so we can check its frequency response.
     b, a = butter_highpass(cutoff, fs, order)
     
+    # Filter the data
+    # X = [:,-3], Y = [:,-2], Z = [:,-1]
     X_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-3], cutoff, fs, order)
     Y_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-2], cutoff, fs, order)
     Z_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-1], cutoff, fs, order)
     
     return X_filtered_data, Y_filtered_data, Z_filtered_data
 
+def high_pass_filter(df_train_label, high_pass_path, path_train_data, data_type):
+    """
+    Apply a high pass filter to the measurement_id files in df_train_label and write the result 
+    in a folder. 
+    
+    Keyword arguments: 
+    - df_train_label: DataFrame containing the following columns 
+            [measurement_id, subject_id, on_off, tremor, dyskenisia]
+    - high_pass_path: Path to the file where the files will be written 
+    - path_train_data: TODO
+    - data_type: TODO 
+    """
+    df_high_pass = []
+
+    # Load every training file for each "row of labels" we have loaded in df_train_label
+    for idx in df_train_label.index:
+        # Load the training data
+        try:
+            df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + ".csv")
+            print('Working on ', df_train_label["measurement_id"][idx])
+        except FileNotFoundError:
+            print('Skipping ' + df_train_label["measurement_id"][idx] +
+                  ' as it doesn\'t exist for the subtype')
+            continue
+
+        # Filter the data
+        # X = [:,-3], Y = [:,-2], Z = [:,-1]
+        # Transformed to DataFrame for the purpose of writing to csv and transposed to have it as a column 
+        X_filtered_data, Y_filtered_data, Z_filtered_data = apply_highpass_filter(df_train_data)
+        
+        # Merge the dataframes together 
+        df_high_pass =  pd.DataFrame(np.vstack([X_filtered_data,
+                                                Y_filtered_data,
+                                                Z_filtered_data]).T,columns= ["X", "Y", "Z"])
+        
+        # Save to a folder 
+        df_high_pass.to_csv(
+            high_pass_path + df_train_label["measurement_id"][idx] + ".csv",
+            index=False,
+            #header=False,
+        )
+        
 
 # TODO : Refactor so it calls the function that only do highpass 
 # TODO: Refactor so that it's not doing plots 
@@ -287,6 +331,8 @@ def remove_inactivity_highpass(
     Keyword Arguments:
     - df_train_label: DataFrame containing the following columns 
             [measurement_id, subject_id, on_off, tremor, dyskenisia]
+    - path_train_data: TODO
+    - data_type: TODO 
     - energy_threshold: what percentage of the max energy do we consider as inactivity?
         For example, 1 of the max is considered as inactivity
     - duration_threshold: how long do we want to have inactivity before we remove it? 
@@ -294,7 +340,7 @@ def remove_inactivity_highpass(
     - mask_path: Path where to save the mask 
     - plot_frequency_response: Optional. {True, False}. 
                                Flag to determine if we want to plot the frequency response or not
-    -plot_accelerometer_after_removal: Optinal. {True, False}.
+    - plot_accelerometer_after_removal: Optinal. {True, False}.
                                 Flag to determine if we want to plot the accelerometer after the inactivity
                                 is removed
     """
@@ -322,9 +368,7 @@ def remove_inactivity_highpass(
 
         # Filter the data
         # X = [:,-3], Y = [:,-2], Z = [:,-1]
-        X_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-3], cutoff, fs, order)
-        Y_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-2], cutoff, fs, order)
-        Z_filtered_data = butter_highpass_filter(df_train_data.iloc[:,-1], cutoff, fs, order)
+        X_filtered_data, Y_filtered_data, Z_filtered_data = apply_highpass_filter(df_train_data)
 
         ### Following section works on removing inactivity following a treshold
         # Get the absolute max values for X, Y, Z
