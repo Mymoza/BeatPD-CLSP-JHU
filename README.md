@@ -170,3 +170,8 @@ $cmd $sOut/globalAccuSVR_Test.log \
      ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
      --is-knn
 ```
+
+# How to remove inactivity (apply high-pass filter) 
+
+Here's an example for measurement_id `db2e053a-0fb8-4206-891a-6f079fb14e3a` from the CIS-PD database.
+
