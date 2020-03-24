@@ -171,7 +171,78 @@ $cmd $sOut/globalAccuSVR_Test.log \
      --is-knn
 ```
 
-# How to remove inactivity (apply high-pass filter) 
+# Inactivity (apply high-pass filter) 
+
+## Example of what it does with plots 
 
 Here's an example for measurement_id `db2e053a-0fb8-4206-891a-6f079fb14e3a` from the CIS-PD database.
+
+<img src="initial-plot-accelerometer.png" width="500">
+
+
+After the High pass filter (inactivity identified is filled with X,Y,Z=0 for the purpose of the plot) :
+
+<img src="plot-after-highpass.png" width="400">
+
+It looks good, with a straight line of inactivity on “zero”… However, it’s not  visible to the eyes, but there are some values left at the complete beginning of the dataframe from index 0 to index 31. 
+
+Then we have inactivity from index 32 to 26073.
+
+<img src="table-explanation-why-not-perfect.png" width="300">
+
+This explains why the accelerometer with inactivity removed looks like this: 
+
+We have 32 values right at the beginning which prevents the graph to show just the [600,1200] part
+
+<img src="final-plot-inactivity-removed.png" width="400">
+
+## How to remove inactivity
+
+Masks have already been created detecting inactivity for all the databases. They are stored in the `*.high_pass_mask` folder. 
+
+Masks were created in the notebook `analyze_data_cleaned.ipynb`, like so: 
+```
+remove_inactivity_highpass(
+    df_train_label,
+    path_train_data,
+    data_type,
+    energy_threshold=5,
+    duration_threshold=3000,
+    plot_frequency_response=False,
+    mask_path='/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.'+
+    data_subset+'.high_pass_mask/')
+```
+Two parameters can be tuned:
+* `energy_threshold` : what percentage of the max energy do we consider as inactivity? The current masks generated have used the threshold of 5% 
+* `duration_threshold` : how long do we want to have inactivity before we remove it? For example 3000x0.02ms=1min of inactivity minimum before those candidates are considered inactivty and will be removed. 
+
+
+What's left is to apply the mask. To do so, a function called `apply_mask` located in `transform_data.py` can be used. 
+
+```
+# import transform_data
+from transform_data import apply_mask
+
+# path_train_data : path to the original training files which we want to apply the highpass filter on 
+# measurement_id : measurement_id we want to apply the mask to
+# mask_path: Path where to apply the mask to the wav file 
+
+df_train_data = apply_mask(path_train_data,
+                                   measurement_id,
+                                   mask_path)
+```
+
+# Working in Jupyter Notebooks 
+
+If you're working in Jupyter notebooks, you will probably need to import functions from python files. 
+
+You should use these two lines to make sure that if you make changes to the python files, the code that is being called from your Jupyter Notebook will be updated: 
+
+```
+%load_ext autoreload
+%autoreload 2
+
+from transform_data import *
+from create_graphs import *
+```
 
