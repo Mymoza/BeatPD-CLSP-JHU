@@ -122,4 +122,51 @@ Questions:
 - Which one to use `bob.learn.em.IVectorTrainer` or the one in `bob.bio.gmm.algorithm.IVector`?
     - it depends. When you want to implement your own application for i-vector training and evaluation, the bob.learn.em classes should work for you. When you are implementing speaker recognition experiments, bob.bio.gmm is the better choice.
     
- We chose to use `bob.learn.em.IVectorTrainer` as advised by a maintainer of bob. 
+ We chose to use `bob.learn.em.IVectorTrainer` as advised by a maintainer of bob.
+
+### Where are the features? 
+`/export/c08/lmorove1/kaldi/egs/beatPDivec/*//exp/ivectors_Training_Fold0/ivector.scp`
+- `/v1/*/*/ivector.scp`:  on/off using the x axis and mfcc
+- `v1_3ax` : on/off using 3 axis and mfcc 
+- `v1_3ax_10mfcc_dysk`
+- `v1_3ax_10mfcc_tr`
+- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE)
+- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
+- `/v1_trem_auto/` : tremor using the three axis and autoencoder (30ft AE)
+
+- `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax_10mfcc_tr/exp`: tremor using the three axis and 10 mfcc 
+
+
+### Step-By-Step guide 
+
+To create the pkl files that are going to let you get the challenge final score afterward: 
+
+This file contains a variable `ivecDim=50` which hardcode the ivector size you want to use. We need to change the value manually to generate the files for all the different ivectors sizes. 
+ 
+`./runSVRFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
+`./runKNNFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
+
+To get the final score as used in the challenge: 
+`./evaluate_global_acc.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+
+This script will generate a .log file from the name and location provided in `evaluate_global_acc.sh`. 
+
+For example, for SVR: 
+```
+./evaluate_global_acc.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/
+```
+With this content: 
+```
+$cmd $sOut/globalAccuSVR_Test.log \
+     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
+     --is-svr
+```
+The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/globalAccuSVR_Test.log`
+
+To get a final score for KNN, only add the `--is-knn` flag, like so: 
+
+```
+$cmd $sOut/globalAccuSVR_Test.log \
+     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
+     --is-knn
+```
