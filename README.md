@@ -96,7 +96,7 @@ You will then be able to select `BeatPD` as your kernel.
 
 # Where are the features? 
 `/export/c08/lmorove1/kaldi/egs/beatPDivec/*//exp/ivectors_Training_Fold0/ivector.scp`
-- `/v1/*/*/ivector.scp`:  on/off using the x axis and mfcc
+- `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
 
 - `v1_3ax` : on/off using the three axis and 10 mfcc 
 - `v1_3ax_10mfcc_dysk` : dysk using the three axis and 10 mfcc
