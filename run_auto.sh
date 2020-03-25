@@ -126,6 +126,16 @@ if [ $stage -eq 4 ]; then
 	done
 fi
 
+x=-13
+while [ $x -le 15 ]
+do
+    for iNumComponents in 2E${x}; do
+        salut=$(printf "%.14f\n" ${iNumComponents})
+        echo $salut
+    done
+    x=$(( $x + 2))
+done
+
 echo STAGE IS 
 echo $stage
 echo END STAGE 
@@ -139,15 +149,22 @@ if [ $stage -eq 5 ]; then  # Just SVR
 	echo 3 
 	echo $sOut
 	for iNumComponents in 15 30 50 100 125 150 175 200 225 250 275; do
-		for sKernel in 'rbf' 'linear'; do # 'poly' 'sigmoid'; do
-			for fCValue in 0.00002 0.0002 0.002; do # 0.02 0.2; do
-			    for fEpsilon in 0 0.01 0.1; do # 0.5 1 2 4; do
-
-				if [ $iNumComponents -le $ivecDim ]; then
-					echo Component is ${iNumComponents}
-					local/pca_svr_bpd.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fCValue $fEpsilon
-				fi
-			    done
+		for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
+			x=-13
+			while [ $x -le 15 ]
+			do
+				for fCValue in 2E${x}; do
+					# Convert from scientific to float
+					fC=$(printf "%.14f\n" ${fCValue})
+					if [ $iNumComponents -le $ivecDim ]; then
+						echo Component is ${iNumComponents}
+						echo $fC
+						fEpsilon=0.1 # default value
+						echo $fEpsilon
+						local/pca_svr_bpd.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fC $fEpsilon
+					fi
+				x=$(( $x + 2))
+				done
 			done
 		done
 	done

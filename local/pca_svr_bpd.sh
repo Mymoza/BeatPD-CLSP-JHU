@@ -14,6 +14,7 @@ sKernel=$5
 fCValue=$6
 fEpsilon=$7
 
+echo $fEpsilon
 echo sssssssssssss
 echo $sOut
 echo sssssssssssssss
