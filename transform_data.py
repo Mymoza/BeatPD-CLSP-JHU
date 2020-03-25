@@ -81,20 +81,17 @@ def define_data_type(data_type, data_dir, data_subset='training_data', data_real
             + "-pd.data_labels/"
             + data_type.upper()
             + "-PD_"
-            + ("Training_Data" if data_subset == 'training_data' else "Ancillary_Data")
+            + ("Training_Data" if data_subset[0:13] == 'training_data' else "Ancillary_Data")
             +"_IDs_Labels.csv"
         )
         path_train_data = data_dir + data_type + "-pd."+data_subset+"/"
-        
+        print('path_train_data : ',path_train_data)
     if data_type == "real":
-        print('data_dir : ', data_dir)
-        print('data_type : ', data_type)
-        print('data_subset : ', data_subset)
-        print('data_real_subtype :', data_real_subtype)
         path_train_data = data_dir + data_type + "-pd."+data_subset+"/" + data_real_subtype + "/"
         
     # Display labels
     df_train_label = pd.read_csv(path_train_labels)
+
     return path_train_data, df_train_label
 
 def interesting_patients(df_train_label, list_measurement_id):
@@ -538,6 +535,7 @@ def apply_mask(path_train_data, measurement_id, mask_path):
     Keyword arguments:
     - TODO
     """
+    print("Apply_Mask function: Inactivity is being removed.") 
     # Load the training data
     try:
         df_train_data = pd.read_csv(path_train_data + measurement_id + ".csv")
@@ -548,8 +546,6 @@ def apply_mask(path_train_data, measurement_id, mask_path):
         df_mask = pd.read_csv(mask_path + measurement_id + ".csv", header=None)
         # multiply df_train_data by mask so the values to be removed are at 0
         df_train_data.iloc[:, -3:] = np.multiply(df_train_data.iloc[:, -3:], df_mask)#[:, -1:])
-
-        #         display(df_train_data)
 
         # Drop the 0 values from the training DataFrame
         df_train_data = df_train_data[(df_train_data.iloc[:, -3:].T != 0).any()]
@@ -727,7 +723,7 @@ def remove_inactivity_pct_change(df_train_label, data_dir, path_train_data, data
 ############ WRITE WAV FILE ############
 ############################################
 
-def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
+def write_wav(measurement_id, path_train_data, wav_path, sAxis, mask_path=None):
     """
     Write a wav file 
     
@@ -738,15 +734,22 @@ def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
     - axis: {'X','Y','Z'}. String. Uppercase. One of the axis
     """
     
-    file_path= wav_path + measurement_id + '.wav'
+    file_path = wav_path + measurement_id + '.wav'
     print('File path : ', file_path)
     if os.path.isfile(file_path):
         # FIX ME: it doesn't go here?
         print ("File exist : ", file_path)
     else:
-        df_train_data = apply_mask(path_train_data,
+        if mask_path is not None:
+            print('Inactivity is going to be removed from the wav files') 
+            df_train_data = apply_mask(path_train_data,
                                    measurement_id,
                                    mask_path)
+        else: 
+            print("Loading training file from ", path_train_data)
+            df_train_data = pd.read_csv(path_train_data + measurement_id + ".csv")
+        
+        
 
         # Save to WAV
         samplerate = 8000 # Hz, we need 8kHz for Kaldi to be happy 
@@ -762,7 +765,7 @@ def write_wav(measurement_id, path_train_data, wav_path, mask_path, sAxis):
               measurement_id + '.wav', samplerate, df_train_data_axis.to_numpy())
 
 
-def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis"):
+def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis", bMask=False):
     """
     Create wav files for the CIS-PD database 
     
@@ -771,16 +774,24 @@ def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis"):
     - data_dir:
     - sAxis: {'X', 'Y', 'Z'}
     - data_type="cis" 
+    - bMask: Flag to determine if inactivity should be removed or not 
     """
     path_train_data, df_train_label = define_data_type(data_type,
                                                        data_dir,
                                                        data_subset)
+    
+    if bMask: 
+        mask_path = data_dir+'cis-pd.'+data_subset+'.high_pass_mask/'
+        wav_path=data_dir+'cis-pd.'+data_subset+'.high_pass_mask.wav_'+sAxis+'/'
+    else:
+        mask_path = None 
+        wav_path = data_dir+'cis-pd.'+data_subset+'.wav_'+sAxis+'/'
     do_work = partial(
         write_wav, 
         path_train_data=path_train_data,
-        wav_path=data_dir+'cis-pd.'+data_subset+'.wav_'+sAxis+'/',
+        wav_path=wav_path,
         sAxis=sAxis,
-        mask_path=data_dir+'cis-pd.'+data_subset+'.high_pass_mask/'
+        mask_path=mask_path
     )
 
     num_jobs = 8
