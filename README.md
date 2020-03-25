@@ -127,7 +127,13 @@ Two parameters can be tuned:
 
 ### Evaluation steps 
 
+#### Automatisation to generate the results 
 
+To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`) for the SVR model, use this script:
+1. `./run_SVR_pkl_files.sh`
+2. `./run_all_evaluation_SVR.sh`
+
+#### Manually 
 1. To create the pkl files that are going to let you get the challenge final score afterward: 
 
 - `./runSVRFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
@@ -156,10 +162,6 @@ $cmd $sOut/globalAccuKNN_Test.log \
      ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
      --is-knn
 ```
-
-To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`), use this script:
-1. `./run_SVR_pkl_files.sh`
-2. `./run_all_evaluation_SVR.sh`
 
 # Inactivity (apply high-pass filter) 
 
