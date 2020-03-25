@@ -106,8 +106,15 @@ You will then be able to select `BeatPD` as your kernel.
 - `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
 - `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
 
+# Visualization 
 
-## Step-By-Step guide 
+TODO 
+
+# Step-By-Step guide 
+
+### CIS-PD: Create High Pass Data
+TODO 
+
 ### Create Masks for inactivity removal 
 Masks were created in the notebook `analyze_data_cleaned.ipynb`, like so: 
 ```
