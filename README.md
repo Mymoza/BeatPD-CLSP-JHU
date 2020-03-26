@@ -94,68 +94,67 @@ You will then be able to select `BeatPD` as your kernel.
 </table>
 
 
-
-# I-vector training 
-
-Documentation: 
-- https://groups.google.com/forum/#!msg/bob-devel/ztz2TcTDH_Y/ISjzx6L1BQAJ
-- https://www.idiap.ch/software/bob/docs/bob/bob.learn.em/stable/guide.html#id29
-- https://www.idiap.ch/software/bob/docs/bob/bob.learn.em/stable/guide.html#session-variability-modeling-with-gaussian-mixture-models
-- https://groups.google.com/forum/#!topic/bob-devel/lFda64dmpjY
-
-
-
-### Steps used to setup the bob_py3 conda environment
-
-```
-$ conda create --name bob_py3 --override-channels -c https://www.idiap.ch/software/bob/conda -c defaults bob
-$ conda activate bob_py3
-$ conda config --env --add channels https://www.idiap.ch/software/bob/conda/label/archive
-$ conda config --env --add channels defaults
-$ conda config --env --add channels https://www.idiap.ch/software/bob/conda
-$ conda install bob.bio.gmm
-$ conda install nb_conda_kernels
-```
-
-
-Questions: 
-- Which one to use `bob.learn.em.IVectorTrainer` or the one in `bob.bio.gmm.algorithm.IVector`?
-    - it depends. When you want to implement your own application for i-vector training and evaluation, the bob.learn.em classes should work for you. When you are implementing speaker recognition experiments, bob.bio.gmm is the better choice.
-    
- We chose to use `bob.learn.em.IVectorTrainer` as advised by a maintainer of bob.
-
-### Where are the features? 
+# Where are the features? 
 `/export/c08/lmorove1/kaldi/egs/beatPDivec/*//exp/ivectors_Training_Fold0/ivector.scp`
-- `/v1/*/*/ivector.scp`:  on/off using the x axis and mfcc
+- `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
 
 - `v1_3ax` : on/off using the three axis and 10 mfcc 
 - `v1_3ax_10mfcc_dysk` : dysk using the three axis and 10 mfcc
 - `v1_3ax_10mfcc_tr`: tremor using the three axis and 10 mfcc
 
-- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE), 20 mfcc 
-- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE), 20 mfcc
-- `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE), 20 mfcc
+- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE) 
+- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
+- `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
 
+# Visualization 
 
-### Step-By-Step guide 
+TODO 
 
-To create the pkl files that are going to let you get the challenge final score afterward: 
+# Step-By-Step guide 
 
-This file contains a variable `ivecDim=50` which hardcode the ivector size you want to use. We need to change the value manually to generate the files for all the different ivectors sizes. 
+### CIS-PD: Create High Pass Data
+TODO 
+
+### Create Masks for inactivity removal 
+Masks were created in the notebook `analyze_data_cleaned.ipynb`, like so: 
+```
+remove_inactivity_highpass(
+    df_train_label,
+    path_train_data,
+    data_type,
+    energy_threshold=5,
+    duration_threshold=3000,
+    plot_frequency_response=False,
+    mask_path='/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.'+
+    data_subset+'.high_pass_mask/')
+```
+Two parameters can be tuned:
+* `energy_threshold` : what percentage of the max energy do we consider as inactivity? The current masks generated have used the threshold of 5% 
+* `duration_threshold` : how long do we want to have inactivity before we remove it? For example 3000x0.02ms=1min of inactivity minimum before those candidates are considered inactivty and will be removed. 
+
+### Evaluation steps 
+
+#### Automatisation to generate the results 
+
+To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`) for the SVR model, use this script:
+1. `./run_SVR_pkl_files.sh`
+2. `./run_all_evaluation_SVR.sh`
+
+#### Manually 
+1. To create the pkl files that are going to let you get the challenge final score afterward: 
+
+- `./runSVRFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
+- `./runKNNFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
+
+This file contains a variable `ivecDim=50` which hardcode the ivector size you want to use. You need to change the value manually to generate the files for all the different ivectors sizes. 
  
-`./runSVRFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
-`./runKNNFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
 
-To get the final score as used in the challenge: 
-`./evaluate_global_acc.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+2. Get the final score as used in the challenge (weighted MSE): 
 
-This script will generate a .log file from the name and location provided in `evaluate_global_acc.sh`. 
+- `./evaluate_global_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
 
-For example, for SVR: 
-```
-./evaluate_global_acc.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/
-```
-With this content: 
+This script will generate a `.log` file from the name and location provided in `evaluate_global_acc.sh`, like so:
+
 ```
 $cmd $sOut/globalAccuSVR_Test.log \
      ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
@@ -166,7 +165,7 @@ The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoe
 To get a final score for KNN, only add the `--is-knn` flag, like so: 
 
 ```
-$cmd $sOut/globalAccuSVR_Test.log \
+$cmd $sOut/globalAccuKNN_Test.log \
      ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
      --is-knn
 ```
@@ -199,22 +198,6 @@ We have 32 values right at the beginning which prevents the graph to show just t
 ## How to remove inactivity
 
 Masks have already been created detecting inactivity for all the databases. They are stored in the `*.high_pass_mask` folder. 
-
-Masks were created in the notebook `analyze_data_cleaned.ipynb`, like so: 
-```
-remove_inactivity_highpass(
-    df_train_label,
-    path_train_data,
-    data_type,
-    energy_threshold=5,
-    duration_threshold=3000,
-    plot_frequency_response=False,
-    mask_path='/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.'+
-    data_subset+'.high_pass_mask/')
-```
-Two parameters can be tuned:
-* `energy_threshold` : what percentage of the max energy do we consider as inactivity? The current masks generated have used the threshold of 5% 
-* `duration_threshold` : how long do we want to have inactivity before we remove it? For example 3000x0.02ms=1min of inactivity minimum before those candidates are considered inactivty and will be removed. 
 
 
 What's left is to apply the mask. To do so, a function called `apply_mask` located in `transform_data.py` can be used. 
