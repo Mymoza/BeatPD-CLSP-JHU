@@ -83,11 +83,13 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 params['data_path'] = train_data_path
+params['remove_inactivity'] = params.get('remove_inactivity', 'False')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
 cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
+cleanParams['remove_inactivity'] = 'False' 
 
 train_X = []
 for idx in df_train_label.index:
