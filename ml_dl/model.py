@@ -1,6 +1,7 @@
 from keras.models import Model
 from keras.layers import Dense, Dropout, Input, Lambda, LSTM, Masking
 from keras.layers import Add
+from keras.layers import Conv1D, MaxPooling1D, AveragePooling1D,GlobalMaxPooling1D,GlobalAveragePooling1D
 
 def make_DNN_model(feat_size=1200,latent_dim=30,num_layers=3,num_neuron=512,dr=0.0,hidu='relu',batch_size=50,epochs=200):
 
@@ -62,4 +63,20 @@ def make_LSTM_model(feat_size=30,num_neuron=10,out_feat_size=1,mode='regression'
     else:
         clf = Dense(out_feat_size,activation='relu')(clf)
     classifier = Model(inp,clf)
-    return classifier  
+    return classifier 
+
+def make_CNN_model(feat_size=30,n_filters=10,kernel_size=3,out_feat_size=1,mode='regression'):
+    inp = Input(shape=(None,feat_size))
+    out = Conv1D(n_filters, kernel_size, dilation_rate=1)(inp)
+    out = MaxPooling1D(2)(out)
+    out = Conv1D(n_filters, kernel_size, dilation_rate=1)(out)
+    out = MaxPooling1D(2)(out)
+    out = Conv1D(n_filters, kernel_size, dilation_rate=1)(out)
+    out = MaxPooling1D(2)(out)
+    out = GlobalAveragePooling1D()(out)
+    if mode == 'classification':
+        out = Dense(out_feat_size,activation='softmax')(out)
+    else:
+        out = Dense(out_feat_size,activation='relu')(out)
+    model = Model(inp,out)     
+    return model

@@ -92,7 +92,8 @@ cleanParams['add_noise'] = 'False'
 
 #encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'.h5')
 
-encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 
 ### LSTM classifier 
 

@@ -52,7 +52,7 @@ dataAugScale = args.dataAugScale
 savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
 load_weights_dir = savedir + "/" + data_type + data_real_subtype + "_all/"
 savedir = savedir + "/" + data_type + data_real_subtype + '_uad_'+ str(use_ancillarydata) +\
-        '_' + str(pid) +'_'+ str(KFind) + '_wsLSTM_' +str(warmstart_LSTM) 
+        '_' + subtask+'_'+str(pid) +'_'+ str(KFind) + '_wsLSTM_' +str(warmstart_LSTM) 
 
 params_append_str = ""
 if params:
@@ -93,7 +93,8 @@ cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
 
 #model = load_model(load_weights_dir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
-encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 #model.predict(train_X)
 
 ## LSTM 

@@ -21,9 +21,9 @@ def load_data(data_frame_in,idx,params):
     #temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
     #import pdb; pdb.set_trace()
     sig_len = temp_train_X.shape[0]
-    if add_noise:
+    if add_noise == 'True':
         temp_train_X = temp_train_X + np.random.normal(0,1,(temp_train_X.shape))
-    if add_rotation:
+    if add_rotation == 'True':
         s_ind = 0
         while (s_ind < sig_len):
             jump = np.random.randint(min_len,max_len,1)[0]
@@ -32,7 +32,7 @@ def load_data(data_frame_in,idx,params):
             rot_mat = r.as_dcm()
             temp_train_X[s_ind:s_ind+jump,:] = np.dot(temp_train_X[s_ind:s_ind+jump,:],rot_mat)
             s_ind = s_ind + jump
-    if do_MVN:
+    if do_MVN == 'True':
         temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
         temp_train_X = temp_train_X / (temp_train_X.std(axis=0,keepdims=True)+1e-9)         
     num_frames = int(np.ceil(float(np.abs(sig_len - frame_length)) / frame_step))
