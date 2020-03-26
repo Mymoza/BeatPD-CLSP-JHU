@@ -95,7 +95,8 @@ You will then be able to select `BeatPD` as your kernel.
 
 
 # Where are the features? 
-`/export/c08/lmorove1/kaldi/egs/beatPDivec/*//exp/ivectors_Training_Fold0/ivector.scp`
+## i-Vectors 
+`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/*/exp/ivectors_Training_Fold0/ivector.scp`
 - `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
 
 - `v1_3ax` : on/off using the three axis and 10 mfcc 
@@ -105,6 +106,20 @@ You will then be able to select `BeatPD` as your kernel.
 - `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE) 
 - `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
 - `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
+
+## Autoencoder output features 
+
+`cd /export/b19/mpgill/BeatPD/`
+
+`$ python train_AE.py --saveAEFeats --dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
+- `AE_30ft_orig_inactivity_removed/` : 30 features, inactivity removed from original training data
+
+`$ python train_AE.py --saveAEFeats --dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
+- `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data
+
+`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "False", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "None"}'`
+- `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed) 
+
 
 # Visualization 
 
