@@ -288,10 +288,15 @@ def high_pass_filter(df_train_label, high_pass_path, path_train_data, data_type)
         # Transformed to DataFrame for the purpose of writing to csv and transposed to have it as a column 
         X_filtered_data, Y_filtered_data, Z_filtered_data = apply_highpass_filter(df_train_data)
         
+        # Set the time axis. It's not the same name for the two databases
+        x_axis_data_type = "t" if data_type == "real" else "Timestamp"
+        time = df_train_data[x_axis_data_type]
+        
         # Merge the dataframes together 
-        df_high_pass =  pd.DataFrame(np.vstack([X_filtered_data,
+        df_high_pass =  pd.DataFrame(np.vstack([time,
+                                                X_filtered_data,
                                                 Y_filtered_data,
-                                                Z_filtered_data]).T,columns= ["X", "Y", "Z"])
+                                                Z_filtered_data]).T,columns= [x_axis_data_type, "X", "Y", "Z"])
         
         # Save to a folder 
         df_high_pass.to_csv(
@@ -538,18 +543,21 @@ def apply_mask(path_train_data, measurement_id, mask_path):
     print("Apply_Mask function: Inactivity is being removed.") 
     # Load the training data
     try:
+        print('path_train_data : ', path_train_data)
         df_train_data = pd.read_csv(path_train_data + measurement_id + ".csv")
         # smartwatch_accelerometer and smartwatch_gyroscope have an additional device_id column
         # in the training data and we want to remove it 
         df_train_data = df_train_data.drop(['device_id'], axis=1, errors='ignore')
-        print('PATH !!! : ', mask_path + measurement_id + ".csv")
-        df_mask = pd.read_csv(mask_path + measurement_id + ".csv", header=None)
-        # multiply df_train_data by mask so the values to be removed are at 0
-        df_train_data.iloc[:, -3:] = np.multiply(df_train_data.iloc[:, -3:], df_mask)#[:, -1:])
 
-        # Drop the 0 values from the training DataFrame
-        df_train_data = df_train_data[(df_train_data.iloc[:, -3:].T != 0).any()]
-        df_train_data.reset_index(drop=True, inplace=True)
+        df_mask = pd.read_csv(mask_path + measurement_id + ".csv", header=None)
+
+        df_mask_val = df_mask.values[:,0]
+
+        temp_ind = df_mask_val.astype(np.bool)
+        # :-3 to remove timestamp
+        df_train_data = df_train_data.iloc[temp_ind]
+        #df_train_data = df_train_data.reset_index()
+
     except FileNotFoundError:
         print('Skipping ' + measurement_id +
               ' as it doesn\'t exist the subtype')

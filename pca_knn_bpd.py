@@ -155,6 +155,8 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKerne
         glob_test_true=np.append(glob_test_true,vLTest_subjectid,axis=0)
 
         # Building a list of the MSEk
+        print('Training MSE : ', mean_squared_error(vLTrai_subjectid, predictionsTrai))
+        print('Testing MSE : ', mean_squared_error(vLTest_subjectid, predictions))
         mse_training_per_subjectid = np.append(mse_training_per_subjectid,
                                                (mean_squared_error(vLTrai_subjectid, predictionsTrai)))
         mse_test_per_subjectid = np.append(mse_test_per_subjectid,
@@ -196,7 +198,8 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKerne
         pickle.dump([glob_trai_pred,glob_trai_true,glob_test_pred,glob_test_true, \
                     mse_training_per_subjectid,mse_test_per_subjectid, \
                     train_nb_files_per_subjectid,test_nb_files_per_subjectid, vTestMeasurementId], f)
-    
+        
+    print('----- GLOBAL -----')
     print('PCAComponents: {}'.format((iComponents)))
     if iNeighbors is not None:
         print('Global training accuracy: {}'.format((glob_trai_true == glob_trai_pred).mean()))
