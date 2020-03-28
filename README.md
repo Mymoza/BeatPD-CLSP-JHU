@@ -113,17 +113,35 @@ From `/home/sjoshi/codes/python/BeatPD/data/BeatPD`:
 
 
 # Where are the features? 
-## i-Vectors 
+## MFCC 
 `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/*/exp/ivectors_Training_Fold0/ivector.scp`
 - `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
 
-- `v1_3ax` : on/off using the three axis and 10 mfcc 
-- `v1_3ax_10mfcc_dysk` : dysk using the three axis and 10 mfcc
-- `v1_3ax_10mfcc_tr`: tremor using the three axis and 10 mfcc
+- `v1_3ax/exp3x/` : on/off using the three axis and 10 mfcc 
+- `v1_3ax_10mfcc_dysk/exp3x/` : dysk using the three axis and 10 mfcc
+- `v1_3ax_10mfcc_tr/exp3x/`: tremor using the three axis and 10 mfcc
 
 - `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE) 
 - `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
 - `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
+
+## Autoencoder 
+
+On/Off: 
+- `on_off_hpf_auto30` : High Pass filtered data. Inactivity is not removed.
+- `on_off_noinact_auto30`: Inactivity removed on original training data. 30 fts.
+- `on_off_combhpfnoinact_auto30`: High Pass filtered data. Inactivity is removed. 
+
+Tremor: 
+- `trem_hpf_auto30` 
+- `trem_noinact_auto30`
+- `trem_combhpfnoinact_auto30`
+
+Dyskenisia: 
+- `dysk_hpf_auto30`
+- `dysk_noinact_auto30`
+- `dysk_combhpfnoinact_auto30`
+
 
 ## Autoencoder output features 
 
