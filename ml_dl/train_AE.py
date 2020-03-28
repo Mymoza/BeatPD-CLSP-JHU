@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Dropout, Input, Lambda, LSTM, Masking
 from keras.layers import Add
 from keras.optimizers import RMSprop,SGD
@@ -46,7 +46,7 @@ saveAEFeats = args.saveAEFeats
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -83,14 +83,14 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 params['data_path'] = train_data_path
-params['remove_inactivity'] = params.get('remove_inactivity', 'False')
+params['remove_inactivity'] = params.get('remove_inactivity', 'True')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
 cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
-cleanParams['remove_inactivity'] = 'False' 
 
+'''
 train_X = []
 for idx in df_train_label.index:
     print(idx)
@@ -120,13 +120,15 @@ model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epoc
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
-encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+'''
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
+
 
 if saveAEFeats:
-    save_feats_path = '/export/b03/sbhati/PD/BeatPD/AE_feats/'
+    save_feats_path = '/export/b19/mpgill/BeatPD/AE_30ft_high_pass/'
     for idx in df_train_label.index:
         print(idx)
-        temp_X = load_data(df_train_label,idx)
+        temp_X = load_data(df_train_label,idx,cleanParams)
         temp_feats = encoder.predict(temp_X)
         name = df_train_label["measurement_id"][idx]
         sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 

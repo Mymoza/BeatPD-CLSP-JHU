@@ -1,12 +1,15 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import pandas as pd
-from .. import transform_data
+import sys
+
+sys.path.append('/home/sjoshi/codes/python/BeatPD/code/')
+from transform_data import apply_mask
 
 def load_data(data_frame_in,idx,params):
     #print(df_train_label["measurement_id"][idx])
 
-    data_path = params['data_path']
+    data_path = params['my_data_path']
     frame_length = params['frame_length']
     frame_step = params['frame_step']
     min_len = params['min_len']
@@ -16,21 +19,26 @@ def load_data(data_frame_in,idx,params):
     add_noise = params['add_noise']
     add_rotation = params['add_rotation']
     remove_inactivity = params['remove_inactivity']
+    mask_path = params['my_mask_path']
 
+    print('before data_path : ', data_path)
+    data_path="/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass//"
+    print('data_path : ', data_path)
     temp_train_X = pd.read_csv(data_path+data_frame_in["measurement_id"][idx] + '.csv')
     temp_train_X = temp_train_X.values[:,1:]
     #temp_train_X = np.log1p(temp_train_X)
     #temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
-    #import pdb; pdb.set_trace()
-    sig_len = temp_train_X.shape[0]
-    if remove_inactivity:: 
+    #import pdb; pdb.set_trace() 
+    if remove_inactivity =='True':
+        mask_path=data_path[:-2]+'_mask/'
         temp_train_X = apply_mask(data_path,
                                   data_frame_in["measurement_id"][idx],
                                   mask_path)
         temp_train_X = temp_train_X.values[:,1:]
-    if add_noise:
+    sig_len = temp_train_X.shape[0]
+    if add_noise == 'True':
         temp_train_X = temp_train_X + np.random.normal(0,1,(temp_train_X.shape))
-    if add_rotation:
+    if add_rotation == 'True':
         s_ind = 0
         while (s_ind < sig_len):
             jump = np.random.randint(min_len,max_len,1)[0]
@@ -39,7 +47,7 @@ def load_data(data_frame_in,idx,params):
             rot_mat = r.as_dcm()
             temp_train_X[s_ind:s_ind+jump,:] = np.dot(temp_train_X[s_ind:s_ind+jump,:],rot_mat)
             s_ind = s_ind + jump
-    if do_MVN:
+    if do_MVN == 'True':
         temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
         temp_train_X = temp_train_X / (temp_train_X.std(axis=0,keepdims=True)+1e-9)         
     num_frames = int(np.ceil(float(np.abs(sig_len - frame_length)) / frame_step))

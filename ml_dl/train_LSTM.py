@@ -44,7 +44,7 @@ latent_dim = args.latent_dim
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -81,6 +81,7 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 params['data_path'] = train_data_path
+params['remove_inactivity']= params.get('remove_inactivity','True')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
