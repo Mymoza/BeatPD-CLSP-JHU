@@ -24,7 +24,7 @@ sDirFeats=$2
 ivecDim=$3
 stage=$4
 
-expDir=${sDirFeats}/exp
+expDir=${sDirFeats}/exp3ax
 
 trials=data/Testing_Fold${foldN}/trials
 
@@ -126,45 +126,21 @@ if [ $stage -eq 4 ]; then
 	done
 fi
 
-x=-13
-while [ $x -le 15 ]
-do
-    for iNumComponents in 2E${x}; do
-        salut=$(printf "%.14f\n" ${iNumComponents})
-        echo $salut
-    done
-    x=$(( $x + 2))
-done
-
-echo STAGE IS 
-echo $stage
-echo END STAGE 
-
 if [ $stage -eq 5 ]; then  # Just SVR
 	sOut=$expDir/ivec_${ivecDim}/resiVecSVR_Fold${foldN}
-	echo 1
-	echo $sFileTrain
-	echo 2 
-	echo $sFileTest
-	echo 3 
-	echo $sOut
-	for iNumComponents in 15 30 50 100 125 150 175 200 225 250 275; do
+	for iNumComponents in 50 100 125 150 175 200 225 250 275 300 350 400 450 500 550; do
 		for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
 			x=-13
-			while [ $x -le 15 ]
+			while [ $x -le 2 ]
 			do
-				for fCValue in 2E${x}; do
-					# Convert from scientific to float
-					fC=$(printf "%.14f\n" ${fCValue})
-					if [ $iNumComponents -le $ivecDim ]; then
-						echo Component is ${iNumComponents}
-						echo $fC
-						fEpsilon=0.1 # default value
-						echo $fEpsilon
-						local/pca_svr_bpd.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fC $fEpsilon
-					fi
+				# Convert from scientific to float
+				fC=$(printf "%.14f\n" 2E${x})
+				if [ $iNumComponents -le $ivecDim ]; then
+					echo Component is ${iNumComponents}
+					fEpsilon=0.1 # default value
+					local/pca_svr_bpd.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fC $fEpsilon
+				fi
 				x=$(( $x + 2))
-				done
 			done
 		done
 	done

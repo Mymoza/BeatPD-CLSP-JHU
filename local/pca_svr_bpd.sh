@@ -14,15 +14,13 @@ sKernel=$5
 fCValue=$6
 fEpsilon=$7
 
-echo $fEpsilon
-echo sssssssssssss
-echo $sOut
-echo sssssssssssssss
+# Just to get C in scientific notation for the name of the log files 
+fCValueStr=$(printf "%g" $fCValue)
 
 filePath=/home/sjoshi/codes/python/BeatPD/code/
 
 cmd=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/utils/run.pl
-$cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValue}_${fEpsilon}Testx.log \
+$cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log \
      ${filePath}pca_knn_bpd.py --input-trai $sFileTrai \
      --input-test $sFileTest \
      --output-file $sOut \

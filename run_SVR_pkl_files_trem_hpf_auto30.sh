@@ -5,19 +5,20 @@
 # ivecDim 50 100 150 200 250 300 
 # sDirFeats /export/b03/sbhati/PD/BeatPD/AE_feats
 
-echo Working on on/off 
+echo Working on tremor
 
-#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
-#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
+sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_hpf_auto30/exp/
+sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_hpf_auto30
 
-sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax/exp3x/
-sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax
+#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax/exp/
+#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax
 
-for ivecDim in 350 400 450 500; do
+for ivecDim in 50; do
     echo Working on ${ivecDim}
     ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
 done
 
+echo DONE
 
 #SOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_dysk_auto/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_dysk_auto
@@ -32,7 +33,7 @@ done
 #    ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
 #done
 
-echo Working on tremor 
+#echo Working on tremor
 
 #sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_trem_auto/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_trem_auto

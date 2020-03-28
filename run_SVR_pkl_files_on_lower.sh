@@ -10,10 +10,10 @@ echo Working on on/off
 #sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
 
-sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax/exp3x/
+sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax/exp3ax/
 sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax
 
-for ivecDim in 350 400 450 500; do
+for ivecDim in 50 100 150 200 250 300; do
     echo Working on ${ivecDim}
     ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
 done
