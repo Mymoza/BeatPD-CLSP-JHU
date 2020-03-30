@@ -17,7 +17,7 @@ import pandas as pd
 import json
 import copy
 
-from dataload import load_data
+from dataload import load_data, load_data_all
 from model import make_DNN_model, make_LSTM_model
 from feat_process import get_AE_feats
 from BeatPDutils import get_class_weights, sort_dict
@@ -65,12 +65,6 @@ train_data_path = data_dir + data_type + "-pd.training_data/" + data_real_subtyp
 df_train_label = pd.read_csv(label_path_train)
 train_data_len = df_train_label.shape[0]
 
-if use_ancillarydata:
-    ancillary_data_path = data_dir + data_type + 'pd.ancillary_data'
-    label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
-    df_ancillary_label = pd.read_csv(label_path_ancillary)
-    #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
-
 if not params:
     params = {}
 
@@ -89,13 +83,21 @@ cleanParams = copy.copy(params)
 cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
 
-train_X = []
-for idx in df_train_label.index:
-    print(idx)
-    temp_X = load_data(df_train_label,idx,cleanParams)
-    train_X.append(temp_X)
+if use_ancillarydata:
+    ancillary_data_path = data_dir + data_type + '-pd.ancillary_data/'
+    label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
+    df_ancillary_label = pd.read_csv(label_path_ancillary)
+    anci_params = copy.copy(params)
+    anci_params['data_path'] = ancillary_data_path
+    anci_cleanParams = copy.copy(cleanParams)
+    anci_cleanParams['data_path'] = ancillary_data_path
+    #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
 
-train_X = np.vstack(train_X)
+train_X = load_data_all(df_train_label,cleanParams)
+if use_ancillarydata:
+    train_X_anci = load_data_all(df_ancillary_label,anci_cleanParams)
+    train_X = np.concatenate((train_X,train_X_anci),axis=0)
+    del train_X_anci
 
 N = train_X.shape[0]
 ind = np.random.permutation(N)
@@ -113,7 +115,30 @@ model.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
 batch_size = 500
 epochs = 200
-model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
+
+train_X_all = train_X
+train_Y_all = train_X
+
+if params['add_noise'] =='True' or params['add_rotation'] == 'True':
+    for i in range(dataAugScale):
+        temp_X = load_data_all(df_train_label,params)
+        if use_ancillarydata:
+            temp_X_anci = load_data_all(df_ancillary_label,anci_params)
+            temp_X = np.concatenate((temp_X,temp_X_anci),axis=0)
+            del temp_X_anci    
+        train_X_all = np.concatenate((temp_X,train_X_all),axis=0)
+        train_Y_all = np.concatenate((train_X,train_Y_all),axis=0)
+        del temp_X
+
+print("Original Size: %f" % (train_X.shape[0]))
+print("Augumented Size: %f" % (train_X_all.shape[0]))
+
+#N = train_X_all.shape[0]
+#ind = np.random.permutation(N)
+#train_X_all = train_X_all[ind,:]
+#train_Y_all = train_Y_all[ind,:]
+
+model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')

@@ -17,7 +17,7 @@ import json
 import copy
 
 from dataload import load_data
-from model import make_DNN_model, make_LSTM_model
+from model import make_DNN_model, make_LSTM_model, make_CNN_model
 from feat_process import get_AE_feats
 from BeatPDutils import get_class_weights, sort_dict
 
@@ -30,11 +30,11 @@ parser.add_argument("--data_real_subtype",default="")
 parser.add_argument("--pid",default=1039,type=int)
 parser.add_argument("--KFind",default=2,type=int)
 parser.add_argument("--subtask",default="on_off",choices=['on_off','dyskinesia', 'tremor'])
-parser.add_argument("--use_ancillarydata",action="store_true")
+parser.add_argument("-uad","--use_ancillarydata",action="store_true")
 parser.add_argument("--latent_dim",default=30,type=int)
 parser.add_argument("-wsLSTM","--warmstart_LSTM",action="store_true")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
-parser.add_argument("--dataAugScale",default=5,type=int)
+parser.add_argument("--dataAugScale",default=2,type=int)
 
 args = parser.parse_args()
 
@@ -93,8 +93,8 @@ cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
 
 #model = load_model(load_weights_dir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
-#encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
-encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 #model.predict(train_X)
 
 ## LSTM 
@@ -121,8 +121,8 @@ temp_Y = labels
 if params['add_noise'] =='True' or params['add_rotation'] == 'True':
     for i in range(dataAugScale):
         temp_AE_feats, temp_labels, temp_ind_selected = get_AE_feats(encoder,df_train_label,subtask,params)
-        temp_X = np.concatenate((temp_X,temp_AE_feats),axis=0)
-        temp_Y = np.concatenate((temp_Y,temp_labels),axis=0)
+        temp_X = np.concatenate((temp_AE_feats,temp_X),axis=0)
+        temp_Y = np.concatenate((temp_labels,temp_Y),axis=0)
         del temp_AE_feats, temp_labels, temp_ind_selected
 
 print("Original Size: %f" % (AE_feats.shape[0]))
@@ -130,11 +130,12 @@ print("Augumented Size: %f" % (temp_X.shape[0]))
 
 #import pdb; pdb.set_trace()
 
-#N = temp_X.shape[0]
-#ind = np.random.permutation(N)
-#temp_X = temp_X[ind,:,:]
-#temp_Y = temp_Y[ind,:]
-classifier.fit(temp_X,temp_Y,validation_split=0.15,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
+N = temp_X.shape[0]
+ind = np.random.permutation(N)
+temp_X = temp_X[ind,:,:]
+temp_Y = temp_Y[ind,:]
+#classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
+classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
 
 del temp_X, temp_Y
 

@@ -31,10 +31,7 @@ def load_data(data_frame_in,idx,params):
             r = R.from_euler('xyz', [rot]*3, degrees=True)
             rot_mat = r.as_dcm()
             temp_train_X[s_ind:s_ind+jump,:] = np.dot(temp_train_X[s_ind:s_ind+jump,:],rot_mat)
-            s_ind = s_ind + jump
-    if do_MVN == 'True':
-        temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
-        temp_train_X = temp_train_X / (temp_train_X.std(axis=0,keepdims=True)+1e-9)         
+            s_ind = s_ind + jump         
     num_frames = int(np.ceil(float(np.abs(sig_len - frame_length)) / frame_step))
     pad_sig_len = num_frames * frame_step + frame_length
     temp_pad = np.zeros((pad_sig_len - sig_len,3))
@@ -43,6 +40,9 @@ def load_data(data_frame_in,idx,params):
     #temp_train_X = np.expand_dims(temp_train_X,axis=0)
     temp_train_X = temp_train_X[indices,:]
     temp_train_X = temp_train_X.reshape(temp_train_X.shape[0],-1)
+    if do_MVN == 'True':
+        temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
+        temp_train_X = temp_train_X / (temp_train_X.std(axis=0,keepdims=True)+1e-9)    
     #temp_train_Y = data_frame_in[subtask][idx]
     #if np.isnan(temp_train_Y):
         #print('nan label')
@@ -51,3 +51,11 @@ def load_data(data_frame_in,idx,params):
     #temp_train_Y = np.expand_dims(temp_train_Y,axis=0)
     return temp_train_X
 
+def load_data_all(data_frame_in,params):
+    train_X = []
+    for idx in data_frame_in.index:
+        print(idx)
+        temp_X = load_data(data_frame_in,idx,params)
+        train_X.append(temp_X)
+    train_X = np.vstack(train_X)
+    return train_X
