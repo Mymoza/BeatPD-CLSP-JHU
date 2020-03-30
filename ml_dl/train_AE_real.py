@@ -17,6 +17,8 @@ import glob
 import os
 import argparse
 import pandas as pd
+import json
+import copy 
 
 from dataload import load_data, load_data_all
 from model import make_DNN_model, make_LSTM_model
@@ -86,6 +88,7 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 #params['data_path'] = train_data_path
+params['remove_inactivity'] = params.get('remove_inactivity', 'True')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
@@ -97,11 +100,11 @@ smartwatch_gyro_params = copy.copy(params)
 
 temp_path = get_data_path(data_type,'smartwatch_accelerometer','train')
 smartwatch_acc_params['my_data_path'] = params.get('sw_acc_data_path',temp_path)
-smartwatch_acc_params['my_mask_path'] = params.get('sw_acc_mask_path',None)
+smartwatch_acc_params['my_mask_path'] = params.get('sw_acc_mask_path',"None")
 
 temp_path = get_data_path(data_type,'smartwatch_gyroscope','train')
 smartwatch_gyro_params['my_data_path'] = params.get('sw_gyro_data_path',temp_path)
-smartwatch_gyro_params['my_mask_path'] = params.get('sw_gyro_mask_path',None)
+smartwatch_gyro_params['my_mask_path'] = params.get('sw_gyro_mask_path',"None")
 
 all_params = {}
 all_params['smartwatch_accelerometer'] = smartwatch_acc_params
@@ -143,7 +146,7 @@ train_X = []
 
 for idx in df_train_label.index:
     print(idx)
-    temp_X = load_subtype_data(df_train_label,idx)
+    temp_X = load_subtype_data(df_train_label,idx,all_params)
     train_X.append(temp_X)
 
 train_X = np.vstack(train_X)
@@ -155,7 +158,7 @@ train_X = train_X[ind,:]
 feat_size = train_X.shape[1]
 
 model,encoder = make_DNN_model(feat_size=feat_size,latent_dim=latent_dim)
-
+import pdb; pdb.set_trace()
 checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5', verbose=1, save_best_only=True)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 #model.compile(optimizer='adam',loss='mse',metrics=['mse'])
