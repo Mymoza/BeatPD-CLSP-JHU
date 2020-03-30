@@ -24,7 +24,7 @@ sDirFeats=$2
 ivecDim=$3
 stage=$4
 
-expDir=${sDirFeats}/exp3ax
+expDir=${sDirFeats}/exp
 
 trials=data/Testing_Fold${foldN}/trials
 
