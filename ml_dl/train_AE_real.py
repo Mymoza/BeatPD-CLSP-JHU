@@ -17,6 +17,8 @@ import glob
 import os
 import argparse
 import pandas as pd
+import json
+import copy
 
 from dataload import load_data, load_data_all
 from model import make_DNN_model, make_LSTM_model
@@ -143,7 +145,7 @@ train_X = []
 
 for idx in df_train_label.index:
     print(idx)
-    temp_X = load_subtype_data(df_train_label,idx)
+    temp_X = load_subtype_data(df_train_label,idx,all_params)
     train_X.append(temp_X)
 
 train_X = np.vstack(train_X)
