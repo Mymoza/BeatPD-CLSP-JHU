@@ -88,7 +88,7 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 #params['data_path'] = train_data_path
-params['remove_inactivity'] = params.get('remove_inactivity', 'True')
+params['remove_inactivity'] = params.get('remove_inactivity', 'False')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
@@ -131,7 +131,7 @@ file_list = os.listdir(temp_path)
 def select_valid_ind(data_frame_in,file_list):
 	ind = []
 	for idx in data_frame_in.index:
-		print(idx)
+		#print(idx)
 		temp_name = data_frame_in['measurement_id'][idx] + '.csv'
 		if temp_name in file_list:
 			ind.append(idx)
@@ -141,13 +141,14 @@ def select_valid_ind(data_frame_in,file_list):
 ind = select_valid_ind(df_train_label,file_list)
 df_train_label = df_train_label.iloc[ind]
 df_train_label = df_train_label.reset_index(drop=True)
-
+import pdb; pdb.set_trace();
 train_X = []
 
 for idx in df_train_label.index:
     print(idx)
     temp_X = load_subtype_data(df_train_label,idx,all_params)
     train_X.append(temp_X)
+
 
 train_X = np.vstack(train_X)
 
@@ -158,7 +159,6 @@ train_X = train_X[ind,:]
 feat_size = train_X.shape[1]
 
 model,encoder = make_DNN_model(feat_size=feat_size,latent_dim=latent_dim)
-import pdb; pdb.set_trace()
 checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5', verbose=1, save_best_only=True)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 #model.compile(optimizer='adam',loss='mse',metrics=['mse'])
