@@ -19,7 +19,7 @@ sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30
 #sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30
 
-for ivecDim in 550; do
+for ivecDim in 450 500; do
     echo Working on ${ivecDim}
     ./runKNNFold.sh ${sOut} $ivecDim $sDirFeats
 done
