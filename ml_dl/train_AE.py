@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Dropout, Input, Lambda, LSTM, Masking
 from keras.layers import Add
 from keras.optimizers import RMSprop,SGD
@@ -77,6 +77,7 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 params['data_path'] = train_data_path
+params['remove_inactivity'] = params.get('remove_inactivity', 'True')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
@@ -98,7 +99,7 @@ if use_ancillarydata:
     train_X_anci = load_data_all(df_ancillary_label,anci_cleanParams)
     train_X = np.concatenate((train_X,train_X_anci),axis=0)
     del train_X_anci
-
+'''
 N = train_X.shape[0]
 ind = np.random.permutation(N)
 train_X = train_X[ind,:]
@@ -139,7 +140,7 @@ print("Augumented Size: %f" % (train_X_all.shape[0]))
 #train_Y_all = train_Y_all[ind,:]
 
 model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
-
+'''
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
@@ -149,7 +150,7 @@ if saveAEFeats:
     save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
     for idx in df_train_label.index:
         print(idx)
-        temp_X = load_data(df_train_label,idx)
+        temp_X = load_data(df_train_label,idx,cleanParams)
         temp_feats = encoder.predict(temp_X)
         name = df_train_label["measurement_id"][idx]
         sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
