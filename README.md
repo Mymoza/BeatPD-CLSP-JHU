@@ -145,16 +145,62 @@ Dyskenisia:
 
 ## Autoencoder output features 
 
+### CIS-PD, training features 
 `cd /export/b19/mpgill/BeatPD/`
 
 `$ python train_AE.py --saveAEFeats --dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 - `AE_30ft_orig_inactivity_removed/` : 30 features, inactivity removed from original training data
+
+Then, I changed `data_path` to a hardcoded path to the high_pass features 
 
 `$ python train_AE.py --saveAEFeats --dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 - `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "False", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "None"}'`
 - `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed) 
+
+### CIS-PD, testing features 
+
+`$ python test_AE_cis.py -dlP`
+
+- `cis_testing_AE_30ft_orig_inactivity_removed`
+
+`$ python test_AE_cis.py -dlP`
+
+- `cis_testing_AE_30ft_high_pass_inactivity_removed`
+
+`$ python test_AE_cis.py -dlP`
+
+- `cis_testing_AE_30ft_high_pass`
+
+### REAL-PD, training features 
+
+`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
+
+- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig_inactivity_removed/`
+
+CHANGE BC WE DIDNT USE HIGH PASS VERSION ? 
+`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
+
+- /export/b19/mpgill/BeatPD/real_train_AE_30ft_high_pass_inactivity_removed/
+
+`$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/",  "remove_inactivity": "False"}'  --saveAEFeats`
+
+- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed)
+
+### REAL-PD, testing features 
+
+`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
+
+- `/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/`
+
+`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
+
+- `real_testing_AE_30ft_high_pass_inactivity_removed`
+
+`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats`
+
+- `real_testing_AE_30ft_high_pass`
 
 
 # Visualization 
