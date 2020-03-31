@@ -87,7 +87,7 @@ def find_res_folders(sFilePath, bKnn, bSVR):
     """
     # Building the list of folders we have to open 
     if bKnn:
-        sFolderNamePattern = "resiVecKNN_Fold\d*"
+        sFolderNamePattern = "resiVecKNN_Fold\d"
     elif bSVR: 
         sFolderNamePattern = "resiVecSVR_Fold\d"
     else:
