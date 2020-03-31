@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model,load_model
 from keras.layers import Dense, Dropout, Input, Lambda, LSTM, Masking
 from keras.layers import Add
 from keras.optimizers import RMSprop,SGD
@@ -48,7 +48,7 @@ saveAEFeats = args.saveAEFeats
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -118,6 +118,7 @@ def load_subtype_data(data_frame_in,idx,all_params):
         temp_X[i] = load_data(data_frame_in,idx,all_params[data_real_subtype])
         temp_X_lens[i] = temp_X[i].shape[0]
         #print(temp_X.shape)
+    #import pdb; pdb.set_trace()
     temp_X_minlen = np.min(temp_X_lens)
     for i in range(len(data_real_subtypes)):
         temp_X[i] = temp_X[i][:temp_X_minlen,:]
@@ -149,7 +150,6 @@ for idx in df_train_label.index:
     temp_X = load_subtype_data(df_train_label,idx,all_params)
     train_X.append(temp_X)
 
-import pdb; pdb.set_trace();
 train_X = np.vstack(train_X)
 
 N = train_X.shape[0]
@@ -167,17 +167,19 @@ lr=0.001
 sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
 model.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
-model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
+#model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
-model.load_weights(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
+#model.load_weights(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
 
-encoder = Model(inputs,feats)
+encoder = load_model(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
 #encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
 
-save_feats_path = '/export/b03/sbhati/PD/BeatPD/real_AE_feats/'
-for idx in df_train_label.index:
-	print(idx)
-	temp_X = load_subtype_data(df_train_label,idx,all_params)
-	temp_feats = encoder.predict(temp_X)
-	name = df_train_label["measurement_id"][idx]     
-	sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
+if saveAEFeats:
+	save_feats_path = '/export/b19/mpgill/BeatPD/real_AE_feats/'
+	for idx in df_train_label.index:
+		print(idx)
+		temp_X = load_subtype_data(df_train_label,idx,all_params)
+		temp_feats = encoder.predict(temp_X)
+		name = df_train_label["measurement_id"][idx]     
+		sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
+
