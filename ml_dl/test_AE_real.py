@@ -146,7 +146,7 @@ df_test_label = df_test_label.reset_index(drop=True)
 
 #model.load_weights(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
 
-encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
+encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 #encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
 
 if saveAEFeats:
