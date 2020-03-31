@@ -88,7 +88,7 @@ params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
 #params['data_path'] = train_data_path
-params['remove_inactivity'] = params.get('remove_inactivity', 'False')
+params['remove_inactivity'] = params.get('remove_inactivity', 'True')
 params = sort_dict(params)
 
 cleanParams = copy.copy(params)
@@ -101,10 +101,12 @@ smartwatch_gyro_params = copy.copy(params)
 temp_path = get_data_path(data_type,'smartwatch_accelerometer','train')
 smartwatch_acc_params['my_data_path'] = params.get('sw_acc_data_path',temp_path)
 smartwatch_acc_params['my_mask_path'] = params.get('sw_acc_mask_path',"None")
+smartwatch_acc_params['my_highpass_path'] = params.get('sw_acc_hp_path',"None")
 
 temp_path = get_data_path(data_type,'smartwatch_gyroscope','train')
 smartwatch_gyro_params['my_data_path'] = params.get('sw_gyro_data_path',temp_path)
 smartwatch_gyro_params['my_mask_path'] = params.get('sw_gyro_mask_path',"None")
+smartwatch_gyro_params['my_highpass_path'] = params.get('sw_gyro_hp_path',"None")
 
 all_params = {}
 all_params['smartwatch_accelerometer'] = smartwatch_acc_params
@@ -175,7 +177,7 @@ encoder = load_model(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
 #encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
 
 if saveAEFeats:
-	save_feats_path = '/export/b19/mpgill/BeatPD/real_AE_feats/'
+	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_data_AE_30ft_orig_inactivity_removed/'
 	for idx in df_train_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_train_label,idx,all_params)

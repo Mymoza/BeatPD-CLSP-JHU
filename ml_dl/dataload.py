@@ -20,9 +20,14 @@ def load_data(data_frame_in,idx,params):
     add_rotation = params['add_rotation']
     remove_inactivity = params['remove_inactivity']
     mask_path = params['my_mask_path']
-
+    highpass_path = params['my_highpass_path']
+    print(type(highpass_path))
+    print('data_path before : ', data_path)
+    if highpass_path is not "None": 
+        print('entered the if') 
+        data_path = highpass_path 
     print('data_path : ', data_path)
-    #data_path="/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass//"
+    #data_path="/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass//"
     temp_train_X = pd.read_csv(data_path+data_frame_in["measurement_id"][idx] + '.csv')
     temp_train_X = temp_train_X.values[:,-3:]
     #temp_train_X = np.log1p(temp_train_X)
@@ -30,6 +35,7 @@ def load_data(data_frame_in,idx,params):
     #import pdb; pdb.set_trace()
     if remove_inactivity =='True':
         #mask_path=data_path[:-2]+'_mask/'
+        print('mask_path : ',  mask_path)
         temp_train_X = apply_mask(data_path,
                                   data_frame_in["measurement_id"][idx],
                                   mask_path)
