@@ -94,12 +94,12 @@ if use_ancillarydata:
     anci_cleanParams['data_path'] = ancillary_data_path
     #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
 
+'''
 train_X = load_data_all(df_train_label,cleanParams)
 if use_ancillarydata:
     train_X_anci = load_data_all(df_ancillary_label,anci_cleanParams)
     train_X = np.concatenate((train_X,train_X_anci),axis=0)
     del train_X_anci
-'''
 N = train_X.shape[0]
 ind = np.random.permutation(N)
 train_X = train_X[ind,:]
@@ -148,7 +148,7 @@ model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epo
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-    save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
+    save_feats_path = '/export/b19/mpgill/BeatPD/AE_30ft_high_pass_inactivity_removed_test/'
     for idx in df_train_label.index:
         print(idx)
         temp_X = load_data(df_train_label,idx,cleanParams)

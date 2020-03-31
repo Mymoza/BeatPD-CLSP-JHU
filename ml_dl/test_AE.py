@@ -86,7 +86,7 @@ cleanParams['add_noise'] = 'False'
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-    save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
+    save_feats_path = '/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig_inactivity_removed/'
     for idx in df_test_label.index:
         print(idx)
         temp_X = load_data(df_test_label,idx,cleanParams)
