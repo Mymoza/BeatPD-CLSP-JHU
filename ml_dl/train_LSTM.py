@@ -44,7 +44,7 @@ latent_dim = args.latent_dim
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b19/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
