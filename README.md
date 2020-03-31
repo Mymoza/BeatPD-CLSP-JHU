@@ -194,15 +194,32 @@ To get all the results for all the combinations of `ivecDim` for every class (`o
 #### Manually 
 1. To create the pkl files that are going to let you get the challenge final score afterward: 
 
-- `./runSVRFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
-- `./runKNNFold.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/`
+- `./runSVRFold.sh $sOut $ivecDim $sDirFeats`
+- `./runKNNFold.sh $sOut $ivecDim $sDirFeats`
 
-This file contains a variable `ivecDim=50` which hardcode the ivector size you want to use. You need to change the value manually to generate the files for all the different ivectors sizes. 
- 
+Or simply use a script like this to automate the ivectors dimension for a provided folder of features: 
+
+```
+echo Working on tremor
+
+#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
+#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
+
+sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/
+sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30
+
+for ivecDim in 50 100 150 200 250 300 350 400 450 500 550; do
+    echo Working on ${ivecDim}
+    ./runKNNFold.sh ${sOut} $ivecDim $sDirFeats
+done
+```
+
 
 2. Get the final score as used in the challenge (weighted MSE): 
 
 - `./evaluate_global_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+
+- `./evaluate_global_acc_knn.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/ /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/`
 
 This script will generate a `.log` file from the name and location provided in `evaluate_global_acc.sh`, like so:
 
