@@ -141,7 +141,7 @@ def select_valid_ind(data_frame_in,file_list):
 ind = select_valid_ind(df_train_label,file_list)
 df_train_label = df_train_label.iloc[ind]
 df_train_label = df_train_label.reset_index(drop=True)
-import pdb; pdb.set_trace();
+
 train_X = []
 
 for idx in df_train_label.index:
@@ -149,7 +149,7 @@ for idx in df_train_label.index:
     temp_X = load_subtype_data(df_train_label,idx,all_params)
     train_X.append(temp_X)
 
-
+import pdb; pdb.set_trace();
 train_X = np.vstack(train_X)
 
 N = train_X.shape[0]

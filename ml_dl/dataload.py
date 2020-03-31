@@ -24,7 +24,7 @@ def load_data(data_frame_in,idx,params):
     print('data_path : ', data_path)
     #data_path="/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass//"
     temp_train_X = pd.read_csv(data_path+data_frame_in["measurement_id"][idx] + '.csv')
-    temp_train_X = temp_train_X.values[:,1:]
+    temp_train_X = temp_train_X.values[:,-3:]
     #temp_train_X = np.log1p(temp_train_X)
     #temp_train_X = temp_train_X - temp_train_X.mean(axis=0,keepdims=True)
     #import pdb; pdb.set_trace()
@@ -34,7 +34,12 @@ def load_data(data_frame_in,idx,params):
                                   data_frame_in["measurement_id"][idx],
                                   mask_path)
         temp_train_X = temp_train_X.values[:,1:]
+    
     sig_len = temp_train_X.shape[0]
+    if sig_len < frame_length:
+        temp_pad = np.zeros((frame_length+1 - sig_len,3))
+        temp_train_X = np.concatenate((temp_train_X, temp_pad),axis=0)
+        sig_len = temp_train_X.shape[0]
     if add_noise == 'True':
         temp_train_X = temp_train_X + np.random.normal(0,1,(temp_train_X.shape))
     if add_rotation == 'True':
