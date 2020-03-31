@@ -46,7 +46,7 @@ saveAEFeats = args.saveAEFeats
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -146,7 +146,7 @@ encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str
 encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-    save_feats_path = '/export/b03/sbhati/PD/BeatPD/AE_feats/'
+    save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
     for idx in df_train_label.index:
         print(idx)
         temp_X = load_data(df_train_label,idx)

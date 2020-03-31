@@ -2,7 +2,7 @@ source ~/cmd.sh
 pids=(1004 1006 1007 1019 1020 1023 1032 1034 1038 1039 1043 1044 1046 1048 1049 1051)
 
 dir="/export/b03/sbhati/PD/BeatPD/"
-savedir="/export/b03/sbhati/PD/BeatPD/logs/"
+savedir="/export/b19/mpgill/BeatPD/logs/"
 subtask="on_off"
 
 rm -rf $dir/logs
