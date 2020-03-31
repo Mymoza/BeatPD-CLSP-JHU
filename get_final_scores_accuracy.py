@@ -7,6 +7,7 @@ import argparse
 from sklearn.metrics import mean_squared_error
 from math import sqrt 
 import pandas as pd 
+import os
 
 def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test=''):
     numerator = np.sum([nb_file * mse for nb_file, mse in zip(np.sqrt(nb_files_per_subject_id), mse_per_subjectid)])
@@ -94,7 +95,7 @@ def find_res_folders(sFilePath, bKnn, bSVR):
         sFolderNamePattern = "resx*"
     
     print('Looking for folder : ', sFolderNamePattern)
-    lResxFolders = [sFilePath+f for f in os.listdir(path) if re.search(sFolderNamePattern, f)]
+    lResxFolders = [sFilePath+f for f in os.listdir(sFilePath) if re.search(sFolderNamePattern, f)]
     sPatternFold = '(?<=[Ff]old)\d+'
 
     # Get a list of all files starting with objs
