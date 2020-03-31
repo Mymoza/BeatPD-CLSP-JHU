@@ -101,12 +101,10 @@ smartwatch_gyro_params = copy.copy(params)
 temp_path = get_data_path(data_type,'smartwatch_accelerometer','train')
 smartwatch_acc_params['my_data_path'] = params.get('sw_acc_data_path',temp_path)
 smartwatch_acc_params['my_mask_path'] = params.get('sw_acc_mask_path',"None")
-smartwatch_acc_params['my_highpass_path'] = params.get('sw_acc_hp_path',"None")
 
 temp_path = get_data_path(data_type,'smartwatch_gyroscope','train')
 smartwatch_gyro_params['my_data_path'] = params.get('sw_gyro_data_path',temp_path)
 smartwatch_gyro_params['my_mask_path'] = params.get('sw_gyro_mask_path',"None")
-smartwatch_gyro_params['my_highpass_path'] = params.get('sw_gyro_hp_path',"None")
 
 all_params = {}
 all_params['smartwatch_accelerometer'] = smartwatch_acc_params

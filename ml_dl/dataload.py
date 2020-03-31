@@ -20,12 +20,7 @@ def load_data(data_frame_in,idx,params):
     add_rotation = params['add_rotation']
     remove_inactivity = params['remove_inactivity']
     mask_path = params['my_mask_path']
-    highpass_path = params['my_highpass_path']
-    print(type(highpass_path))
-    print('data_path before : ', data_path)
-    if highpass_path is not "None": 
-        print('entered the if') 
-        data_path = highpass_path 
+   
     print('data_path : ', data_path)
     #data_path="/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass//"
     temp_train_X = pd.read_csv(data_path+data_frame_in["measurement_id"][idx] + '.csv')
