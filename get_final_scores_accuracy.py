@@ -87,14 +87,14 @@ def find_res_folders(sFilePath, bKnn, bSVR):
     """
     # Building the list of folders we have to open 
     if bKnn:
-        sFolderName = "resiVecKNN*"
+        sFolderNamePattern = "resiVecKNN_Fold\d*"
     elif bSVR: 
-        sFolderName = "resiVecSVR*"
+        sFolderNamePattern = "resiVecSVR_Fold\d"
     else:
-        sFolderName = "resx"
+        sFolderNamePattern = "resx*"
     
-    print('Looking for folder : ', sFolderName)
-    lResxFolders = [f for f in glob.glob(sFilePath + sFolderName)]
+    print('Looking for folder : ', sFolderNamePattern)
+    lResxFolders = [sFilePath+f for f in os.listdir(path) if re.search(sFolderNamePattern, f)]
     sPatternFold = '(?<=[Ff]old)\d+'
 
     # Get a list of all files starting with objs
