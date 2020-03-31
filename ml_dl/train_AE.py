@@ -141,10 +141,11 @@ print("Augumented Size: %f" % (train_X_all.shape[0]))
 
 model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 '''
-model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
-encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
+#encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
-encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
     save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
