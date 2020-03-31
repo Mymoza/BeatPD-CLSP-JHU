@@ -125,7 +125,7 @@ def load_subtype_data(data_frame_in,idx,all_params):
     return temp_X 	
 
 
-temp_path = get_data_path(data_type,'smartwatch_accelerometer')
+temp_path = get_data_path(data_type,'smartwatch_accelerometer','test')
 file_list = os.listdir(temp_path)
 
 def select_valid_ind(data_frame_in,file_list):
@@ -148,13 +148,12 @@ df_test_label = df_test_label.reset_index(drop=True)
 
 encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 #encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
-
 if saveAEFeats:
-	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
+	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_high_pass_inactivity_removed/'
 	for idx in df_test_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_test_label,idx,all_params)
 		temp_feats = encoder.predict(temp_X)
-		name = df_train_label["measurement_id"][idx]     
+		name = df_test_label["measurement_id"][idx]     
 		sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
 

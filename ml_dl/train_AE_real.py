@@ -175,7 +175,7 @@ encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'_ld_'+str(la
 #encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
 
 if saveAEFeats:
-	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_data_AE_30ft_orig_inactivity_removed/'
+	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
 	for idx in df_train_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_train_label,idx,all_params)
