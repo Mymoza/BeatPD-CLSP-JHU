@@ -89,7 +89,7 @@ if saveAEFeats:
     save_feats_path = '/export/b19/mpgill/BeatPD/somefolder/'
     for idx in df_test_label.index:
         print(idx)
-        temp_X = load_data(df_train_label,idx,cleanParams)
+        temp_X = load_data(df_test_label,idx,cleanParams)
         temp_feats = encoder.predict(temp_X)
         name = df_test_label["measurement_id"][idx]
         sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
