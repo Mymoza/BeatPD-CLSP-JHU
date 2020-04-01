@@ -10,11 +10,48 @@ import pandas as pd
 import os
 
 def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test=''):
+    """
+    Compute the final score for the challenge given the arguments 
+    
+    Keyword arguments:
+    - mse_per_subjectid: list of the mse per subject_id 
+    - nb_files_per_subject_id: list of the number of files per subject_id 
+    - training_or_test: string just for the purpose of printing the result 
+    """
     numerator = np.sum([nb_file * mse for nb_file, mse in zip(np.sqrt(nb_files_per_subject_id), mse_per_subjectid)])
     denominator = np.sum(np.sqrt(nb_files_per_subject_id))
+    #FIXME : Refactor so it's not printing by default 
     print(training_or_test+'Final score : ', np.divide(numerator, denominator))
     return np.divide(numerator, denominator)
 
+def get_final_score(vPredictions, vParID, vTrueLabels):
+    """
+    Compute the final score from the challenge and print the result
+    
+    Keyword arguments: 
+    - vPredictions: Numpy array containing the predictions 
+    - VParID: list containing the subject_id 
+    - vTrueLabels: list containing the true labels 
+    """
+    mse_per_subjectId = []
+    nb_files_per_subjectId = []
+    
+    for subject_id in np.unique(vParID):
+        print('--- SUBJECT ID ', subject_id, '---')
+        
+        vSubjectId = (vParID == subject_id)
+
+        vPredictions_subjectId = vPredictions[vSubjectId]
+
+        vTrueLabels_subjectId = np.array(vTrueLabels)[vSubjectId]
+        mse_per_subjectId.append(mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
+        nb_files_per_subjectId.append(len(vPredictions_subjectId))
+        
+        print('MSE : ', mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
+    
+    print('--- FUSION ---')
+    final_score(mse_per_subjectId, nb_files_per_subjectId, "Fusion ")
+    
 def find_components_neighbors(lObjsFiles, bKnn, bSVR): 
     lComponents = [] 
     
