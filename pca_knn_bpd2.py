@@ -42,29 +42,28 @@ def pca(sFileTrai, sFileTest, iComponents):
     """
     dIvecTrai = { key:mat for key,mat in kaldi_io.read_vec_flt_scp(sFileTrai) }
     vTrai= pd.DataFrame((list(dIvecTrai.values())))
-    # Takes the last character in the filename as it is the label 
+    # Takes the last character in the filename as it is the label
     vLTrai = np.array([x[-1] for x in np.array(list(dIvecTrai.keys()))])
-    
-    
+
+
     pca = PCA(n_components=iComponents, svd_solver='randomized', whiten=True)
     pca.fit(vTrai)
-        
+
     vTraiPCA=pca.transform(vTrai)
-    
-    sPatternSubjectId = r'(?<=[_])[a-z\-0-9]{5,6}$'
-    lFileNamesTrai = np.array([x for x in np.array(list(dIvecTrai.keys()))])
-    vTraiSubjectId = np.array([re.findall(sPatternSubjectId, fileName)[0] for fileName in lFileNamesTrai])
-    
+
+    # FIXME : For realPD, we need more than -5 (CIS-PD subject_id is 4 characters long)
+    # FIXME REAL-PD it's not only int
+    vTraiSubjectId = np.array(([int(x[-5:-1]) for x in np.array(list(dIvecTrai.keys()))]))
+
     dIvecTest = { key:mat for key,mat in kaldi_io.read_vec_flt_scp(sFileTest) }
     vTest=np.array(list(dIvecTest.values()), dtype=float)
     vLTest=np.array([int(x[-1]) for x in np.array(list(dIvecTest.keys()))])
-    lFileNamesTest = np.array([x for x in np.array(list(dIvecTest.keys()))])
-    vTestSubjectId = np.array([re.findall(sPatternSubjectId, fileName)[0] for fileName in lFileNamesTest])
-
-    # Builds a list of the measurement_id to use for the testing_data subset  
-    sPatternMeasurementId = r'(?<=test_)[a-z\-0-9]+(?=[_])'
-    vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in lFileNamesTest])
-
+    vTestSubjectId = np.array([int(x[-5:-1]) for x in np.array(list(dIvecTest.keys()))])
+    vTestMeasurementId =  np.array([x[-42:-6] for x in np.array(list(dIvecTest.keys()))])
+    # Builds a list of the measurement_id to use for the testing_data subset
+    sPatternMeasurementId = r'(?<=trai_)[a-z\-0-9]+(?=[_])'
+    #vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in np.array(list(dIvecTest.keys()))])
+    
     # Get the measurement_id here 
     vTestPCA=pca.transform(vTest)
 
