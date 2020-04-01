@@ -52,17 +52,19 @@ def pca(sFileTrai, sFileTest, iComponents):
     vTraiPCA=pca.transform(vTrai)
     
     # FIXME : For realPD, we need more than -5 (CIS-PD subject_id is 4 characters long)
-    # FIXME REAL-PD it's not only int 
+    # FIXME REAL-PD it's not only int, it's hbv090
     vTraiSubjectId = np.array(([int(x[-5:-1]) for x in np.array(list(dIvecTrai.keys()))]))
 
     dIvecTest = { key:mat for key,mat in kaldi_io.read_vec_flt_scp(sFileTest) }
     vTest=np.array(list(dIvecTest.values()), dtype=float)
     vLTest=np.array([int(x[-1]) for x in np.array(list(dIvecTest.keys()))])
     vTestSubjectId = np.array([int(x[-5:-1]) for x in np.array(list(dIvecTest.keys()))])
-    
-    # Builds a list of the measurement_id to use for the testing_data subset  
-    sPatternMeasurementId = r'(?<=trai_)[a-z\-0-9]+(?=[_])'
-    vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in np.array(list(dIvecTest.keys()))])
+
+    print(dIvecTest)
+#     # Builds a list of the measurement_id to use for the testing_data subset  
+    sPatternMeasurementId = r'(?<=test_)[a-z\-0-9]+(?=[_])'
+    lFileNames = np.array([x for x in np.array(list(dIvecTest.keys()))])
+    vTestMeasurementId = [re.findall(sPatternMeasurementId, fileName)[0] for fileName in lFileNames]
     
     # Get the measurement_id here 
     vTestPCA=pca.transform(vTest)
