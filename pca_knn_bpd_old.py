@@ -62,7 +62,7 @@ def pca(sFileTrai, sFileTest, iComponents):
     
     # Builds a list of the measurement_id to use for the testing_data subset  
     sPatternMeasurementId = r'(?<=trai_)[a-z\-0-9]+(?=[_])'
-    vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in np.array(list(dIvecTrai.keys()))])
+    vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in np.array(list(dIvecTest.keys()))])
     
     # Get the measurement_id here 
     vTestPCA=pca.transform(vTest)
