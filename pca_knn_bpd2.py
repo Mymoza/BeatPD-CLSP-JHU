@@ -42,13 +42,13 @@ def pca(sFileTrai, sFileTest, iComponents):
     """
     dIvecTrai = { key:mat for key,mat in kaldi_io.read_vec_flt_scp(sFileTrai) }
     vTrai= pd.DataFrame((list(dIvecTrai.values())))
-    # Takes the last character in the filename as it is the label
+    # Takes the last character in the filename as it is the label 
     vLTrai = np.array([x[-1] for x in np.array(list(dIvecTrai.keys()))])
-
-
+    
+    
     pca = PCA(n_components=iComponents, svd_solver='randomized', whiten=True)
     pca.fit(vTrai)
-
+        
     vTraiPCA=pca.transform(vTrai)
 
     # FIXME : For realPD, we need more than -5 (CIS-PD subject_id is 4 characters long)
@@ -63,8 +63,8 @@ def pca(sFileTrai, sFileTest, iComponents):
     # Builds a list of the measurement_id to use for the testing_data subset
     sPatternMeasurementId = r'(?<=trai_)[a-z\-0-9]+(?=[_])'
     #vTestMeasurementId = np.array([re.findall(sPatternMeasurementId, fileName)[0] for fileName in np.array(list(dIvecTest.keys()))])
-    
-    # Get the measurement_id here 
+
+    # Get the measurement_id here
     vTestPCA=pca.transform(vTest)
 
     if isinstance(iComponents, str):
