@@ -293,24 +293,24 @@ $cmd $sOut/globalAccuKNN_Test.log \
 
 Here's an example for measurement_id `db2e053a-0fb8-4206-891a-6f079fb14e3a` from the CIS-PD database.
 
-<img src="initial-plot-accelerometer.png" width="500">
+<img src="images/initial-plot-accelerometer.png" width="500">
 
 
 After the High pass filter (inactivity identified is filled with X,Y,Z=0 for the purpose of the plot) :
 
-<img src="plot-after-highpass.png" width="400">
+<img src="images/plot-after-highpass.png" width="400">
 
 It looks good, with a straight line of inactivity on “zero”… However, it’s not  visible to the eyes, but there are some values left at the complete beginning of the dataframe from index 0 to index 31. 
 
 Then we have inactivity from index 32 to 26073.
 
-<img src="table-explanation-why-not-perfect.png" width="300">
+<img src="images/table-explanation-why-not-perfect.png" width="300">
 
 This explains why the accelerometer with inactivity removed looks like this: 
 
 We have 32 values right at the beginning which prevents the graph to show just the [600,1200] part
 
-<img src="final-plot-inactivity-removed.png" width="400">
+<img src="images/final-plot-inactivity-removed.png" width="400">
 
 ## How to remove inactivity
 
