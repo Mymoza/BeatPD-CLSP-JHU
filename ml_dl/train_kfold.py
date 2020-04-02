@@ -32,7 +32,6 @@ parser.add_argument("--KFind",default=2,type=int)
 parser.add_argument("--subtask",default="on_off",choices=['on_off','dyskinesia', 'tremor'])
 parser.add_argument("-uad","--use_ancillarydata",action="store_true")
 parser.add_argument("--latent_dim",default=30,type=int)
-parser.add_argument("-wsLSTM","--warmstart_LSTM",action="store_true")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
 
@@ -45,14 +44,13 @@ KFind = args.KFind
 subtask = args.subtask
 use_ancillarydata = args.use_ancillarydata
 latent_dim = args.latent_dim
-warmstart_LSTM = args.warmstart_LSTM
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
 savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
 load_weights_dir = savedir + "/" + data_type + data_real_subtype + "_all/"
 savedir = savedir + "/" + data_type + data_real_subtype + '_uad_'+ str(use_ancillarydata) +\
-        '_' + subtask+'_'+str(pid) +'_'+ str(KFind) + '_wsLSTM_' +str(warmstart_LSTM) 
+        '_' + subtask+'_'+str(pid) +'_'+ str(KFind) 
 
 params_append_str = ""
 if params:
