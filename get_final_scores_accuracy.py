@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt 
 import pandas as pd 
 import os
+from sklearn.metrics import r2_score
 
 def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test=''):
     numerator = np.sum([nb_file * mse for nb_file, mse in zip(np.sqrt(nb_files_per_subject_id), mse_per_subjectid)])
@@ -333,10 +334,10 @@ def get_final_scores_SVR(sFilePath, bKnn, bSVR):
                     allfolds_train_nb_files_per_subjectid, \
                     allfolds_test_nb_files_per_subjectid = get_all_folds(lResxFolders, sFileName)
 
-                    global_training_accuracy = (allfolds_glob_trai_true == allfolds_glob_trai_pred).mean()
-                    global_testing_accuracy = (allfolds_glob_test_true == allfolds_glob_test_pred).mean()
-                    print('Global training R2: {}'.format(global_training_accuracy))
-                    print('Global testing R2: {}'.format(global_testing_accuracy))
+                    global_training_r2 = r2_score(allfolds_glob_trai_true, allfolds_glob_trai_pred)
+                    global_testing_r2 = r2_score(allfolds_glob_test_true, allfolds_glob_test_pred)
+                    print('Global training R2: {}'.format(global_training_r2))
+                    print('Global testing R2: {}'.format(global_testing_r2))
 
                     global_training_final_score = final_score(allfolds_mse_training_per_subjectid,
                                 allfolds_train_nb_files_per_subjectid,
@@ -347,8 +348,8 @@ def get_final_scores_SVR(sFilePath, bKnn, bSVR):
 
                     if best_result.loc[0,'Test Final score'] > global_testing_final_score:
                         best_result.update({'Filename': [sFileName],
-                                            'Global training r2':[global_training_accuracy],
-                                            'Global testing r2':[global_testing_accuracy],
+                                            'Global training r2':[global_training_r2],
+                                            'Global testing r2':[global_testing_r2],
                                             'Train Final score':[global_training_final_score],
                                             'Test Final score':[global_testing_final_score]})
                 
