@@ -18,7 +18,7 @@ import copy
 
 from dataload import load_data
 from model import make_DNN_model, make_LSTM_model, make_CNN_model
-from feat_process import get_AE_feats
+from feat_process import get_AE_feats, combine_feats
 from BeatPDutils import get_class_weights, sort_dict
 
 import tensorflow as tf
@@ -32,6 +32,7 @@ parser.add_argument("--KFind",default=2,type=int)
 parser.add_argument("--subtask",default="on_off",choices=['on_off','dyskinesia', 'tremor'])
 parser.add_argument("-uad","--use_ancillarydata",action="store_true")
 parser.add_argument("--latent_dim",default=30,type=int)
+parser.add_argument("-wsLSTM","--warmstart_LSTM",action="store_true")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
 
@@ -44,11 +45,14 @@ KFind = args.KFind
 subtask = args.subtask
 use_ancillarydata = args.use_ancillarydata
 latent_dim = args.latent_dim
+warmstart_LSTM = args.warmstart_LSTM
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
 savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
-load_weights_dir = savedir + "/" + data_type + data_real_subtype + "_all/"
+load_weights_AE = savedir + "/" + data_type + data_real_subtype + "_all/"
+load_weights_dir = savedir + "/" + data_type + data_real_subtype + '_uad_'+ str(use_ancillarydata) +\
+        '_' + subtask+'_0_'+ str(KFind) 
 savedir = savedir + "/" + data_type + data_real_subtype + '_uad_'+ str(use_ancillarydata) +\
         '_' + subtask+'_'+str(pid) +'_'+ str(KFind) 
 
@@ -59,6 +63,7 @@ if params:
         params_append_str = params_append_str + '_' + key + '_' + str(params[key])
 
 savedir = savedir + params_append_str + "/"
+load_weights_dir = load_weights_dir + params_append_str + "/"
 
 if not os.path.exists(savedir):
     os.mkdir(savedir)
@@ -113,13 +118,14 @@ if use_ancillarydata:
     anci_cleanParams['data_path'] = ancillary_data_path
 
 #model = load_model(load_weights_dir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
-encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(load_weights_AE+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 #encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 #model.predict(train_X)
 
 ## LSTM 
 
 AE_feats, labels, ind_selected = get_AE_feats(encoder,df_train_label,subtask,cleanParams)
+train_data_len = AE_feats.shape[0]
 if use_ancillarydata:
     acni_AE_feats, anci_labels, anci_ind_selected = get_AE_feats(encoder,df_ancillary_label,subtask,anci_cleanParams)
     AE_feats = combine_feats(AE_feats,acni_AE_feats)
@@ -141,35 +147,41 @@ if params['add_noise'] =='True' or params['add_rotation'] == 'True':
         temp_Y = np.concatenate((temp_labels,temp_Y),axis=0)
         del temp_AE_feats, temp_labels, temp_ind_selected
 
-print("Original Size: %f" % (AE_feats.shape[0]))
-print("Augumented Size: %f" % (temp_X.shape[0]))
+print("Original Size: %d" % (AE_feats.shape[0]))
+print("Augumented Size: %d" % (temp_X.shape[0]))
 
-N = temp_X.shape[0]
-ind = np.random.permutation(N)
-temp_X = temp_X[ind,:,:]
-temp_Y = temp_Y[ind,:]
+#N = temp_X.shape[0]
+#ind = np.random.permutation(N)
+#temp_X = temp_X[ind,:,:]
+#temp_Y = temp_Y[ind,:]
 
 LSTM_featsize = AE_feats.shape[-1]
 classifier = make_LSTM_model(feat_size=LSTM_featsize)
 
+checkpointer = ModelCheckpoint(filepath=savedir+'LSTM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.h5',save_best_only=True)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
 lr=0.0001
 sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
 classifier.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
+if warmstart_LSTM:
+    lstm_loadname = load_weights_dir + 'LSTM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.h5'
+    print(lstm_loadname)
+    classifier.load_weights(lstm_loadname)
+
 #classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
-classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
+classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer,early_stopping])
 
 del temp_X, temp_Y
 
-tr_pred = classifier.predict(AE_feats,batch_size=100,verbose=1)
+tr_pred = classifier.predict(AE_feats[:train_data_len,:,:],batch_size=100,verbose=1)
 
-tr_class_weights = get_class_weights(df_train_label)
+tr_class_weights = get_class_weights(df_train_label.iloc[ind_selected])
 
-temp = (labels-tr_pred)**2
+temp = (labels[:train_data_len,:]-tr_pred)**2
 tr_mse = np.sum(temp) / temp.shape[0]
-tr_w_mse = np.sum(temp[:,0]*tr_class_weights[ind_selected])/np.sum(tr_class_weights[ind_selected])
+tr_w_mse = np.sum(temp[:,0]*tr_class_weights)/np.sum(tr_class_weights)
 
 
 ## test 
@@ -194,15 +206,15 @@ test_AE_feats, test_labels, test_ind_selected = get_AE_feats(encoder,df_test_lab
 
 test_pred = classifier.predict(test_AE_feats,batch_size=100,verbose=1)
 
-test_class_weights = get_class_weights(df_test_label)
+test_class_weights = get_class_weights(df_test_label.iloc[test_ind_selected])
 
 temp = (test_labels-test_pred)**2
 test_mse = np.sum(temp) / temp.shape[0]
-test_w_mse = np.sum(temp[:,0]*test_class_weights[test_ind_selected])/np.sum(test_class_weights[test_ind_selected])
+test_w_mse = np.sum(temp[:,0]*test_class_weights)/np.sum(test_class_weights)
 
-temp = (test_labels-test_labels.mean())**2
+temp = (test_labels-labels.mean())**2
 test_ml_mse = np.sum(temp) / temp.shape[0]
-test_ml_w_mse = np.sum(temp[:,0]*test_class_weights[test_ind_selected])/np.sum(test_class_weights[test_ind_selected])
+test_ml_w_mse = np.sum(temp[:,0]*test_class_weights)/np.sum(test_class_weights)
 
 
 filename = savedir + 'error.txt'
