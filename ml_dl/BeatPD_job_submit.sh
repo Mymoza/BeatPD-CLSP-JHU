@@ -103,3 +103,68 @@ $keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_
 fi
 done
 done
+
+source ~/cmd.sh
+
+dir="/export/b03/sbhati/PD/BeatPD/"
+savedir="/export/b03/sbhati/PD/BeatPD/AElogs/"
+
+ld=30
+
+log_file=${savedir}/cis_${ld}_400.log
+out_file=${savedir}/cis_${ld}_400.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False"}'
+
+log_file=${savedir}/cis_${ld}_480.log
+out_file=${savedir}/cis_${ld}_480.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":480}'
+
+log_file=${savedir}/cis_${ld}_320.log
+out_file=${savedir}/cis_${ld}_320.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":320}'
+
+ld=60
+
+log_file=${savedir}/cis_${ld}_400.log
+out_file=${savedir}/cis_${ld}_400.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False"}'
+
+log_file=${savedir}/cis_${ld}_480.log
+out_file=${savedir}/cis_${ld}_480.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":480}'
+
+log_file=${savedir}/cis_${ld}_320.log
+out_file=${savedir}/cis_${ld}_320.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":320}'
+
+ld=30
+
+log_file=${savedir}/real_${ld}_400.log
+out_file=${savedir}/real_${ld}_400.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False"}'
+
+log_file=${savedir}/real_${ld}_480.log
+out_file=${savedir}/real_${ld}_480.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":480}'
+
+log_file=${savedir}/real_${ld}_320.log
+out_file=${savedir}/real_${ld}_320.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":320}'
+
+ld=60
+
+log_file=${savedir}/real_${ld}_400.log
+out_file=${savedir}/real_${ld}_400.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False"}'
+
+log_file=${savedir}/real_${ld}_480.log
+out_file=${savedir}/real_${ld}_480.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":480}'
+
+log_file=${savedir}/real_${ld}_320.log
+out_file=${savedir}/real_${ld}_320.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_AE_real.py --latent_dim $ld -dlP '{"remove_inactivity":"False","frame_length":320}'
+
+
+
+
