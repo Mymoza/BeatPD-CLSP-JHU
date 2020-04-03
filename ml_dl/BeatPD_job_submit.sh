@@ -11,10 +11,38 @@ mkdir $dir/logs
 
 for kfind in `seq 0 4`
 do
+log_file=${savedir}/${pid}_${kfind}.log
+out_file=${savedir}/${pid}_${kfind}.txt
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_kfold.py --KFind $kfind --subtask $subtask
+done
+
+for kfind in `seq 0 4`
+do
 log_file=${savedir}/${pid}_${kfind}_uad.log
 out_file=${savedir}/${pid}_${kfind}_uad.txt
-$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run_cpu.sh ${dir}/train_kfold.py --KFind $kfind --subtask $subtask -uad
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_kfold.py --KFind $kfind --subtask $subtask -uad
 done
+
+for kfind in `seq 0 4`
+do
+log_file=${savedir}/${pid}_${kfind}.log
+out_file=${savedir}/${pid}_${kfind}.txt
+if [[ `tail -1 $log_file` == *"Failed to create session"* ]];
+then
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_kfold.py --KFind $kfind --subtask $subtask
+fi
+done
+
+for kfind in `seq 0 4`
+do
+log_file=${savedir}/${pid}_${kfind}_uad.log
+out_file=${savedir}/${pid}_${kfind}_uad.txt
+if [[ `tail -1 $log_file` == *"Failed to create session"* ]];
+then
+$keras_cmd_all -e $log_file -o $out_file /home/sbhati/keras_run.sh ${dir}/train_kfold.py --KFind $kfind --subtask $subtask -uad
+fi
+done
+
 
 for pid in ${pids[@]}
 do
