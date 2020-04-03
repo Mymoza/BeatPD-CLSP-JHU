@@ -34,6 +34,7 @@ parser.add_argument("--subtask",default="tremor",choices=['on_off','dyskinesia',
 parser.add_argument("-uad","--use_ancillarydata",action="store_true")
 parser.add_argument("--latent_dim",default=30,type=int)
 parser.add_argument("--saveAEFeats",action="store_true")
+parser.add_argument("--saveFeatDir",default="")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
 
@@ -45,11 +46,12 @@ subtask = args.subtask
 use_ancillarydata = args.use_ancillarydata
 latent_dim = args.latent_dim
 saveAEFeats = args.saveAEFeats
+saveFeatDir = args.saveFeatDir
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-#savedir = "/export/b19/mpgill/BeatPD/Weights/"
-savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
+savedir = "/export/b19/mpgill/BeatPD/Weights/"
+#savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -145,7 +147,7 @@ def select_valid_ind(data_frame_in,file_list):
 ind = select_valid_ind(df_train_label,file_list)
 df_train_label = df_train_label.iloc[ind]
 df_train_label = df_train_label.reset_index(drop=True)
-
+'''
 train_X = []
 
 for idx in df_train_label.index:
@@ -176,15 +178,15 @@ model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epoc
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
-
+'''
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
+	#save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
 	for idx in df_train_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_train_label,idx,all_params)
 		temp_feats = encoder.predict(temp_X)
 		name = df_train_label["measurement_id"][idx]     
-		sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
+		sio.savemat(saveFeatDir+name+'.mat',{'feat':temp_feats}) 
 

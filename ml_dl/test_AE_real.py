@@ -34,6 +34,7 @@ parser.add_argument("--subtask",default="tremor",choices=['on_off','dyskinesia',
 parser.add_argument("-uad","--use_ancillarydata",action="store_true")
 parser.add_argument("--latent_dim",default=30,type=int)
 parser.add_argument("--saveAEFeats",action="store_true")
+parser.add_argument("--saveFeatDir",default="")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
 
@@ -45,6 +46,7 @@ subtask = args.subtask
 use_ancillarydata = args.use_ancillarydata
 latent_dim = args.latent_dim
 saveAEFeats = args.saveAEFeats
+saveFeatDir = args.saveFeatDir
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
@@ -147,11 +149,11 @@ df_test_label = df_test_label.reset_index(drop=True)
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_high_pass_inactivity_removed/'
+	#save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_high_pass_inactivity_removed/'
 	for idx in df_test_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_test_label,idx,all_params)
 		temp_feats = encoder.predict(temp_X)
 		name = df_test_label["measurement_id"][idx]     
-		sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats}) 
+		sio.savemat(saveFeatDir+name+'.mat',{'feat':temp_feats}) 
 
