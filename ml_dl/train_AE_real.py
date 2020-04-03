@@ -48,7 +48,8 @@ saveAEFeats = args.saveAEFeats
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b19/mpgill/BeatPD/Weights/"
+#savedir = "/export/b19/mpgill/BeatPD/Weights/"
+savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -167,6 +168,8 @@ lr=0.001
 sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
 model.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
+batch_size = 500
+epochs = 200
 model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')

@@ -46,7 +46,8 @@ saveAEFeats = args.saveAEFeats
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
 
-savedir = "/export/b19/mpgill/BeatPD/Weights/"
+#savedir = "/export/b19/mpgill/BeatPD/Weights/"
+savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
 savedir = savedir + "/" + data_type + data_real_subtype + "_all/"
 
 if not os.path.exists(savedir):
@@ -103,19 +104,6 @@ N = train_X.shape[0]
 ind = np.random.permutation(N)
 train_X = train_X[ind,:]
 
-model,encoder = make_DNN_model(feat_size=params['frame_length']*3,latent_dim=latent_dim)
-
-checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5', verbose=1, save_best_only=True)
-early_stopping = EarlyStopping(monitor='val_loss', patience=5)
-#model.compile(optimizer='adam',loss='mse',metrics=['mse'])
-
-lr=0.001
-sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
-model.compile(optimizer='adam',loss='mse',metrics=['mae'])
-
-batch_size = 500
-epochs = 200
-
 train_X_all = train_X
 train_Y_all = train_X
 
@@ -137,7 +125,18 @@ print("Augumented Size: %f" % (train_X_all.shape[0]))
 #ind = np.random.permutation(N)
 #train_X_all = train_X_all[ind,:]
 #train_Y_all = train_Y_all[ind,:]
+model,encoder = make_DNN_model(feat_size=params['frame_length']*3,latent_dim=latent_dim)
 
+checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5', verbose=1, save_best_only=True)
+early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+#model.compile(optimizer='adam',loss='mse',metrics=['mse'])
+
+lr=0.001
+sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
+model.compile(optimizer='adam',loss='mse',metrics=['mae'])
+
+batch_size = 500
+epochs = 200
 model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
