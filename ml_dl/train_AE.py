@@ -94,7 +94,6 @@ if use_ancillarydata:
     anci_cleanParams['data_path'] = ancillary_data_path
     #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
 
-'''
 train_X = load_data_all(df_train_label,cleanParams)
 if use_ancillarydata:
     train_X_anci = load_data_all(df_ancillary_label,anci_cleanParams)
@@ -140,12 +139,11 @@ print("Augumented Size: %f" % (train_X_all.shape[0]))
 #train_Y_all = train_Y_all[ind,:]
 
 model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
-'''
-#model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
-#encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
-#encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
-encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
+model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
+encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
     save_feats_path = '/export/b19/mpgill/BeatPD/AE_30ft_high_pass_inactivity_removed_test/'

@@ -142,12 +142,8 @@ ind = select_valid_ind(df_test_label,file_list)
 df_test_label = df_test_label.iloc[ind]
 df_test_label = df_test_label.reset_index(drop=True)
 
-#model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
-#model.load_weights(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
-
-encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
-#encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
 if saveAEFeats:
 	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_high_pass_inactivity_removed/'
 	for idx in df_test_label.index:

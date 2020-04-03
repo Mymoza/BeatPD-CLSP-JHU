@@ -159,7 +159,7 @@ train_X = train_X[ind,:]
 feat_size = train_X.shape[1]
 
 model,encoder = make_DNN_model(feat_size=feat_size,latent_dim=latent_dim)
-checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5', verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5', verbose=1, save_best_only=True)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 #model.compile(optimizer='adam',loss='mse',metrics=['mse'])
 
@@ -167,12 +167,12 @@ lr=0.001
 sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
 model.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
-#model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
+model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
-#model.load_weights(savedir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
+model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
-encoder = load_model(savedir+'mlp_encoder_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
-#encoder.save(savedir+'mlp_encoder_'+str(use_ancillarydata)+'.h5')
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
 	save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
