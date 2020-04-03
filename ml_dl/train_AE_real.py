@@ -183,6 +183,8 @@ encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_ap
 
 if saveAEFeats:
 	#save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
+    if not os.path.exists(saveFeatDir):
+        os.mkdir(saveFeatDir)
 	for idx in df_train_label.index:
 		print(idx)
 		temp_X = load_subtype_data(df_train_label,idx,all_params)
