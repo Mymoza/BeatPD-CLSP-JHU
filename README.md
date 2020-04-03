@@ -148,18 +148,41 @@ Dyskenisia:
 ### CIS-PD, training features 
 `cd /export/b19/mpgill/BeatPD/`
 
+Use `python train_AE.py`
+If using raw data, then you don't need to give `my_data_path`.
+
+`$ NO COMMAND YET`
+
+`/export/b03/sbhati/PD/BeatPD/AE_feats` : 30 features, 400 frame length, inactivity not removed. Original data
+
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 
-- `AE_30ft_orig_inactivity_removed/` : 30 features, inactivity removed from original training data
-
-Then, I changed `data_path` to a hardcoded path to the high_pass features 
+- `AE_30ft_orig_inactivity_removed/` : 30 features, 400 frame length, inactivity removed from original training data
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 
 - `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "False", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "None"}'`
+
 - `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed) 
+
+`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+
+- `AE_60ft_480fl_orig` : 60 ft, frame length 480, original data. Inactivity is not removed.
+
+`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"True","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+
+- `AE_60ft_480fl_orig_inactivity_removed` : 60 ft, frame length 480, original data. Inactivity is removed. 
+
+`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+
+- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is not removed. TODO
+
+`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"True","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+
+- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 3200, original data. Inactivity is removed. TODO
+
 
 ### CIS-PD, testing features 
 
