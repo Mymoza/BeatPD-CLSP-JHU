@@ -58,6 +58,8 @@ params_append_str = ""
 if params:
     params = sort_dict(params)
     for key in params:
+        if key == "remove_inactivity":
+            continue    	
         params_append_str = params_append_str + '_' + key + '_' + str(params[key])
 
 data_dir = "/home/sjoshi/codes/python/BeatPD/data/BeatPD/"

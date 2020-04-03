@@ -57,6 +57,8 @@ params_append_str = ""
 if params:
     params = sort_dict(params)
     for key in params:
+        if key == "remove_inactivity":
+            continue
         params_append_str = params_append_str + '_' + key + '_' + str(params[key])
 
 data_dir = "/home/sjoshi/codes/python/BeatPD/data/BeatPD/"
@@ -77,7 +79,8 @@ params['rot_ang'] = params.get('rot_ang',15)
 params['do_MVN'] = params.get('do_MVN','False')
 params['add_rotation'] = params.get('add_rotation','False')
 params['add_noise'] = params.get('add_noise','False')
-params['data_path'] = train_data_path
+params['my_data_path'] = params.get('my_data_path',train_data_path)
+params['my_mask_path'] = params.get('my_mask_path',"None")
 params['remove_inactivity'] = params.get('remove_inactivity', 'True')
 params = sort_dict(params)
 
