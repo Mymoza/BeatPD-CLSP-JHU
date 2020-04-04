@@ -145,8 +145,10 @@ Dyskenisia:
 
 ## Autoencoder output features 
 
+1. `cd /export/b19/mpgill/BeatPD/`
+2. `source activate keras_tf2`
+
 ### CIS-PD, training features 
-`cd /export/b19/mpgill/BeatPD/`
 
 Use `python train_AE.py`
 If using raw data, then you don't need to give `my_data_path`.
@@ -175,13 +177,13 @@ If using raw data, then you don't need to give `my_data_path`.
 
 - `AE_60ft_480fl_orig_inactivity_removed` : 60 ft, frame length 480, original data. Inactivity is removed. 
 
-`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_320fl_orig/"`
 
-- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is not removed. TODO
+- `AE_60ft_320fl_orig` : 60 ft, frame length 320, original data. Inactivity is not removed. TODO
 
-`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"True","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
+`$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
 
-- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 3200, original data. Inactivity is removed. TODO
+- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is removed. TODO
 
 
 ### CIS-PD, testing features 
