@@ -182,13 +182,13 @@ encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
-	#save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
+    #save_feats_path = '/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/'
     if not os.path.exists(saveFeatDir):
         os.mkdir(saveFeatDir)
-	for idx in df_train_label.index:
-		print(idx)
-		temp_X = load_subtype_data(df_train_label,idx,all_params)
-		temp_feats = encoder.predict(temp_X)
-		name = df_train_label["measurement_id"][idx]     
-		sio.savemat(saveFeatDir+name+'.mat',{'feat':temp_feats}) 
+    for idx in df_train_label.index:
+        print(idx)
+        temp_X = load_subtype_data(df_train_label,idx,all_params)
+        temp_feats = encoder.predict(temp_X)
+        name = df_train_label["measurement_id"][idx]     
+        sio.savemat(saveFeatDir+name+'.mat',{'feat':temp_feats}) 
 
