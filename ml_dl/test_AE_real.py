@@ -60,7 +60,7 @@ params_append_str = ""
 if params:
     params = sort_dict(params)
     for key in params:
-        if key == "remove_inactivity":
+        if key == "remove_inactivity" or ("path" in key):
             continue    	
         params_append_str = params_append_str + '_' + key + '_' + str(params[key])
 
