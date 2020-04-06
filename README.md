@@ -306,7 +306,7 @@ Two parameters can be tuned:
 
 ### Create i-vectors 
 
-After creating Autoencoder features, we can create i-vectors. 
+After creating Autoencoder features, we can create i-vectors. You need to have Kaldi installed first. Follow Kaldi's instructions to install. 
 
 1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec`
 2. `mkdir *****` 
