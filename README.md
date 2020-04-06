@@ -159,15 +159,19 @@ If using raw data, then you don't need to give `my_data_path`.
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 
-- `AE_30ft_orig_inactivity_removed/` : 30 features, 400 frame length, inactivity removed from original training data
+- `AE_30ft_orig_inactivity_removed/` : 30 features, 400 frame length, inactivity removed from original training data. 400 fl
+
+`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "frame_length":320, "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}' --saveFeatDir "/export/b19/mpgill/BeatPD/AE_30ft_320fl_orig_inactivity_removed/"`
+
+- `AE_30ft_320fl_orig_inactivity_removed` : 30 features, inactivity removed from original data with 320 fl 
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 
-- `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data
+- `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data. 400 fl
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "False", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "None"}'`
 
-- `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed) 
+- `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed). 400 fl
 
 `$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
 
