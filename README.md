@@ -148,6 +148,8 @@ Dyskenisia:
 1. `cd /export/b19/mpgill/BeatPD/`
 2. `source activate keras_tf2`
 
+Unless stated otherwise, the basic parameters are 30 features, 400 framelength, and cis training database. 
+
 ### CIS-PD, training features 
 
 Use `python train_AE.py`
@@ -155,7 +157,7 @@ If using raw data, then you don't need to give `my_data_path`.
 
 `$ NO COMMAND YET`
 
-`/export/b03/sbhati/PD/BeatPD/AE_feats` : 30 features, 400 frame length, inactivity not removed. Original data
+`/export/b03/sbhati/PD/BeatPD/AE_feats` : 30 features, 400 frame length, inactivity not removed. Original data. Equivalent to `AE_30ft_orig`
 
 `$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
 
@@ -199,13 +201,24 @@ If using raw data, then you don't need to give `my_data_path`.
 
 ### CIS-PD, Ancillary features 
 
-TO FIX 
+1. Open `train_AE.py`
+2. Uncomment line 71 to 74 to use ancillary data instead of training data 
+3. Save and run the following command
+4. Don't forget to comment again lines 71 to 74 
 
-`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig_inactivity_removed/"`
+`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig/"`
+
+- `cis_ancillary_AE_30ft_orig`
+
+`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig_inactivity_removed/"`
 
 - `cis_ancillary_AE_30ft_orig_inactivity_removed` : 400 fl. 30 fts. Ancillary Data. Inactivity removed 
 
 ### CIS-PD, testing features 
+
+`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig/"`
+
+- `cis_testing_AE_30ft_orig`
 
 `$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats`
 
@@ -223,11 +236,15 @@ We won't do the following as they're not obtaining better results :
 
 ### REAL-PD, training features 
 
+`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig/"`
+
+- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig/` : 30 ft, 400 fl (should be the same content as `/export/b03/sbhati/PD/BeatPD/real_AE_feats`) 
+
 `python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
 
 - `/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig_inactivity_removed/`
 
-`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
+- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
 
 - /export/b19/mpgill/BeatPD/real_train_AE_30ft_high_pass_inactivity_removed/
 
@@ -253,7 +270,6 @@ We won't do the following as they're not obtaining better results :
 
 - `real_train_AE_60ft_400fl_orig_inactivity_removed` 
 
-
 - `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False", "frame_length":320}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_320fl_orig/"`
 
 - `real_train_AE_60ft_320fl_orig`  
@@ -262,8 +278,28 @@ We won't do the following as they're not obtaining better results :
 
 - `real_train_AE_60ft_320fl_orig_inactivity_removed` 
 
+### REAL-PD, Ancillary Features 
+
+1. Edit `train_AE_real.py`
+2. Uncomment line 72 and 73 
+3. Edit line 141 to add this ancillary mode : `temp_path = get_data_path(data_type,'smartwatch_accelerometer',"ancillary")`
+4. Run the following command (from `ml_dl` folder)
+5. Don't forget to undo the changes we just did when you're done getting features. 
+
+- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig/"`
+
+- `/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig/`
+
+- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig_inactivity_removed/"`
+
+- `/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig_inactivity_removed/`
 
 ### REAL-PD, testing features 
+
+
+`$ NO COMMAND`
+
+`/export/b03/sbhati/PD/BeatPD/real_AE_feats_test` : Real Testing Data. Original data. 30 ft. 400 fl ("real_testing_AE_30ft_orig") 
 
 `$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
 
