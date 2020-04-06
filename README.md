@@ -197,6 +197,13 @@ If using raw data, then you don't need to give `my_data_path`.
 
 - `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is removed. 
 
+### CIS-PD, Ancillary features 
+
+TO FIX 
+
+`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig_inactivity_removed/"`
+
+- `cis_ancillary_AE_30ft_orig_inactivity_removed` : 400 fl. 30 fts. Ancillary Data. Inactivity removed 
 
 ### CIS-PD, testing features 
 
@@ -296,6 +303,24 @@ remove_inactivity_highpass(
 Two parameters can be tuned:
 * `energy_threshold` : what percentage of the max energy do we consider as inactivity? The current masks generated have used the threshold of 5% 
 * `duration_threshold` : how long do we want to have inactivity before we remove it? For example 3000x0.02ms=1min of inactivity minimum before those candidates are considered inactivty and will be removed. 
+
+### Create i-vectors 
+
+After creating Autoencoder features, we can create i-vectors. 
+
+1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec`
+2. `mkdir *****` 
+3. `cd ****`
+4. `mkdir data`
+5. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/v2_auto/. ./`
+6. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/autoencData/****/. data/.` 
+Replace "****" with either `on_off`, `trem` or `dysk`
+7. `cp ../on_off_noinact_auto60_480fl/run_auto.sh .` I use `on_off_noinact_auto60_480fl/run_auto.sh` only because we made a few changes to the one copied over from step 5 to make it faster on the grid. We also removed KNN and PLDA step as at this time we're focusing on SVR results. 
+8. `cp ../on_off_noinact_auto60_400fl/runFor.sh .` Copy a `runFor` from another folder as it's not being copied over from step 5. Be careful that the folder you decide to copy it from as the `local/evaluate SVR` line inside. 
+9. In `runFor.sh`, change the `sDirFeats` variable pointing to a folder of AutoEncoder features
+10. `screen -R name_of_your_screen`
+11. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/****`
+12. `./runFor.sh`
 
 ### Evaluation steps 
 
