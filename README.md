@@ -155,6 +155,10 @@ Unless stated otherwise, the basic parameters are 30 features, 400 framelength, 
 Use `python train_AE.py`
 If using raw data, then you don't need to give `my_data_path`.
 
+`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":240}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_30ft_240fl_orig_inactivity_removed/"`
+
+- `AE_30ft_240fl_orig_inactivity_removed`
+
 `$ NO COMMAND YET`
 
 `/export/b03/sbhati/PD/BeatPD/AE_feats` : 30 features, 400 frame length, inactivity not removed. Original data. Equivalent to `AE_30ft_orig`
@@ -175,6 +179,13 @@ If using raw data, then you don't need to give `my_data_path`.
 
 - `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed). 400 fl
 
+
+
+`$ python train_AE.py --latent_dim 60 -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":240}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_240fl_orig_inactivity_removed/"`
+
+- `AE_60ft_240fl_orig_inactivity_removed`
+
+
 `$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
 
 - `AE_60ft_480fl_orig` : 60 ft, frame length 480, original data. Inactivity is not removed.
@@ -185,7 +196,7 @@ If using raw data, then you don't need to give `my_data_path`.
 
 `$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig/"`
 
-- `AE_60ft_400fl_orig` : 60 ft, frame length 400, original data. Inactivity is not removed. TODO 
+- `AE_60ft_400fl_orig` : 60 ft, frame length 400, original data. Inactivity is not removed.  
 
 `$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig_inactivity_removed/"`
 
@@ -198,6 +209,8 @@ If using raw data, then you don't need to give `my_data_path`.
 `$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_320fl_orig_inactivity_removed/"`
 
 - `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is removed. 
+
+
 
 ### CIS-PD, Ancillary features 
 
