@@ -170,8 +170,8 @@ if warmstart_LSTM:
     print(lstm_loadname)
     classifier.load_weights(lstm_loadname)
 
-#classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[early_stopping])
-classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer,early_stopping])
+classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer,early_stopping])
+#classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer,early_stopping])
 
 del temp_X, temp_Y
 
