@@ -68,12 +68,19 @@ if params:
 data_dir = "/home/sjoshi/codes/python/BeatPD/data/BeatPD/"
 label_path_train=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Training_Data_IDs_Labels.csv'
 
+# FIXME: This uses ancillary data instead of train. Be careful
+#label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
+#label_path_train=label_path_ancillary
+# FIXME: End of ancillary section
+
 df_train_label = pd.read_csv(label_path_train)
 train_data_len = df_train_label.shape[0]
 
 def get_data_path(data_type,data_real_subtype,mode='train'):
 	if mode =="train":
 		temp_data_path = data_dir + data_type + "-pd.training_data/" + data_real_subtype + "/"
+	elif mode =="ancillary":
+		temp_data_path = data_dir + data_type + "-pd.ancillary_data/" + data_real_subtype + "/"
 	else:
 		temp_data_path = data_dir + data_type + "-pd.testing_data/" + data_real_subtype + "/"
 	return temp_data_path
