@@ -108,6 +108,15 @@ cleanParams = copy.copy(params)
 cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
 
+if use_ancillarydata:
+    ancillary_data_path = data_dir + data_type + '-pd.ancillary_data/'
+    label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
+    df_ancillary_label = pd.read_csv(label_path_ancillary)
+    anci_params = copy.copy(params)
+    anci_params['data_path'] = ancillary_data_path
+    anci_cleanParams = copy.copy(cleanParams)
+    anci_cleanParams['data_path'] = ancillary_data_path
+
 #model = load_model(load_weights_dir+'mlp_AE_'+str(use_ancillarydata)+'.h5')
 encoder = load_model(load_weights_AE+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 #encoder = load_model(load_weights_dir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
@@ -117,6 +126,11 @@ encoder = load_model(load_weights_AE+'mlp_encoder_uad_'+str(use_ancillarydata)+p
 
 AE_feats, labels, ind_selected = get_AE_feats(encoder,df_train_label,subtask,cleanParams)
 train_data_len = AE_feats.shape[0]
+if use_ancillarydata:
+    acni_AE_feats, anci_labels, anci_ind_selected = get_AE_feats(encoder,df_ancillary_label,subtask,anci_cleanParams)
+    AE_feats = combine_feats(AE_feats,acni_AE_feats)
+    labels = np.concatenate((labels,anci_labels),axis=0)
+    del acni_AE_feats,anci_labels
 
 temp_X = AE_feats
 temp_Y = labels
@@ -124,6 +138,11 @@ temp_Y = labels
 if params['add_noise'] =='True' or params['add_rotation'] == 'True':
     for i in range(dataAugScale):
         temp_AE_feats, temp_labels, temp_ind_selected = get_AE_feats(encoder,df_train_label,subtask,params)
+        if use_ancillarydata:
+            acni_AE_feats, anci_labels, anci_ind_selected = get_AE_feats(encoder,df_ancillary_label,subtask,anci_cleanParams)
+            temp_AE_feats = combine_feats(temp_AE_feats,acni_AE_feats)
+            temp_labels = np.concatenate((temp_labels,anci_labels),axis=0)
+            del acni_AE_feats,anci_labels,anci_ind_selected
         temp_X = np.concatenate((temp_AE_feats,temp_X),axis=0)
         temp_Y = np.concatenate((temp_labels,temp_Y),axis=0)
         del temp_AE_feats, temp_labels, temp_ind_selected
