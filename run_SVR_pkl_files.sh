@@ -10,12 +10,16 @@ echo Working on on/off
 #sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
 
-sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax/exp3x/
-sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_3ax
+sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto60_400fl/exp/
+sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto60_400fl
 
 for ivecDim in 350 400 450 500; do
     echo Working on ${ivecDim}
     ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
+
+    sDirRes=${sOut}/ivec_${ivecDim}/
+    sDirOut=${sOut}/ivec_${ivecDim}
+    local/evaluate_global_everyone_SVR.sh $sDirRes $sDirOut 
 done
 
 

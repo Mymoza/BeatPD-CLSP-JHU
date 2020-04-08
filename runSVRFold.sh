@@ -18,14 +18,14 @@ sDirFeats=$3
 #ivecDim=300
 
 # Only run stage 5 which means only the SVR step 
-stage=5
+stage=6
 
 cmd=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/utils/run.pl
 
 for ((iNumFold=0; iNumFold <=4 ; iNumFold++))  do
     echo hello fold ${iNumFold}
-    $cmd $sOut/pca_${numComponents}_svr_runauto_Testx.log \
-    /home/sjoshi/codes/python/BeatPD/code/run_auto.sh $iNumFold $sDirFeats $ivecDim $stage || exit 1;
+    $cmd $sOut/pca_${numComponents}_everyone_svr_runauto_Testx.log \
+    ./run_auto.sh $iNumFold $sDirFeats $ivecDim $stage || exit 1;
 done
 
 source deactivate

@@ -22,6 +22,9 @@ from sklearn.neighbors import KNeighborsClassifier
 # MSE 
 from sklearn.metrics import mean_squared_error
 
+from get_final_scores_accuracy import final_score
+
+from sklearn.preprocessing import OneHotEncoder
 
 def pca(sFileTrai, sFileTest, iComponents):
     """
@@ -105,15 +108,17 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
     glob_test_true=[]
     glob_test_mesID=[]
     
-    # To compute the final score as per the challenge
-    mse_training_per_subjectid=[]
-    mse_test_per_subjectid=[]
-    train_nb_files_per_subjectid=[]
-    test_nb_files_per_subjectid=[]
     
         
     lScoreTrai = []
     lScoreTest = []
+    vTraiPCA_all = np.array([]).reshape(0,iComponents+15)
+    vLTrai_all = np.array([]).reshape(0,)
+    vTestPCA_all = np.array([]).reshape(0,iComponents+15)
+    vLTest_all = np.array([]).reshape(0,)
+    print('aaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhggggggggggggggg')
+    uniq_subjectid = np.unique(vTraiSubjectId)
+    enc = OneHotEncoder(handle_unknown='ignore').fit(uniq_subjectid.reshape(-1,1))
     for subject_id in np.unique(vTraiSubjectId):
         print('----- ' + str(subject_id) + '----- ')
         if iNeighbors is not None:
@@ -122,15 +127,26 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
             sScoreType = 'accuracy'
         else: 
             print('Using SVR')
+            #knn = LinearSVR(epsilon=fEpsilon) 
             knn = SVR(kernel=sKernel, C=fCValue, epsilon=fEpsilon, gamma='auto')
             sScoreType = 'R2'
 
         # Filter vTraiPCA and vLTraiPCA for one subject_id
         indices_subject_id = np.where(vTraiSubjectId == subject_id) 
+        print('vTraiPCA.shape ', vTraiPCA.shape)
         vTraiPCA_subjectid = vTraiPCA[indices_subject_id]
         vLTrai_subjectid = vLTrai[indices_subject_id]
         vLTrai_subjectid = vLTrai_subjectid.astype(int)
-
+        print('vTraiPCA_subjectid.shape : ', vTraiPCA_subjectid.shape)
+        vMeanTrai_subjectid = np.mean(vTraiPCA_subjectid,axis=0)
+        vMNTraiPCA_subjectid = vTraiPCA_subjectid - vMeanTrai_subjectid
+        
+        onehot_subjectid = enc.transform([[subject_id]]).toarray()
+        onehotTrai_subjectid = np.repeat(onehot_subjectid,vMNTraiPCA_subjectid.shape[0],axis=0)
+        
+        vMNTraiPCA_subjectid = np.concatenate((vMNTraiPCA_subjectid,onehotTrai_subjectid),axis=1)
+        print('vMNTraiPCA_subjectid shape : ', vMNTraiPCA_subjectid.shape)
+        
         # Filter vTestPCA and vLTestPCA for one subject_id
         indices_subject_id = np.where(vTestSubjectId == subject_id)
         vTestPCA_subjectid = vTestPCA[indices_subject_id]
@@ -138,28 +154,76 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         vLTest_subjectid = vLTest_subjectid.astype(int)
         lTestMeasId_subjectid = vTestMeasurementId[indices_subject_id] # measID per participant
         
-        # We train the KNN only on the data for one subject_id 
-        knn.fit(vTraiPCA_subjectid, vLTrai_subjectid)
-        lScoreTrai.append(knn.score(vTraiPCA_subjectid, vLTrai_subjectid))
-        lScoreTest.append(knn.score(vTestPCA_subjectid, vLTest_subjectid))
-       
-        print('Training '+sScoreType+': ', knn.score(vTraiPCA_subjectid, vLTrai_subjectid))
-        print('Testing '+sScoreType+': ', knn.score(vTestPCA_subjectid, vLTest_subjectid))
+        vMNTestPCA_subjectid = vTestPCA_subjectid - vMeanTrai_subjectid
         
-        # Predicting on the training and test data
-        predictionsTrai = knn.predict(vTraiPCA_subjectid)
-        predictions = knn.predict(vTestPCA_subjectid)
+        onehotTest_subjectid = np.repeat(onehot_subjectid,vMNTestPCA_subjectid.shape[0],axis=0)
+        vMNTestPCA_subjectid = np.concatenate((vMNTestPCA_subjectid,onehotTest_subjectid),axis=1)
+        
+        vTraiPCA_all = np.concatenate((vTraiPCA_all,vMNTraiPCA_subjectid),axis=0)
+        vLTrai_all = np.concatenate((vLTrai_all,vLTrai_subjectid),axis=0)
+        vTestPCA_all = np.concatenate((vTestPCA_all,vMNTestPCA_subjectid),axis=0)
+        vLTest_all = np.concatenate((vLTest_all,vLTest_subjectid),axis=0)
+        
+        # We train the KNN only on the data for one subject_id 
+    N = vTraiPCA_all.shape[0]
+    ind = np.random.permutation(N)
+    vTraiPCA_all = vTraiPCA_all[ind,:]
+    vLTrai_all = vLTrai_all[ind]
+    
+    knn.fit(vTraiPCA_all, vLTrai_all)
+    lScoreTrai.append(knn.score(vTraiPCA_all, vLTrai_all))
+    lScoreTest.append(knn.score(vTestPCA_all, vLTest_all))
+    
+    print('Training '+sScoreType+': ', knn.score(vTraiPCA_all, vLTrai_all))
+    print('Testing '+sScoreType+': ', knn.score(vTestPCA_all, vLTest_all))
 
-        # Computing the accuracy
-        glob_trai_pred=np.append(glob_trai_pred,predictionsTrai,axis=0)
-        glob_test_pred=np.append(glob_test_pred,predictions,axis=0)
-        glob_trai_true=np.append(glob_trai_true,vLTrai_subjectid,axis=0)
-        glob_test_true=np.append(glob_test_true,vLTest_subjectid,axis=0)
-        glob_test_mesID.append(lTestMeasId_subjectid)
+    # Predicting on the training and test data
+    predictionsTrai = knn.predict(vTraiPCA_all)
+    predictions = knn.predict(vTestPCA_all)
 
-        # Building a list of the MSEk
-        print('Training MSE : ', mean_squared_error(vLTrai_subjectid, predictionsTrai))
-        print('Testing MSE : ', mean_squared_error(vLTest_subjectid, predictions))
+    # Computing the accuracy
+    glob_trai_pred=predictionsTrai
+    glob_test_pred=predictions
+    glob_trai_true=vLTrai_all
+    glob_test_true=vLTest_all
+    glob_test_mesID=vTestMeasurementId
+#     glob_test_mesID.append(lTestMeasId_subjectid)
+
+    # Building a list of the MSEk
+    # To compute the final score as per the challenge
+    mse_training_per_subjectid=[]
+    mse_test_per_subjectid=[]
+    train_nb_files_per_subjectid=[]
+    test_nb_files_per_subjectid=[]
+    for subject_id in np.unique(vTraiSubjectId):
+        print('----- ' + str(subject_id) + '----- ')
+        indices_subject_id = np.where(vTraiSubjectId == subject_id) 
+        vTraiPCA_subjectid = vTraiPCA[indices_subject_id]
+        vLTrai_subjectid = vLTrai[indices_subject_id]
+        vLTrai_subjectid = vLTrai_subjectid.astype(int)
+        
+        vMeanTrai_subjectid = np.mean(vTraiPCA_subjectid,axis=0)
+        vMNTraiPCA_subjectid = vTraiPCA_subjectid - vMeanTrai_subjectid
+        
+        onehot_subjectid = enc.transform([[subject_id]]).toarray()
+        onehotTrai_subjectid = np.repeat(onehot_subjectid,vMNTraiPCA_subjectid.shape[0],axis=0)
+        vMNTraiPCA_subjectid = np.concatenate((vMNTraiPCA_subjectid,onehotTrai_subjectid),axis=1)
+        
+        # Filter vTestPCA and vLTestPCA for one subject_id
+        indices_subject_id = np.where(vTestSubjectId == subject_id)
+        vTestPCA_subjectid = vTestPCA[indices_subject_id]
+        vLTest_subjectid = vLTest[indices_subject_id]
+        vLTest_subjectid = vLTest_subjectid.astype(int)
+        lTestMeasId_subjectid = vTestMeasurementId[indices_subject_id] # measID per participant
+        
+        vMNTestPCA_subjectid = vTestPCA_subjectid - vMeanTrai_subjectid
+        
+        onehotTest_subjectid = np.repeat(onehot_subjectid,vMNTestPCA_subjectid.shape[0],axis=0)
+        vMNTestPCA_subjectid = np.concatenate((vMNTestPCA_subjectid,onehotTest_subjectid),axis=1)
+        
+        predictionsTrai = knn.predict(vMNTraiPCA_subjectid)
+        predictions = knn.predict(vMNTestPCA_subjectid) 
+        
         mse_training_per_subjectid = np.append(mse_training_per_subjectid,
                                                (mean_squared_error(vLTrai_subjectid, predictionsTrai)))
         mse_test_per_subjectid = np.append(mse_test_per_subjectid,
@@ -167,9 +231,11 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         train_nb_files_per_subjectid.append(len(vLTrai_subjectid))
         test_nb_files_per_subjectid.append(len(vLTest_subjectid))
         
-#         print('mean_squared_error train for subject id: ', mean_squared_error(vLTrai_subjectid, np.repeat(np.mean(vLTrai_subjectid), len(vLTrai_subjectid)))) 
-#         print('mean_squared_error test for subject id: ', mean_squared_error(vLTest_subjectid, np.repeat(np.mean(vLTest_subjectid), len(vLTest_subjectid)))) 
- 
+        
+        print('mean_squared_error train for subject id: ', mean_squared_error(vLTrai_subjectid, predictionsTrai)) 
+        print('mean_squared_error test for subject id: ', mean_squared_error(vLTest_subjectid, predictions)) 
+    #import pdb; pdb.set_trace()
+    final_score(mse_training_per_subjectid.tolist(),train_nb_files_per_subjectid, 'Training ')
     
     # print('True Labels Training:')
     # print(glob_trai_true)
@@ -187,13 +253,14 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
     # print(glob_test_pred)
     # print('#')
     # print('#')
+    print('sOut : ', sOut)
     if not  os.path.isdir(sOut):
         os.mkdir(sOut)
     
     if iNeighbors is not None:
         sObjname='objs_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
     else: 
-        sObjname='objs_'+str(iComponents)+'_kernel_'+str(sKernel)+ \
+        sObjname='objs_everyone_'+str(iComponents)+'_kernel_'+str(sKernel)+ \
                                           '_c_'+str(fCValue)+ \
                                           '_eps_'+str(fEpsilon)+'.pkl'
                 
