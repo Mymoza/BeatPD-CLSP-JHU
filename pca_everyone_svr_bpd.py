@@ -112,9 +112,9 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         
     lScoreTrai = []
     lScoreTest = []
-    vTraiPCA_all = np.array([]).reshape(0,iComponents+15)
+    vTraiPCA_all = np.array([]).reshape(0,iComponents+len(np.unique(vTraiSubjectId)))
     vLTrai_all = np.array([]).reshape(0,)
-    vTestPCA_all = np.array([]).reshape(0,iComponents+15)
+    vTestPCA_all = np.array([]).reshape(0,iComponents+len(np.unique(vTraiSubjectId)))
     vLTest_all = np.array([]).reshape(0,)
     print('aaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhggggggggggggggg')
     uniq_subjectid = np.unique(vTraiSubjectId)
