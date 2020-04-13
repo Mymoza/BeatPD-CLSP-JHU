@@ -420,7 +420,7 @@ if __name__ == "__main__":
     parser.add_argument('--is-everyone-svr',dest='bEveryoneSVR', default=False, required=False, action='store_true')
     args=parser.parse_args()
     
-    if args.bSVR:
+    if args.bSVR or args.bEveryoneSVR:
         print('yayyyyyyyyy good if') 
         get_final_scores_SVR(**vars(args))
     else:

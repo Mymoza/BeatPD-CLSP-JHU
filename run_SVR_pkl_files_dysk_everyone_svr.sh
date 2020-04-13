@@ -5,24 +5,59 @@
 # ivecDim 50 100 150 200 250 300 
 # sDirFeats /export/b03/sbhati/PD/BeatPD/AE_feats
 
-echo Working on on/off 
+echo Working on Dysk dysk_noinact_auto30
 
 #sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
 
-sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/
-sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30
+#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/
+#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30
 
-for ivecDim in 550 600 650 700; do
+#for ivecDim in 350 400 450 500 550 600 650 700; do
+#    echo Working on ${ivecDim}
+#    ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
+
+#    sDirRes=${sOut}/ivec_${ivecDim}/
+#    sDirOut=${sOut}/ivec_${ivecDim}
+#    ./evaluate_global_everyone_SVR.sh $sDirRes $sDirOut 
+#done
+
+#echo DONE dysk_noinact_auto30 
+
+
+echo DYSK dysk_noinact_auto30_240fl
+
+sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30_240fl/exp/
+sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30_240fl
+
+for ivecDim in 350 400 450 500 550 600 650 700; do
     echo Working on ${ivecDim}
     ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
 
     sDirRes=${sOut}/ivec_${ivecDim}/
     sDirOut=${sOut}/ivec_${ivecDim}
-    ./evaluate_global_everyone_SVR.sh $sDirRes $sDirOut 
+    ./evaluate_global_everyone_SVR.sh $sDirRes $sDirOut
 done
 
-echo DONE
+echo DONE dysk_noinact_auto30_240fl
+
+#echo DYSK dysk_noinact_auto30_320fl
+
+#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30_320fl/exp/
+#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30_320fl
+
+#for ivecDim in 350 400 450 500 550 600 650 700; do
+#    echo Working on ${ivecDim}
+#    ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
+
+#    sDirRes=${sOut}/ivec_${ivecDim}/
+#    sDirOut=${sOut}/ivec_${ivecDim}
+#    ./evaluate_global_everyone_SVR.sh $sDirRes $sDirOut
+#done
+
+#echo DONE dysk_noinact_auto30_320fl
+
+
 #SOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_dysk_auto/exp/
 #sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_dysk_auto
 

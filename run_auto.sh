@@ -145,14 +145,13 @@ if [ $stage -eq 5 ]; then  # Just SVR
 		done
 	done
 fi
-echo "allllllllllllllllllloooooooo next is stage 6"
+
 if [ $stage -eq 6 ]; then  # Just SVR
-        echo "Allllllllllo stage 6"
 	sOut=$expDir/ivec_${ivecDim}/resiVecEveryoneSVR_Fold${foldN}
-        for iNumComponents in 350 400 450 500 550; do
+        for iNumComponents in 350 400 450 500 550 600 650 700; do
                 for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
                         x=-13
-                        while [ $x -le 2 ]
+                        while [ $x -le 0 ]
                         do
                                 # Convert from scientific to float
                                 fC=$(printf "%.14f\n" 2E${x})
