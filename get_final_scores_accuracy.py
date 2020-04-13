@@ -53,7 +53,7 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
     print('--- FUSION ---')
     final_score(mse_per_subjectId, nb_files_per_subjectId, "Fusion ")
     
-def find_components_neighbors(lObjsFiles, bKnn, bSVR): 
+def find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR): 
     lComponents = [] 
     
     #KNN
@@ -67,7 +67,10 @@ def find_components_neighbors(lObjsFiles, bKnn, bSVR):
     # Get a list of all no of components 
     for objsFile in lObjsFiles:
         # Get a list of all iComponents
-        sPatternComponents = r'(?<=objs_)\d+(?=[_|.])'
+        if bEveryoneSVR:
+            sPatternComponents = r'(?<=objs_everyone_)\d+(?=[_|.])'
+        else: 
+            sPatternComponents = r'(?<=objs_)\d+(?=[_|.])'
         # Only add it to the list if it's not already there 
         noToAdd = re.findall(sPatternComponents, objsFile)[0]
         lComponents.append(noToAdd) if noToAdd not in lComponents else lComponents
@@ -78,7 +81,7 @@ def find_components_neighbors(lObjsFiles, bKnn, bSVR):
             print('no To Add : ', re.findall(sPatternNeighbors, objsFile))
             noToAdd = re.findall(sPatternNeighbors, objsFile)[0]
             lNeighbors.append(noToAdd) if noToAdd not in lNeighbors else lNeighbors
-        elif bSVR:
+        elif bSVR or bEveryoneSVR:
             sPatternKernel = r'(?<=kernel_).*(?=_c)'
             kernelToAdd = re.findall(sPatternKernel, objsFile)[0]
             lKernel.append(kernelToAdd) if kernelToAdd not in lKernel else lKernel
@@ -98,7 +101,7 @@ def find_components_neighbors(lObjsFiles, bKnn, bSVR):
     print('Components found : ', lComponents)
     if bKnn:
         print('Neighbors found : ', lNeighbors)
-    elif bSVR:
+    elif bSVR or bEveryoneSVR:
         print('Kernels found : ', lKernel)
         print('C Values found : ', lCValue) 
         print('Epsilon found : ', lEpsilon) 
@@ -107,7 +110,7 @@ def find_components_neighbors(lObjsFiles, bKnn, bSVR):
         
     return lNeighbors, lComponents
     
-def find_res_folders(sFilePath, bKnn, bSVR):
+def find_res_folders(sFilePath, bKnn, bSVR, bEveryoneSVR):
     """
     Keyword arguments: 
     - sFilePath: Path to where the res* folders are. 
@@ -129,6 +132,8 @@ def find_res_folders(sFilePath, bKnn, bSVR):
         sFolderNamePattern = "resiVecKNN_Fold\d"
     elif bSVR: 
         sFolderNamePattern = "resiVecSVR_Fold\d"
+    elif bEveryoneSVR:
+        sFolderNamePattern = "resiVecEveryoneSVR_Fold\d"
     else:
         sFolderNamePattern = "resx*"
     
@@ -143,6 +148,8 @@ def find_res_folders(sFilePath, bKnn, bSVR):
             lObjsFiles.extend(glob.glob(fold_folder + "/objs*k_*"))
         elif bSVR: 
             lObjsFiles.extend(glob.glob(fold_folder + "/objs*kernel_*"))
+        elif bEveryoneSVR: 
+            lObjsFiles.extend(glob.glob(fold_folder + "/objs_everyone_*kernel_*"))
 
     print('lResxFolders : ', lResxFolders)
     print('lObjsFiles : ', lObjsFiles)
@@ -197,7 +204,7 @@ def get_all_folds(lResxFolders, sFileName):
            allfolds_test_nb_files_per_subjectid
         
     
-def get_final_scores_accuracy(sFilePath, bKnn, bSVR):
+def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -206,8 +213,8 @@ def get_final_scores_accuracy(sFilePath, bKnn, bSVR):
     - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
     """
     
-    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR)
-    lNeighbors, lComponents = find_components_neighbors(lObjsFiles, bKnn, bSVR)
+    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR, bEveryoneSVR)
+    lNeighbors, lComponents = find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR)
     
     # DataFrame which is going to contain the info of the best hyperparameters combination 
     best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
@@ -319,17 +326,18 @@ def get_final_scores_accuracy(sFilePath, bKnn, bSVR):
 #         header=["measurement_id","prediction"],
 #     )
 
-def get_final_scores_SVR(sFilePath, bKnn, bSVR):
+def get_final_scores_SVR(sFilePath, bKnn, bSVR, bEveryoneSVR):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
     Keyword arguments:
     - sFilePath: Path to where the res* folders are. 
     - bKnn: Flag to say if the KNN algorithm is used to go through neighbors combination
+    - bEveryoneSVR: TODO
     """
     
-    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR)
-    lComponents, lKernel, lCValue, lEpsilon = find_components_neighbors(lObjsFiles, bKnn, bSVR)
+    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR, bEveryoneSVR)
+    lComponents, lKernel, lCValue, lEpsilon = find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR)
     
     # DataFrame which is going to contain the info of the best hyperparameters combination 
     best_result = pd.DataFrame([['TBD', 100,100,100,100]], columns=['Filename',
@@ -358,7 +366,10 @@ def get_final_scores_SVR(sFilePath, bKnn, bSVR):
                     allfolds_train_nb_files_per_subjectid = []
                     allfolds_test_nb_files_per_subjectid = []
 
-                    sFileName = '/objs_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
+                    if bEveryoneSVR:
+                        sFileName = '/objs_everyone_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
+                    else:
+                        sFileName = '/objs_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
                     print('sFileName : ', sFileName)
 
                     #To compute mean accuracy accross all folds
@@ -406,9 +417,10 @@ if __name__ == "__main__":
     parser.add_argument('--file-path',dest='sFilePath', required=True)
     parser.add_argument('--is-knn',dest='bKnn', default=False, required=False, action='store_true')
     parser.add_argument('--is-svr',dest='bSVR', default=False, required=False, action='store_true')
+    parser.add_argument('--is-everyone-svr',dest='bEveryoneSVR', default=False, required=False, action='store_true')
     args=parser.parse_args()
     
-    if args.bSVR:
+    if args.bSVR or args.bEveryoneSVR:
         print('yayyyyyyyyy good if') 
         get_final_scores_SVR(**vars(args))
     else:
