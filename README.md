@@ -141,192 +141,7 @@ Dyskenisia:
 - `dysk_hpf_auto30`
 - `dysk_noinact_auto30`
 - `dysk_combhpfnoinact_auto30`
-
-
-## Autoencoder output features 
-
-1. `cd /export/b19/mpgill/BeatPD/`
-2. `source activate keras_tf2`
-
-Unless stated otherwise, the basic parameters are 30 features, 400 framelength, and cis training database. 
-
-### CIS-PD, training features 
-
-Use `python train_AE.py`
-If using raw data, then you don't need to give `my_data_path`.
-
-`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":240}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_30ft_240fl_orig_inactivity_removed/"`
-
-- `AE_30ft_240fl_orig_inactivity_removed`
-
-`$ NO COMMAND YET`
-
-`/export/b03/sbhati/PD/BeatPD/AE_feats` : 30 features, 400 frame length, inactivity not removed. Original data. Equivalent to `AE_30ft_orig`
-
-`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
-
-- `AE_30ft_orig_inactivity_removed/` : 30 features, 400 frame length, inactivity removed from original training data. 400 fl
-
-`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "frame_length":320, "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}' --saveFeatDir "/export/b19/mpgill/BeatPD/AE_30ft_320fl_orig_inactivity_removed/"`
-
-- `AE_30ft_320fl_orig_inactivity_removed` : 30 features, inactivity removed from original data with 320 fl 
-
-`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/"}'`
-
-- `AE_30ft_high_pass_inactivity_removed/` : 30 features, inactivity removed from the high pass filtered training data. 400 fl
-
-`$ python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "False", "my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass/", "my_mask_path": "None"}'`
-
-- `AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed). 400 fl
-
-
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":240}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_240fl_orig_inactivity_removed/"`
-
-- `AE_60ft_240fl_orig_inactivity_removed`
-
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig/"`
-
-- `AE_60ft_480fl_orig` : 60 ft, frame length 480, original data. Inactivity is not removed.
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":480}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_480fl_orig_inactivity_removed/"`
-
-- `AE_60ft_480fl_orig_inactivity_removed` : 60 ft, frame length 480, original data. Inactivity is removed. 
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig/"`
-
-- `AE_60ft_400fl_orig` : 60 ft, frame length 400, original data. Inactivity is not removed.  
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig_inactivity_removed/"`
-
-- `AE_60ft_400fl_orig_inactivity_removed` : 60 ft, frame length 400, original data. Inactivity is removed. TODO
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_320fl_orig/"`
-
-- `AE_60ft_320fl_orig` : 60 ft, frame length 320, original data. Inactivity is not removed. 
-
-`$ python train_AE.py --latent_dim 60 -dlP '{"my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.high_pass_mask/", "remove_inactivity":"True","frame_length":320}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_320fl_orig_inactivity_removed/"`
-
-- `AE_60ft_320fl_orig_inactivity_removed` : 60 ft, frame length 320, original data. Inactivity is removed. 
-
-
-
-### CIS-PD, Ancillary features 
-
-1. Open `train_AE.py`
-2. Uncomment line 71 to 74 to use ancillary data instead of training data 
-3. Save and run the following command
-4. Don't forget to comment again lines 71 to 74 
-
-`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig/"`
-
-- `cis_ancillary_AE_30ft_orig`
-
-`$ python train_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.ancillary_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_ancillary_AE_30ft_orig_inactivity_removed/"`
-
-- `cis_ancillary_AE_30ft_orig_inactivity_removed` : 400 fl. 30 fts. Ancillary Data. Inactivity removed 
-
-### CIS-PD, testing features 
-
-`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig/"`
-
-- `cis_testing_AE_30ft_orig`
-
-`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats`
-
-- `cis_testing_AE_30ft_orig_inactivity_removed`
-
-We won't do the following as they're not obtaining better results : 
-
-`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "True"}'`
-
-- `cis_testing_AE_30ft_high_pass_inactivity_removed`
-
-`$ python test_AE.py -dlP '{"my_data_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass/", "my_mask_path": "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "False"}'`
-
-- `cis_testing_AE_30ft_high_pass`
-
-### REAL-PD, training features 
-
-`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig/"`
-
-- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig/` : 30 ft, 400 fl (should be the same content as `/export/b03/sbhati/PD/BeatPD/real_AE_feats`) 
-
-`python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
-
-- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_orig_inactivity_removed/`
-
-- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
-
-- /export/b19/mpgill/BeatPD/real_train_AE_30ft_high_pass_inactivity_removed/
-
-`$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/",  "remove_inactivity": "False"}'  --saveAEFeats`
-
-- `/export/b19/mpgill/BeatPD/real_train_AE_30ft_high_pass/` : 30 features, high pass on training data (inactivity is not removed)
-
-(`sw_acc_data_path`, `sw_acc_mask_path`, `sw_gyro_data_path` and `sw_gyro_mask_path` are not necessary in the following command as these are their default values) 
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False", "frame_length":480}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_480fl_orig/"`
-
-- `real_train_AE_60ft_480fl_orig`
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True", "frame_length":480}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_480fl_orig_inactivity_removed/"`
-
-- `real_train_AE_60ft_480fl_orig_inactivity_removed`  
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_400fl_orig/"`
-
-- `real_train_AE_60ft_400fl_orig` 
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_400fl_orig_inactivity_removed/"`
-
-- `real_train_AE_60ft_400fl_orig_inactivity_removed` 
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False", "frame_length":320}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_320fl_orig/"`
-
-- `real_train_AE_60ft_320fl_orig`  
-
-- `$ python train_AE_real.py --latent_dim 60 -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.training_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True", "frame_length":320}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_train_AE_60ft_320fl_orig_inactivity_removed/"`
-
-- `real_train_AE_60ft_320fl_orig_inactivity_removed` 
-
-### REAL-PD, Ancillary Features 
-
-1. Edit `train_AE_real.py`
-2. Uncomment line 72 and 73 
-3. Edit line 141 to add this ancillary mode : `temp_path = get_data_path(data_type,'smartwatch_accelerometer',"ancillary")`
-4. Run the following command (from `ml_dl` folder)
-5. Don't forget to undo the changes we just did when you're done getting features. 
-
-- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig/"`
-
-- `/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig/`
-
-- `$ python train_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.ancillary_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig_inactivity_removed/"`
-
-- `/export/b19/mpgill/BeatPD/real_ancillary_AE_30ft_orig_inactivity_removed/`
-
-### REAL-PD, testing features 
-
-
-`$ NO COMMAND`
-
-`/export/b03/sbhati/PD/BeatPD/real_AE_feats_test` : Real Testing Data. Original data. 30 ft. 400 fl ("real_testing_AE_30ft_orig") 
-
-`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
-
-- `/export/b19/mpgill/BeatPD/real_testing_AE_30ft_orig_inactivity_removed/`: 400 fl, 30 fts
-
-`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "True"}'  --saveAEFeats`
-
-- `real_testing_AE_30ft_high_pass_inactivity_removed` : 400 fl, 30 fts
-
-`$ python test_AE_real.py -dlP '{"sw_acc_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_accelerometer/", "sw_acc_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_accelerometer/","sw_gyro_data_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass/smartwatch_gyroscope/","sw_gyro_mask_path":"/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.testing_data.high_pass_mask/smartwatch_gyroscope/", "remove_inactivity": "False"}'  --saveAEFeats`
-
-- `real_testing_AE_30ft_high_pass` : inactivity is not removed. 400 fl, 30 fts
-
-
+ 
 # Visualization 
 
 TODO 
@@ -375,8 +190,10 @@ Replace "****" with either `on_off`, `trem` or `dysk`
 
 #### Automatisation to generate the results 
 
+_TODO: To update_
+
 To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`) for the SVR model, use this script:
-1. `./run_SVR_pkl_files.sh`
+1. `./run_SVR_pkl_files.sh` 
 2. `./run_all_evaluation_SVR.sh`
 
 #### Manually 
@@ -384,6 +201,7 @@ To get all the results for all the combinations of `ivecDim` for every class (`o
 
 - `./runSVRFold.sh $sOut $ivecDim $sDirFeats`
 - `./runKNNFold.sh $sOut $ivecDim $sDirFeats`
+- `./runEveryoneSVRFold.sh ${sOut} $ivecDim $sDirFeats`
 
 Or simply use a script like this to automate the ivectors dimension for a provided folder of features: 
 
@@ -401,22 +219,13 @@ for ivecDim in 50 100 150 200 250 300 350 400 450 500 550; do
     ./runKNNFold.sh ${sOut} $ivecDim $sDirFeats
 done
 ```
+Many examples are available on the repository in the folder `run_SVR/`. 
 
+2. If pickle files are already created and you just want to get the final score as used in the challenge (weighted MSE): 
 
-2. Get the final score as used in the challenge (weighted MSE): 
-
-- `./evaluate_global_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+#### For KNN 
 
 - `./evaluate_global_acc_knn.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/ /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/`
-
-This script will generate a `.log` file from the name and location provided in `evaluate_global_acc.sh`, like so:
-
-```
-$cmd $sOut/globalAccuSVR_Test.log \
-     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-     --is-svr
-```
-The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/globalAccuSVR_Test.log`
 
 To get a final score for KNN, only add the `--is-knn` flag, like so: 
 
@@ -426,6 +235,78 @@ $cmd $sOut/globalAccuKNN_Test.log \
      --is-knn
 ```
 
+#### For SVR 
+
+- `./evaluate_global_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+
+_FIXME: Is it really that sh file?_ 
+
+This script will generate a `.log` file from the name and location provided in `evaluate_global_acc.sh`, like so:
+
+```
+$cmd $sOut/globalAccuSVR_Test.log \
+     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
+     --is-svr
+```
+
+The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/globalAccuSVR_Test.log`
+
+#### For SVR Per Patient 
+
+For this type of results, pkl files are the same as the one for regular SVR. When `.pkl` files are present in `resiVecSVR_Fold*` folders, than you can find the best set of hyperparameters with a function in the file `get_final_scores_accuracy.py`. 
+
+Here's a command as an example: 
+
+`qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/error_file -o /export/b19/mpgill/outputs/output_file run_evaluate_global_per_patient_SVR.sh`
+
+You need to edit this file and write manually the name of the folder with the ivectors you want to get results for, as well as for what dimensions of ivectors as it will loop over all the ivector dimensions given. 
+
+The file `run_evaluate_global_per_patient_SVR.sh` actually calls the file `evaluate_global_per_patient_SVR.sh` that creates the log files with the results we are looking for : `/export/c08/lmorove1/kaldi/egs/beatPDivec/***/exp/ivec_***/globalAccuPerPatientSVR_Test.log`
+
+If you only want to have results for one ivector dimension, you can do this directly like this: 
+
+- `./evaluate_global_per_patient_SVR-patient-SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/` 
+
+#### For SVR Everyone 
+
+__TODO__
+
+
+### Automation to get results directly to Excel format 
+
+As of now, the automation is present in the `drafts.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet: 
+
+```
+import pandas as pd 
+import re
+
+
+#/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/
+#trem_noinact_auto30
+for folder in ['trem_noinact_auto60_480fl']:#'trem_noinact_auto30']:#,'trem_noinact_auto30_320fl','trem_noinact_auto30_240fl','trem_noinact_auto60_400fl']:
+    print(folder)
+    value = []
+    liVecDim = [350,400,450,500, 550]
+    for ivecDim in liVecDim:
+        sFilePath='/export/c08/lmorove1/kaldi/egs/beatPDivec/'+folder+'/exp/ivec_'+str(ivecDim)+'/'
+
+        config_pattern = re.compile(r"Test Final score\s:\s*(\d*.\d*)")
+
+        with open(sFilePath+"globalAccuPerPatientSVR_Test.log") as f:
+            for line in f:
+                match = config_pattern.search(line)
+                if match:
+                    #print(match.groups()[0])
+                    value.append(match.groups()[0])
+                    #yield line.strip()
+
+    value = pd.DataFrame(value)
+    value = value.T
+    value.columns = liVecDim
+    display(value)
+```
+
+
 # Inactivity (apply high-pass filter) 
 
 ## Example of what it does with plots 
@@ -433,7 +314,6 @@ $cmd $sOut/globalAccuKNN_Test.log \
 Here's an example for measurement_id `db2e053a-0fb8-4206-891a-6f079fb14e3a` from the CIS-PD database.
 
 <img src="images/initial-plot-accelerometer.png" width="500">
-
 
 After the High pass filter (inactivity identified is filled with X,Y,Z=0 for the purpose of the plot) :
 
