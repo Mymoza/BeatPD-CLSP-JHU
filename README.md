@@ -253,19 +253,35 @@ The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoe
 
 #### For SVR Per Patient 
 
-For this type of results, pkl files are the same as the one for regular SVR. When `.pkl` files are present in `resiVecSVR_Fold*` folders, than you can find the best set of hyperparameters with a function in the file `get_final_scores_accuracy.py`. 
+##### Option 1 (the best one)
+
+Use the `runFor.sh` file in the repository. For example:
+
+`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/`
+
+If you don't need to run the extractions of ivectors and other stuff, make sure to comment some code in the `runFor.sh` file before running it. 
+
+`qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_noinact_auto30 -o /export/b19/mpgill/outputs/outputs_dysk_noinact_auto30 runFor.sh`
+
+##### Option 2 (in your own repo, on a specific branch for example)
+
+For this type of results, pkl files are the same as the one for regular SVR. When `.pkl` files are present in `resiVecSVR_Fold*` folders, than you can find the best set of hyperparameters with a function in the file `get_final_scores_accuracy.py` and get a final score. 
+
+You need to edit the file `run_evaluate_global_per_patient_SVR.sh` and write manually the name of the folder with the ivectors you want to get results for, as well as for what dimensions of ivectors as it will loop over all the ivector dimensions given. 
 
 Here's a command as an example: 
 
-`qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/error_file -o /export/b19/mpgill/outputs/output_file run_evaluate_global_per_patient_SVR.sh`
-
-You need to edit this file and write manually the name of the folder with the ivectors you want to get results for, as well as for what dimensions of ivectors as it will loop over all the ivector dimensions given. 
+```
+qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/error_file -o /export/b19/mpgill/outputs/output_file run_evaluate_global_per_patient_SVR.sh
+```
 
 The file `run_evaluate_global_per_patient_SVR.sh` actually calls the file `evaluate_global_per_patient_SVR.sh` that creates the log files with the results we are looking for : `/export/c08/lmorove1/kaldi/egs/beatPDivec/***/exp/ivec_***/globalAccuPerPatientSVR_Test.log`
 
+##### Option 3 (very manual)
+
 If you only want to have results for one ivector dimension, you can do this directly like this: 
 
-- `./evaluate_global_per_patient_SVR-patient-SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/` 
+`./evaluate_global_per_patient_SVR_patient_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/` 
 
 #### For SVR Everyone 
 
