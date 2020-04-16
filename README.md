@@ -111,10 +111,7 @@ Dyskenisia:
 - `dysk_hpf_auto30`
 - `dysk_noinact_auto30`
 - `dysk_combhpfnoinact_auto30`
- 
-# Visualization 
 
-TODO 
 
 # Step-By-Step guide 
 
