@@ -128,7 +128,7 @@ fi
 
 if [ $stage -eq 5 ]; then  # Just SVR
 	sOut=$expDir/ivec_${ivecDim}/resiVecSVR_Fold${foldN}
-	for iNumComponents in 50 100 125 150 175 200 225 250 275 300 350 400 450 500 550; do
+	for iNumComponents in 350 400 450 500 550 600 650 700; do
 		for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
 			x=-13
 			while [ $x -le 2 ]

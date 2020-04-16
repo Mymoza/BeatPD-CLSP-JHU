@@ -12,13 +12,22 @@ echo Working on on/off
 
 sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/
 sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30
+sSubChallenge=tremor 
 
-for ivecDim in 550 600 650 700; do
+cd .. 
+
+for ivecDim in 350; do
     echo Working on ${ivecDim}
-    ./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
+    # Creathes the Pkl Files for SVR 
+    #./runSVRFold.sh ${sOut} $ivecDim $sDirFeats
+    
+    # Creates the pkl files for Everyone SVR
+    #./runEveryoneSVRFold.sh ${sOut} $ivecDim $sDirFeats 
 
     sDirRes=${sOut}/ivec_${ivecDim}/
     sDirOut=${sOut}/ivec_${ivecDim}
+    ./evaluate_global_SVR.sh $sDirRes $sDirOut
+    ./evaluate_global_per_patient_SVR.sh $sDirRes $sDirOut $sSubChallenge
     ./evaluate_global_everyone_SVR.sh $sDirRes $sDirOut 
 done
 

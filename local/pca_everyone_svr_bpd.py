@@ -116,7 +116,7 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
     vLTrai_all = np.array([]).reshape(0,)
     vTestPCA_all = np.array([]).reshape(0,iComponents+len(np.unique(vTraiSubjectId)))
     vLTest_all = np.array([]).reshape(0,)
-    print('aaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhggggggggggggggg')
+
     uniq_subjectid = np.unique(vTraiSubjectId)
     enc = OneHotEncoder(handle_unknown='ignore').fit(uniq_subjectid.reshape(-1,1))
     for subject_id in np.unique(vTraiSubjectId):
