@@ -285,8 +285,20 @@ If you only want to have results for one ivector dimension, you can do this dire
 
 #### For SVR Everyone 
 
-__TODO__
+##### Option 1 (the best one)
 
+To create `.pkl` files for SVR Everyone, `stage=6` needs to be ran. 
+
+`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
+
+`vim runFor.sh` : Edit this file to run stage 6. You can comment the part that extracts ivectors if that's already done. 
+
+Make sure `local/evaluate_global_everyone_SVR.sh` is ran also following the `run_auto.sh` stage 6 to create the log files with results. 
+
+##### Option 3 
+
+To get results: 
+`./evaluate_global_everyone_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
 
 ### Automation to get results directly to Excel format 
 
