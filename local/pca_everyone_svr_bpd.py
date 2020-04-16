@@ -22,6 +22,7 @@ from sklearn.neighbors import KNeighborsClassifier
 # MSE 
 from sklearn.metrics import mean_squared_error
 
+sys.path.insert(0,'/home/sjoshi/codes/python/BeatPD/code/')
 from get_final_scores_accuracy import final_score
 
 from sklearn.preprocessing import OneHotEncoder
