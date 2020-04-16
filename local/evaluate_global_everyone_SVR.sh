@@ -12,17 +12,13 @@ export PATH="./local:$PATH"
 sFileTrai=$1
 sOut=$2
 
-#filePath=/home/sjoshi/codes/python/BeatPD/code/
-filePath=`pwd`/
+#filePath=/home/mpgill/BeatPD/BeatPD-CLSP-JHU/
+filePath=`pwd`/local/
 
 cmd=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/utils/run.pl
-$cmd $sOut/globalAccuSVR_Test.log \
+$cmd $sOut/globalAccuEveryoneSVR_Test.log \
      ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-     --is-svr
-
-#$cmd $sOut/globalAccuSVR_Test.log \
-#     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-#     --is-svr
+     --is-everyone-svr
 
 #$cmd $sOut/globakAccuKNN_Test.txt \
 #    get_final_scores_accuracy.py  --file-path $sFileTrai --is-knn

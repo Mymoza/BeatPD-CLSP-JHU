@@ -11,14 +11,14 @@ export PATH="./local:$PATH"
 
 sFileTrai=$1
 sOut=$2
-sSubchallenge=$3 
 
-#filePath=/home/sjoshi/codes/python/BeatPD/code/
-filePath=`pwd`/
+filePath=`pwd`/local/
 
 cmd=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/utils/run.pl
-$cmd $sOut/globalAccuPerPatientSVR_Test.log \
-         ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-         --is-svr --per-subject-svr --database CIS --subchallenge $sSubchallenge
+$cmd $sOut/globalAccuPLDA.log \
+     ${filePath}get_final_scores_accuracy.py --file-path $sFileTrai \
 
+$cmd $sOut/globalAccuKNN.log \
+     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
+     --is-knn
 conda deactivate
