@@ -184,7 +184,7 @@ Replace "****" with either `on_off`, `trem` or `dysk`
 9. In `runFor.sh`, change the `sDirFeats` variable pointing to a folder of AutoEncoder features
 10. `screen -R name_of_your_screen`
 11. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/****`
-12. `./runFor.sh`
+12. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_orig_auto60_400fl -o /export/b19/mpgill/outputs/outputs_dysk_orig_auto60_400fl runFor.sh`
 
 ### Evaluation steps 
 
@@ -381,6 +381,8 @@ df_train_data = apply_mask(path_train_data,
 
 # Working in Jupyter Notebooks 
 
+## Import functions 
+
 If you're working in Jupyter notebooks, you will probably need to import functions from python files. 
 
 You should use these two lines to make sure that if you make changes to the python files, the code that is being called from your Jupyter Notebook will be updated: 
@@ -393,3 +395,9 @@ from transform_data import *
 from create_graphs import *
 ```
 
+## Opening Jupyter notebooks on the grid - example 
+
+1. `ssh -L 8805:b19:8805 -J mpgill@login.clsp.jhu.edu mpgill@b19`
+2. `screen -R marie-jup`
+3. `cd /home/sjoshi/codes/python/BeatPD`
+4. `jupyter-notebook --no-browser --port 8805`
