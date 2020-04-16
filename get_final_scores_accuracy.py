@@ -9,6 +9,7 @@ from math import sqrt
 import pandas as pd 
 import os
 from sklearn.metrics import r2_score
+import pprint
 
 def final_score(mse_per_subjectid, nb_files_per_subject_id, training_or_test=''):
     """
@@ -156,6 +157,14 @@ def find_res_folders(sFilePath, bKnn, bSVR, bEveryoneSVR):
     return lResxFolders, lObjsFiles
 
 def get_all_folds(lResxFolders, sFileName):
+    """
+    Returns all the folds from the provided list of folders (lResxFolders) and that have a certain 
+    hyperparameters configuration provided in sFileName 
+    
+    Keyword arguments:
+    - lResxFolders: TODO 
+    - sFileName: TODO 
+    """
     # To compute mean accuracy accross all folds
     allfolds_glob_trai_pred = []
     allfolds_glob_trai_true = []
@@ -194,6 +203,7 @@ def get_all_folds(lResxFolders, sFileName):
                                                          train_nb_files_per_subjectid)
         allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
                                                         test_nb_files_per_subjectid)
+    
     return allfolds_glob_trai_pred, \
            allfolds_glob_trai_true, \
            allfolds_glob_test_pred, \
@@ -326,7 +336,7 @@ def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR):
 #         header=["measurement_id","prediction"],
 #     )
 
-def get_final_scores_SVR(sFilePath, bKnn, bSVR, bEveryoneSVR):
+def get_final_scores_SVR(sFilePath, bKnn, bSVR, bEveryoneSVR, bPerSubject, sDatabase, sSubchallenge):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -386,7 +396,8 @@ def get_final_scores_SVR(sFilePath, bKnn, bSVR, bEveryoneSVR):
                     global_testing_r2 = r2_score(allfolds_glob_test_true, allfolds_glob_test_pred)
                     print('Global training R2: {}'.format(global_training_r2))
                     print('Global testing R2: {}'.format(global_testing_r2))
-
+                    print('allfolds_mse_training_per_subjectid : ', len(allfolds_mse_training_per_subjectid))
+                    print('SUM allfolds_mse_training_per_subjectid : ', sum(allfolds_train_nb_files_per_subjectid))
                     global_training_final_score = final_score(allfolds_mse_training_per_subjectid,
                                 allfolds_train_nb_files_per_subjectid,
                                 training_or_test='Train ')
@@ -405,6 +416,123 @@ def get_final_scores_SVR(sFilePath, bKnn, bSVR, bEveryoneSVR):
     print('------ GLOBAL WINNER PARAMETERS ------')
     print(best_result.transpose()[0].to_string())
     
+def get_final_scores_SVR_lowest_mse_for_subjectid(sFilePath, bKnn, bSVR, bEveryoneSVR, bPerSubject, sDatabase, sSubchallenge):
+    """
+    Get final Scores for the individual SVR but we use different parameters for each patient depending on what 
+    set of parameters worked best. 
+    
+    TODO: Not all arguments are needed, certain can be removed. 
+    
+    Keyword arguments:
+    - TODO
+    """
+    lResxFolders, lObjsFiles = find_res_folders(sFilePath, bKnn, bSVR, bEveryoneSVR)
+    lComponents, lKernel, lCValue, lEpsilon = find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR)
+    
+    # QUICKFIX: Because right now we are not experimenting with different Kernels. Otherwise we need to add for loops 
+    kernel=lKernel[0]
+    epsilon=lEpsilon[0]
+    
+    # Each database and subchallenge have different subject_id 
+    if sDatabase == "CIS" and sSubchallenge =="onoff":
+        pids = np.array([1004,1006,1007,1019,1020,1023,1032,1034,1038,1039,1043,1044,1048,1049,1051])
+    elif sDatabase == "CIS" and sSubchallenge =="tremor":
+        pids = np.array([1004,1006,1007,1019,1020,1023,1032,1034,1038,1043,1046,1048,1049])
+    elif sDatabase == "CIS" and sSubchallenge =="dysk":
+        pids = np.array([1004,1007,1019,1023,1034,1038,1039,1043,1044,1048,1049])
+        
+    config_to_choose = {i:('FileName', 100) for i in pids}
+    
+    for subjectid_index in range(len(pids)):
+        print('------ PATIENT ', pids[subjectid_index], ' ------')
+        for c_value in lCValue:
+            print('------ FOR C VALUE ', c_value, '------')
+            for component in lComponents:
+                print('---- FOR COMPONENT ', component, '----')
+
+                if bEveryoneSVR:
+                    sFileName = '/objs_everyone_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
+                else:
+                    sFileName = '/objs_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
+
+                # Numpy array to contain the Test MSE for the 5 folds for one subject id 
+                all_folds_mse_test_per_subjectid = []
+                # List to contain the nb of test files for one subject id 
+                total_nb_files = []
+
+                for fold_folder in lResxFolders:
+                    [glob_trai_pred,glob_trai_true, \
+                     glob_test_pred,glob_test_true, \
+                     mse_training_per_subjectid, \
+                     mse_test_per_subjectid, \
+                     train_nb_files_per_subjectid, \
+                     test_nb_files_per_subjectid, \
+                     vTestMeasurementId] = pickle.load(open(fold_folder+sFileName, "rb" ) )
+
+                    # On Test Subset but we could do it on Train subset 
+                    print('TEST MSE: ', mse_test_per_subjectid[subjectid_index])
+                    total_nb_files.append(test_nb_files_per_subjectid[subjectid_index])
+                    all_folds_mse_test_per_subjectid = np.append(all_folds_mse_test_per_subjectid, \
+                                                                 mse_test_per_subjectid[subjectid_index])
+                
+
+                # Find the Challenge Final Score over the MSE per patient over the 5 folds
+                # This candidate is just a way to get a metric to choose what is the best configuration 
+                candidate_final_score = final_score(all_folds_mse_test_per_subjectid, total_nb_files, training_or_test='')
+                print('Candidate Final Score : ', candidate_final_score) 
+                if candidate_final_score < config_to_choose[pids[subjectid_index]][1]:
+                    config_to_choose[pids[subjectid_index]] = [sFileName, candidate_final_score]
+        
+    print('------ GLOBAL WINNER PARAMETERS ------')
+ 
+    pprint.pprint(config_to_choose)
+    # To compute mean accuracy accross all folds
+    allfolds_glob_trai_pred = []
+    allfolds_glob_trai_true = []
+    allfolds_glob_test_pred = []
+    allfolds_glob_test_true = [] 
+
+    # To compute final score across all folds 
+    allfolds_mse_training_per_subjectid = []
+    allfolds_mse_test_per_subjectid = []
+    allfolds_train_nb_files_per_subjectid = []
+    allfolds_test_nb_files_per_subjectid = []
+    
+    # FIXME to switch between training or data 
+    lNb_Files_per_subjectid = test_nb_files_per_subjectid
+    
+    for fold_folder in lResxFolders:
+        
+        for subjectid_index in range(len(pids)):
+            
+            sFileName = config_to_choose[pids[subjectid_index]][0]
+            
+            [glob_trai_pred,glob_trai_true, \
+             glob_test_pred,glob_test_true, \
+             mse_training_per_subjectid, \
+             mse_test_per_subjectid, \
+             train_nb_files_per_subjectid, \
+             test_nb_files_per_subjectid, \
+             vTestMeasurementId] = pickle.load(open(fold_folder+sFileName, "rb" ) )
+
+            allfolds_mse_training_per_subjectid = np.append(allfolds_mse_training_per_subjectid, 
+                                                            mse_training_per_subjectid[subjectid_index])
+            allfolds_mse_test_per_subjectid = np.append(allfolds_mse_test_per_subjectid,
+                                                       mse_test_per_subjectid[subjectid_index])
+            allfolds_train_nb_files_per_subjectid = np.append(allfolds_train_nb_files_per_subjectid, 
+                                                             train_nb_files_per_subjectid[subjectid_index])
+            allfolds_test_nb_files_per_subjectid = np.append(allfolds_test_nb_files_per_subjectid, 
+                                                            test_nb_files_per_subjectid[subjectid_index])
+    
+    global_training_final_score = final_score(allfolds_mse_training_per_subjectid,
+        allfolds_train_nb_files_per_subjectid,
+        training_or_test='Train ')
+    global_testing_final_score = final_score(allfolds_mse_test_per_subjectid,
+            allfolds_test_nb_files_per_subjectid,
+            training_or_test='Test ')          
+                 
+                    
+                    
 if __name__ == "__main__":
     # Usage example : 
     # sFilePath = '/home/sjoshi/codes/python/BeatPD/code/'
@@ -418,13 +546,18 @@ if __name__ == "__main__":
     parser.add_argument('--is-knn',dest='bKnn', default=False, required=False, action='store_true')
     parser.add_argument('--is-svr',dest='bSVR', default=False, required=False, action='store_true')
     parser.add_argument('--is-everyone-svr',dest='bEveryoneSVR', default=False, required=False, action='store_true')
+    
+    # Arguments for Per-Subject-SVR 
+    parser.add_argument('--per-subject-svr',dest='bPerSubject', default=False, required=False, action='store_true')
+    parser.add_argument('--database',dest='sDatabase', required=False)
+    parser.add_argument('--subchallenge',dest='sSubchallenge', required=False)
     args=parser.parse_args()
     
-    if args.bSVR or args.bEveryoneSVR:
-        print('yayyyyyyyyy good if') 
+    if args.bPerSubject:
+        get_final_scores_SVR_lowest_mse_for_subjectid(**vars(args))
+    elif args.bSVR or args.bEveryoneSVR:
         get_final_scores_SVR(**vars(args))
     else:
-        print('KNN SIDE YAY')
         print(args)
         get_final_scores_accuracy(**vars(args))
                                     

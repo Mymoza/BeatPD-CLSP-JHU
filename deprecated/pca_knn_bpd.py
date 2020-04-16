@@ -149,6 +149,7 @@ def pca_knn_bpd(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKerne
         predictions = knn.predict(vTestPCA_subjectid)
 
         # Computing the accuracy
+        print('len(predictionsTrai) : ', len(predictionsTrai))
         glob_trai_pred=np.append(glob_trai_pred,predictionsTrai,axis=0)
         glob_test_pred=np.append(glob_test_pred,predictions,axis=0)
         glob_trai_true=np.append(glob_trai_true,vLTrai_subjectid,axis=0)
