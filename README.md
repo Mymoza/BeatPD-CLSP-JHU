@@ -220,6 +220,12 @@ The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoe
 
 #### For SVR Per Patient 
 
+The SVR Per Patient uses the pkl files created for the original SVR. That means it uses pkl files that were created per configuration, but for all patients. 
+
+These files provide the MSE per patient for each configuration.
+
+To get results, it's actually in the file `get_final_scores_accuracy.py`. These is the function called `get_final_scores_SVR_lowest_mse_for_subjectid` that gets final Scores for the individual SVR but with using different parameters for each patient depending on what set of parameters worked best for that patient.
+
 ##### Option 1 (the best one)
 
 Use the `runFor.sh` file in the repository. For example:
@@ -229,6 +235,10 @@ Use the `runFor.sh` file in the repository. For example:
 If you don't need to run the extractions of ivectors and other stuff, make sure to comment some code in the `runFor.sh` file before running it. 
 
 `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_noinact_auto30 -o /export/b19/mpgill/outputs/outputs_dysk_noinact_auto30 runFor.sh`
+
+`vim runFor.sh` : Edit this file to run stage 5. You can comment the part that extracts ivectors if that's already done. 
+
+Make sure `local/evaluate_global_per_patient_SVR.sh` is ran also following the `run_auto.sh` stage 5 to create the log files with results (all done in the `runFor.sh` file). 
 
 ##### Option 2 (in your own repo, on a specific branch for example)
 
