@@ -82,7 +82,10 @@ From `/home/sjoshi/codes/python/BeatPD/data/BeatPD`:
 ```
 
 
-# Where are the features? 
+# Where are the i-vectors? 
+
+The directory of the ivectors are all reported in our [Google Spreadsheet](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/) presenting our results for the different experiments. 
+
 ## MFCC 
 `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/*/exp/ivectors_Training_Fold0/ivector.scp`
 - `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
