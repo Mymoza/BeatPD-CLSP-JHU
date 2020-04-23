@@ -214,7 +214,7 @@ def get_all_folds(lResxFolders, sFileName):
            allfolds_test_nb_files_per_subjectid
         
     
-def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR):
+def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR, bPerSubject):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -443,6 +443,7 @@ def get_final_scores_SVR_lowest_mse_for_subjectid(sFilePath, bKnn, bSVR, bEveryo
         
     config_to_choose = {i:('FileName', 100) for i in pids}
     
+    # First Step : Choose the best configuration for each patient 
     for subjectid_index in range(len(pids)):
         print('------ PATIENT ', pids[subjectid_index], ' ------')
         for c_value in lCValue:
@@ -484,8 +485,12 @@ def get_final_scores_SVR_lowest_mse_for_subjectid(sFilePath, bKnn, bSVR, bEveryo
                     config_to_choose[pids[subjectid_index]] = [sFileName, candidate_final_score]
         
     print('------ GLOBAL WINNER PARAMETERS ------')
- 
     pprint.pprint(config_to_choose)
+    
+    
+    # Second Step: Pick that best configuration for all subjects id and output the global training final score
+    # and the global testing final score 
+    
     # To compute mean accuracy accross all folds
     allfolds_glob_trai_pred = []
     allfolds_glob_trai_true = []
