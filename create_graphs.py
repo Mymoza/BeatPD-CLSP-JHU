@@ -171,14 +171,23 @@ def plot_symptoms_occurences(df_occurences, df_train_label_subject_id):
             subject_symptom = " ".join(
                 [str(key), symptom]
             )  # variable used to create a title for each plot
-
-            ax = df_train_label_subject_id.get_group(key)[symptom].value_counts().plot(
+            df_train_label_subject_id_symptom = df_train_label_subject_id.get_group(key)[symptom].value_counts()
+            order = [-1,0,1,2,3,4]
+            df_train_label_subject_id_symptom = df_train_label_subject_id_symptom.reindex(order)
+            ax = df_train_label_subject_id_symptom.plot(
                 kind="bar",
                 x=symptom,
                 title=subject_symptom,
                 ax=axes[symptom_no], # fix it to this ax=axes[patient, symptom_no] if i'm plotting many 
                 sharey=True,
             )
+#             ax = df_train_label_subject_id.get_group(key)[symptom].value_counts().plot(
+#                 kind="bar",
+#                 x=symptom,
+#                 title=subject_symptom,
+#                 ax=axes[symptom_no], # fix it to this ax=axes[patient, symptom_no] if i'm plotting many 
+#                 sharey=True,
+#             )
             fig.tight_layout()
             plt.tight_layout()
             symptom_no = symptom_no + 1
