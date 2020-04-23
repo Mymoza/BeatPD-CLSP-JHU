@@ -13,6 +13,8 @@ from sklearn.decomposition import PCA
 import pandas as pd
 import re 
 
+from sklearn.metrics import r2_score
+
 # SVR
 from sklearn.svm import SVR
 
@@ -54,7 +56,8 @@ def pca(sFileTrai, sFileTest, iComponents):
     # FIXME : For realPD, we need more than -5 (CIS-PD subject_id is 4 characters long)
     # FIXME REAL-PD it's not only int
     vTraiSubjectId = np.array(([int(x[-5:-1]) for x in np.array(list(dIvecTrai.keys()))]))
-
+    vTraiMeasurementId = np.array([x[-42:-6] for x in np.array(list(dIvecTrai.keys()))])
+    
     dIvecTest = { key:mat for key,mat in kaldi_io.read_vec_flt_scp(sFileTest) }
     vTest=np.array(list(dIvecTest.values()), dtype=float)
     vLTest=np.array([int(x[-1]) for x in np.array(list(dIvecTest.keys()))])
@@ -70,11 +73,12 @@ def pca(sFileTrai, sFileTest, iComponents):
     if isinstance(iComponents, str):
         iComponents=int(iComponents)
         
-    return vTraiPCA, vLTrai, vTraiSubjectId, vTestPCA, vLTest, vTestSubjectId, vTestMeasurementId
+    return vTraiPCA, vLTrai, vTraiSubjectId, vTraiMeasurementId, vTestPCA, vLTest, vTestSubjectId, vTestMeasurementId
 
-def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKernel=None, fCValue=None, fEpsilon=None):
+def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKernel=None, fCValue=None, fEpsilon=None,
+                bLabelNormalization=False, bPatientPredictionsPkl=False):
     """
-    Performs PCA, then KNN and dumps the results in a pickle file 
+    Performs PCA, then KNN or SVR and dumps the results in a pickle file 
     
     Keyword arguments: 
     - sFileTrai: TODO
@@ -94,7 +98,8 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         fEpsilon=float(fEpsilon)
         
     vTraiPCA, vLTrai, \
-    vTraiSubjectId, vTestPCA, \
+    vTraiSubjectId, vTraiMeasurementId, \
+    vTestPCA, \
     vLTest, vTestSubjectId, \
     vTestMeasurementId = pca(sFileTrai, sFileTest, iComponents)
 
@@ -138,17 +143,57 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         vLTest_subjectid = vLTest_subjectid.astype(int)
         lTestMeasId_subjectid = vTestMeasurementId[indices_subject_id] # measID per participant
         
-        # We train the KNN only on the data for one subject_id 
-        knn.fit(vTraiPCA_subjectid, vLTrai_subjectid)
-        lScoreTrai.append(knn.score(vTraiPCA_subjectid, vLTrai_subjectid))
-        lScoreTest.append(knn.score(vTestPCA_subjectid, vLTest_subjectid))
+        # Label Normalization
+        if bLabelNormalization:
+            print('Performing Label Normalization')
+            # Find the Mean of the Labels for this subject_id
+            vLMeanTrai_subjectid = np.mean(vLTrai_subjectid,axis=0)
+            
+            # Find the Mean Normalized vector of labels for training & testing subsets
+            vLMNTrai_subjectid = vLTrai_subjectid - vLMeanTrai_subjectid
+            vLMNTest_subjectid = vLTest_subjectid - vLMeanTrai_subjectid
+            
+            #FIXME : Do I need to do that? Should we score on the MN test labels? 
+            #vLTest_subjectid = vLMNTest_subjectid
+            # I don't think so, i think that's what we need to un-normalize?
+            
+            # We train the KNN only on the data for one subject_id 
+            knn.fit(vTraiPCA_subjectid, vLMNTrai_subjectid)
+        
+            # Get the schore on Mean Normalized Labels vectors
+            # Same for test because if the model does well, then it will predict the labels where MN 
+            # was applied. So we would need to un-normalize it to get real test predictions. At this time
+            # we just want the score so we will use the MN vector of test labels
+            vTraiPCA_subjectid_score = knn.score(vTraiPCA_subjectid, vLMNTrai_subjectid)
+            vTestPCA_subjectid_score = knn.score(vTestPCA_subjectid, vLMNTest_subjectid)
+            
+        else:
+            knn.fit(vTraiPCA_subjectid, vLTrai_subjectid)
+            
+            vTraiPCA_subjectid_score = knn.score(vTraiPCA_subjectid, vLTrai_subjectid)
+            vTestPCA_subjectid_score = knn.score(vTestPCA_subjectid, vLTest_subjectid)
+        
+        
+        lScoreTrai.append(vTraiPCA_subjectid_score)
+        lScoreTest.append(vTestPCA_subjectid_score)
        
-        print('Training '+sScoreType+': ', knn.score(vTraiPCA_subjectid, vLTrai_subjectid))
-        print('Testing '+sScoreType+': ', knn.score(vTestPCA_subjectid, vLTest_subjectid))
+        print('Training '+sScoreType+': ', vTraiPCA_subjectid_score)
+        print('Testing '+sScoreType+': ', vTestPCA_subjectid_score)
         
         # Predicting on the training and test data
-        predictionsTrai = knn.predict(vTraiPCA_subjectid)
-        predictions = knn.predict(vTestPCA_subjectid)
+        if bLabelNormalization:
+            predictionsTrai = knn.predict(vTraiPCA_subjectid)
+            predictionsTrai = predictionsTrai + vLMeanTrai_subjectid
+            
+            predictions = knn.predict(vTestPCA_subjectid)
+            predictions = predictions + vLMeanTrai_subjectid
+            
+        else:
+            predictionsTrai = knn.predict(vTraiPCA_subjectid)
+            predictions = knn.predict(vTestPCA_subjectid)
+        
+#         print('TRAIN NEW R2 SCORE : ', r2_score(vLTrai_subjectid, predictionsTrai))
+#         print('TEST NEW R2 SCORE : ', r2_score(vLTest_subjectid, predictions))
 
         # Computing the accuracy
         glob_trai_pred=np.append(glob_trai_pred,predictionsTrai,axis=0)
@@ -166,6 +211,21 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
                                             (mean_squared_error(vLTest_subjectid, predictions)))
         train_nb_files_per_subjectid.append(len(vLTrai_subjectid))
         test_nb_files_per_subjectid.append(len(vLTest_subjectid))
+
+        # If the flag to create predictions pkl files per patient is provided
+        if bPatientPredictionsPkl: 
+            if iNeighbors is not None:
+                sObjname=str(subject_id)+'_objs_'+str(iComponents)+'_k_'+str(iNeighbors)+'.pkl'
+            else: 
+                sObjname=str(subject_id)+'_objs_'+str(iComponents)+'_kernel_'+str(sKernel)+ \
+                                              '_c_'+str(fCValue)+ \
+                                              '_eps_'+str(fEpsilon)+'.pkl'
+            with open(os.path.join(sOut,sObjname), 'wb') as f:  # Python 3: open(..., 'wb')
+                pickle.dump([predictionsTrai,vLTrai_subjectid,predictions,vLTest_subjectid, \
+                             vTraiMeasurementId, \
+                             mean_squared_error(vLTrai_subjectid, predictionsTrai), \
+                             mean_squared_error(vLTest_subjectid, predictions), \
+                             lTestMeasId_subjectid], f)
         
 #         print('mean_squared_error train for subject id: ', mean_squared_error(vLTrai_subjectid, np.repeat(np.mean(vLTrai_subjectid), len(vLTrai_subjectid)))) 
 #         print('mean_squared_error test for subject id: ', mean_squared_error(vLTest_subjectid, np.repeat(np.mean(vLTest_subjectid), len(vLTest_subjectid)))) 
@@ -187,7 +247,7 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
     # print(glob_test_pred)
     # print('#')
     # print('#')
-    if not  os.path.isdir(sOut):
+    if not os.path.isdir(sOut):
         os.mkdir(sOut)
     
     if iNeighbors is not None:
@@ -203,6 +263,8 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
                      train_nb_files_per_subjectid,test_nb_files_per_subjectid, glob_test_mesID], f)
         
     print('----- GLOBAL -----')
+    print('lScoreTrai : ', lScoreTrai)
+    print('lScoreTest : ', lScoreTest)
     print('PCAComponents: {}'.format((iComponents)))
     if iNeighbors is not None:
         print('Global training accuracy: {}'.format((glob_trai_true == glob_trai_pred).mean()))
@@ -212,7 +274,7 @@ def pca_knn_bpd2(sFileTrai, sFileTest, sOut, iComponents, iNeighbors=None, sKern
         print('Global training R2: {}'.format((sum(lScoreTrai) / len(lScoreTrai))))
         print('Global testing R2: {}'.format((sum(lScoreTest) / len(lScoreTest))))
 
-
+    
 if __name__ == "__main__":
     # Usage example : 
     # sFileTrai = '/export/c08/lmorove1/kaldi/egs/beatPDivec/v1/exp/ivectors_Training_Fold0/ivector.scp'
@@ -236,6 +298,9 @@ if __name__ == "__main__":
     parser.add_argument('--fCValue', dest='fCValue')
     parser.add_argument('--fEpsilon', dest='fEpsilon')
 
+    parser.add_argument('--bLabelNormalization', dest='bLabelNormalization', default=False, required=False, action='store_true')
+    parser.add_argument('--bPatientPredictionsPkl', dest='bPatientPredictionsPkl', default=False, required=False, action='store_true')
+    
     args=parser.parse_args()
     
     pca_knn_bpd2(**vars(args))
