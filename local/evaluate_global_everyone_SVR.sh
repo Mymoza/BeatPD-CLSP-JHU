@@ -13,7 +13,8 @@ sFileTrai=$1
 sOut=$2
 
 #filePath=/home/mpgill/BeatPD/BeatPD-CLSP-JHU/
-filePath=`pwd`/
+
+filePath=`pwd`/local/
 
 cmd=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/utils/run.pl
 $cmd $sOut/globalAccuEveryoneSVR_Test.log \
