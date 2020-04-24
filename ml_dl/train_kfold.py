@@ -8,6 +8,7 @@ from keras import backend as K
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.utils import to_categorical
 
+from sklearn.mixture import GaussianMixture as GMM
 import numpy as np
 import scipy.io as sio
 import os
@@ -15,6 +16,7 @@ import argparse
 import pandas as pd
 import json
 import copy
+import pickle
 
 from dataload import load_data
 from model import make_DNN_model, make_LSTM_model, make_CNN_model
@@ -27,11 +29,11 @@ sess = tf.Session()
 parser = argparse.ArgumentParser(description="Initial Experiment with Wavenet")
 parser.add_argument("--data_type",default="cis")
 parser.add_argument("--data_real_subtype",default="")
-parser.add_argument("--pid",default=0,type=int)
+parser.add_argument("--pid",default=1039,type=int)
 parser.add_argument("--KFind",default=2,type=int)
 parser.add_argument("--subtask",default="on_off",choices=['on_off','dyskinesia', 'tremor'])
 parser.add_argument("-uad","--use_ancillarydata",action="store_true")
-parser.add_argument("--latent_dim",default=30,type=int)
+parser.add_argument("--latent_dim",default=10,type=int)
 parser.add_argument("-wsLSTM","--warmstart_LSTM",action="store_true")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
@@ -74,21 +76,9 @@ train_data_path = data_dir + data_type + "-pd.training_data/" + data_real_subtyp
 if data_type == "cis":
     kfold_path = "/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.training_data.k_fold_v3/"
 
-if pid == 0:
-    pids = np.array([1004,1006,1007,1019,1020,1023,1032,1034,1038,1039,1043,1044,1046,1048,1049,1051])
-    df_train_label = pd.DataFrame()
-    for temp_pid in pids:
-        print(temp_pid)
-        file_name = str(temp_pid) + '_train_kfold_' + str(KFind) + '.csv'
-        temp = pd.read_csv(kfold_path+file_name)
-        df_train_label = pd.concat([df_train_label,temp],axis=0,ignore_index=True)
-    N = df_train_label.shape[0]
-    ind = np.random.permutation(N)
-    df_train_label = df_train_label.iloc[ind]
-    df_train_label = df_train_label.reset_index(drop=True)
-else:
-    file_name = str(pid) + '_train_kfold_' + str(KFind) + '.csv' 
-    df_train_label = pd.read_csv(kfold_path+file_name)
+
+file_name = str(pid) + '_train_kfold_' + str(KFind) + '.csv' 
+df_train_label = pd.read_csv(kfold_path+file_name)
 
 if not params:
     params = {}
@@ -121,6 +111,35 @@ train_data_len = AE_feats.shape[0]
 temp_X = AE_feats
 temp_Y = labels
 
+LSTM_featsize = AE_feats.shape[-1]
+temp_X_gmm = temp_X[temp_Y[:,0]==0,:,:]
+temp_X_gmm = temp_X.reshape(-1,LSTM_featsize)
+ind_to_keep = np.sum(np.abs(temp_X_gmm),axis=1) > 0
+temp_X_gmm = temp_X_gmm[ind_to_keep,:]
+
+if warmstart_LSTM:
+    gmm_loadname = load_weights_dir+'GMM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.sav'
+    gmm = pickle.load(open(gmm_loadname,'rb'))
+else:
+    gmm = GMM(n_components=5,verbose=2,warm_start=True)
+
+gmm.fit(temp_X_gmm)
+thres = gmm.score(temp_X_gmm)
+del temp_X_gmm, ind_to_keep
+
+def append_gmm_inac(gmm,in_data,thres=None):
+    s1,s2,s3 = in_data.shape
+    in_data = in_data.reshape(-1,s3)
+    ind_to_keep = np.sum(np.abs(in_data),axis=1) > 0
+    logprob = np.zeros((s1*s2,1))
+    logprob[ind_to_keep,0] = gmm.score_samples(in_data[ind_to_keep,:])
+    if thres is not None:
+        logprob[logprob>thres] = 0
+        in_data[logprob[:,0] == 0,:] = 0 
+    #in_data =  np.concatenate((in_data,logprob),axis=1)
+    in_data = in_data.reshape(s1,s2,s3)
+    return in_data
+
 if params['add_noise'] =='True' or params['add_rotation'] == 'True':
     for i in range(dataAugScale):
         temp_AE_feats, temp_labels, temp_ind_selected = get_AE_feats(encoder,df_train_label,subtask,params)
@@ -130,6 +149,11 @@ if params['add_noise'] =='True' or params['add_rotation'] == 'True':
 
 print("Original Size: %d" % (AE_feats.shape[0]))
 print("Augumented Size: %d" % (temp_X.shape[0]))
+
+temp_X = append_gmm_inac(gmm,temp_X,thres=thres)
+ind_del = np.where(np.sum(np.abs(temp_X),axis=(1,2)) ==0)
+temp_X = np.delete(temp_X,ind_del,axis=0)
+temp_Y = np.delete(temp_Y,ind_del,axis=0)
 
 #N = temp_X.shape[0]
 #ind = np.random.permutation(N)
@@ -156,7 +180,8 @@ classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verb
 
 del temp_X, temp_Y
 
-tr_pred = classifier.predict(AE_feats[:train_data_len,:,:],batch_size=100,verbose=1)
+AE_feats_inac_appended = append_gmm_inac(gmm,AE_feats,thres=thres) 
+tr_pred = classifier.predict(AE_feats_inac_appended[:train_data_len,:,:],batch_size=100,verbose=1)
 
 tr_class_weights = get_class_weights(df_train_label.iloc[ind_selected])
 
@@ -166,24 +191,12 @@ tr_w_mse = np.sum(temp[:,0]*tr_class_weights)/np.sum(tr_class_weights)
 
 
 ## test 
-if pid == 0:
-    pids = np.array([1004,1006,1007,1019,1020,1023,1032,1034,1038,1039,1043,1044,1046,1048,1049,1051])
-    df_test_label = pd.DataFrame()
-    for temp_pid in pids:
-        print(temp_pid)
-        file_name = str(temp_pid) + '_test_kfold_' + str(KFind) + '.csv'
-        temp = pd.read_csv(kfold_path+file_name)
-        df_test_label = pd.concat([df_test_label,temp],axis=0,ignore_index=True)
-    N = df_test_label.shape[0]
-    ind = np.random.permutation(N)
-    df_test_label = df_test_label.iloc[ind]
-    df_test_label = df_test_label.reset_index(drop=True)
-else:
-    file_name = str(pid) + '_test_kfold_' + str(KFind) + '.csv' 
-    df_test_label = pd.read_csv(kfold_path+file_name)
 
+file_name = str(pid) + '_test_kfold_' + str(KFind) + '.csv' 
+df_test_label = pd.read_csv(kfold_path+file_name)
 
 test_AE_feats, test_labels, test_ind_selected = get_AE_feats(encoder,df_test_label,subtask,params)
+test_AE_feats = append_gmm_inac(gmm,test_AE_feats,thres=thres)
 
 test_pred = classifier.predict(test_AE_feats,batch_size=100,verbose=1)
 

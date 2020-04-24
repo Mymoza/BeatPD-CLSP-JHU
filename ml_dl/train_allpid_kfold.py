@@ -8,6 +8,7 @@ from keras import backend as K
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.utils import to_categorical
 
+from sklearn.mixture import GaussianMixture as GMM
 import numpy as np
 import scipy.io as sio
 import os
@@ -15,6 +16,7 @@ import argparse
 import pandas as pd
 import json
 import copy
+import pickle
 
 from dataload import load_data
 from model import make_DNN_model, make_LSTM_model, make_CNN_model
@@ -135,6 +137,32 @@ if use_ancillarydata:
 temp_X = AE_feats
 temp_Y = labels
 
+LSTM_featsize = AE_feats.shape[-1]
+temp_X_gmm = temp_X[temp_Y[:,0]==0,:,:]
+temp_X_gmm = temp_X.reshape(-1,LSTM_featsize)
+ind_to_keep = np.sum(np.abs(temp_X_gmm),axis=1) > 0
+temp_X_gmm = temp_X_gmm[ind_to_keep,:]
+gmm = GMM(n_components=5,verbose=2,warm_start=True)
+gmm.fit(temp_X_gmm)
+thres = gmm.score(temp_X_gmm)
+del temp_X_gmm, ind_to_keep
+
+gmm_savename = savedir+'GMM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.sav'
+pickle.dump(gmm,open(gmm_savename,'wb'))
+
+def append_gmm_inac(gmm,in_data,thres=None):
+    s1,s2,s3 = in_data.shape
+    in_data = in_data.reshape(-1,s3)
+    ind_to_keep = np.sum(np.abs(in_data),axis=1) > 0
+    logprob = np.zeros((s1*s2,1))
+    logprob[ind_to_keep,0] = gmm.score_samples(in_data[ind_to_keep,:])
+    if thres is not None:
+        logprob[logprob>thres] = 0
+        in_data[logprob[:,0] == 0,:] = 0 
+    #in_data =  np.concatenate((in_data,logprob),axis=1)
+    in_data = in_data.reshape(s1,s2,s3)
+    return in_data
+
 if params['add_noise'] =='True' or params['add_rotation'] == 'True':
     for i in range(dataAugScale):
         temp_AE_feats, temp_labels, temp_ind_selected = get_AE_feats(encoder,df_train_label,subtask,params)
@@ -150,12 +178,16 @@ if params['add_noise'] =='True' or params['add_rotation'] == 'True':
 print("Original Size: %d" % (AE_feats.shape[0]))
 print("Augumented Size: %d" % (temp_X.shape[0]))
 
+temp_X = append_gmm_inac(gmm,temp_X,thres=thres)
+ind_del = np.where(np.sum(np.abs(temp_X),axis=(1,2)) ==0)
+temp_X = np.delete(temp_X,ind_del,axis=0)
+temp_Y = np.delete(temp_Y,ind_del,axis=0)
+
 #N = temp_X.shape[0]
 #ind = np.random.permutation(N)
 #temp_X = temp_X[ind,:,:]
 #temp_Y = temp_Y[ind,:]
-
-LSTM_featsize = AE_feats.shape[-1]
+LSTM_featsize = temp_X.shape[-1]
 classifier = make_LSTM_model(feat_size=LSTM_featsize)
 
 checkpointer = ModelCheckpoint(filepath=savedir+'LSTM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.h5',save_best_only=True)
@@ -175,7 +207,8 @@ classifier.fit(temp_X,temp_Y,validation_split=0.10,batch_size=50,epochs=100,verb
 
 del temp_X, temp_Y
 
-tr_pred = classifier.predict(AE_feats[:train_data_len,:,:],batch_size=100,verbose=1)
+AE_feats_inac_appended = append_gmm_inac(gmm,AE_feats,thres=thres) 
+tr_pred = classifier.predict(AE_feats_inac_appended[:train_data_len,:,:],batch_size=100,verbose=1)
 
 tr_class_weights = get_class_weights(df_train_label.iloc[ind_selected])
 
@@ -203,6 +236,7 @@ else:
 
 
 test_AE_feats, test_labels, test_ind_selected = get_AE_feats(encoder,df_test_label,subtask,params)
+test_AE_feats = append_gmm_inac(gmm,test_AE_feats,thres=thres)
 
 test_pred = classifier.predict(test_AE_feats,batch_size=100,verbose=1)
 
@@ -238,3 +272,26 @@ for key in params:
 
 f.close()
 
+'''
+
+save_feats_path = '/export/b03/sbhati/PD/BeatPD/AE_feats_inac_removed/'
+for idx in df_train_label.index:
+    print(idx)
+    temp_X = load_data(df_train_label,idx,cleanParams)
+    temp_feats = encoder.predict(temp_X)
+    name = df_train_label["measurement_id"][idx]
+    logprob = gmm.score_samples(temp_feats)
+    temp_feats = temp_feats[logprob<thres,:]
+    sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats})
+
+save_feats_path = '/export/b03/sbhati/PD/BeatPD/AE_feats_inac_removed/'
+for idx in df_test_label.index:
+    print(idx)
+    temp_X = load_data(df_test_label,idx,cleanParams)
+    temp_feats = encoder.predict(temp_X)
+    name = df_test_label["measurement_id"][idx]
+    logprob = gmm.score_samples(temp_feats)
+    temp_feats = temp_feats[logprob<thres,:]
+    sio.savemat(save_feats_path+name+'.mat',{'feat':temp_feats})
+
+'''    

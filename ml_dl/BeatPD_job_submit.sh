@@ -50,7 +50,7 @@ for kfind in `seq 0 4`
 do
 log_file=${savedir}/${pid}_${kfind}_warmLSTM.log
 out_file=${savedir}/${pid}_${kfind}_warmLSTM.txt
-$keras_cmd_cpu -e $log_file -o $out_file /home/sbhati/keras_run_cpu.sh ${dir}/train_kfold.py --pid $pid --KFind $kfind --subtask $subtask --warmstart_LSTM -uad
+$keras_cmd_cpu -e $log_file -o $out_file /home/sbhati/keras_run_cpu.sh ${dir}/train_kfold.py --pid $pid --KFind $kfind --subtask $subtask --warmstart_LSTM
 done
 done
 
