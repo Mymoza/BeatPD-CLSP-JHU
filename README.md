@@ -346,50 +346,6 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 
 8. Run that cell, and it will create a `csv` file in the provided location `dst_dir`. 
 
-# Inactivity (apply high-pass filter) 
-
-## Example of what it does with plots 
-
-Here's an example for measurement_id `db2e053a-0fb8-4206-891a-6f079fb14e3a` from the CIS-PD database.
-
-<img src="images/initial-plot-accelerometer.png" width="500">
-
-After the High pass filter (inactivity identified is filled with X,Y,Z=0 for the purpose of the plot) :
-
-<img src="images/plot-after-highpass.png" width="400">
-
-It looks good, with a straight line of inactivity on “zero”… However, it’s not  visible to the eyes, but there are some values left at the complete beginning of the dataframe from index 0 to index 31. 
-
-Then we have inactivity from index 32 to 26073.
-
-<img src="images/table-explanation-why-not-perfect.png" width="300">
-
-This explains why the accelerometer with inactivity removed looks like this: 
-
-We have 32 values right at the beginning which prevents the graph to show just the [600,1200] part
-
-<img src="images/final-plot-inactivity-removed.png" width="400">
-
-## How to remove inactivity
-
-Masks have already been created detecting inactivity for all the databases. They are stored in the `*.high_pass_mask` folder. 
-
-
-What's left is to apply the mask. To do so, a function called `apply_mask` located in `transform_data.py` can be used. 
-
-```
-# import transform_data
-from transform_data import apply_mask
-
-# path_train_data : path to the original training files which we want to apply the highpass filter on 
-# measurement_id : measurement_id we want to apply the mask to
-# mask_path: Path where to apply the mask to the wav file 
-
-df_train_data = apply_mask(path_train_data,
-                                   measurement_id,
-                                   mask_path)
-```
-
 # Working in Jupyter Notebooks 
 
 ## Import functions 
