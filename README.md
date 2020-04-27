@@ -65,27 +65,34 @@ This step-by-step guide will cover the following steps:
 
 ## 1. Prepare the data 
 
-### CIS-PD: Create High Pass Data
-TODO 
+All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
 
-### Create Masks for inactivity removal 
-Masks were created in the notebook `analyze_data_cleaned.ipynb`, like so: 
+1. Open the notebook
+2. Change the `data_dir` variable for the absolute path to the folder that contains the data given by the challenge. In this folder, you should already have the following directories: 
 ```
-remove_inactivity_highpass(
-    df_train_label,
-    path_train_data,
-    data_type,
-    energy_threshold=5,
-    duration_threshold=3000,
-    plot_frequency_response=False,
-    mask_path='/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.'+
-    data_subset+'.high_pass_mask/')
+/export/b19/mpgill/BeatPD_data  $ ls
+cis-pd.ancillary_data  cis-pd.testing_data   real-pd.ancillary_data  real-pd.testing_data
+cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.training_data
 ```
-Two parameters can be tuned:
-* `energy_threshold` : what percentage of the max energy do we consider as inactivity? The current masks generated have used the threshold of 5% 
-* `duration_threshold` : how long do we want to have inactivity before we remove it? For example 3000x0.02ms=1min of inactivity minimum before those candidates are considered inactivty and will be removed. 
+3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. 
 
-### Create i-vectors 
+## 2. AutoEncoder features 
+
+### 2.1 Train the AutoEncoder 
+
+TODO - Ask Bhati for help 
+reeeeed
+
+<span style="color:red">TODO: Create the keras_tf environment</span>
+
+### 2.2 Get AutoEncoder Features 
+
+1. `git checkout ml_dl`: The code to get features from the AutoEncoder is in another branch. 
+2. `cd ml_dl`
+3. `cd source activate keras_tf2`
+
+
+## 3. Create i-vectors 
 
 After creating Autoencoder features, we can create i-vectors. You need to have Kaldi installed first. Follow Kaldi's instructions to install. 
 
