@@ -61,7 +61,8 @@ This step-by-step guide will cover the following steps:
     2. AutoEncoder (AE)
         1. Train the AutoEncoder
         2. Save AE Features
-    3. Get results for SVR/SVR Per Patient/SVR Everyone
+    3. Create i-vectors
+    4. Get results for SVR/SVR Per Patient/SVR Everyone
 3. TSFRESH + XGBOOST 
 4. Fusion 
 
@@ -151,49 +152,10 @@ globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
 
 #### 2.2.4.2 Extract results for different ivector sizes 
 
-As of now, the automation is present in the `drafts.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
+As of now, the automation is present in the `get_excel_results.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
 
-It works only for Per Patient SVR and Everyone SVR.
-
-```
-import pandas as pd 
-import re
-
-
-def read_log_results_to_excel(folders, fileName):
-    for folder in folders:#'trem_noinact_auto30']:#,'trem_noinact_auto30_320fl','trem_noinact_auto30_240fl','trem_noinact_auto60_400fl']:
-        print(folder)
-        value = []
-        liVecDim = [350,450,500,550]
-        for ivecDim in liVecDim:
-            sFilePath='/export/c08/lmorove1/kaldi/egs/beatPDivec/'+folder+'/exp/ivec_'+str(ivecDim)+'/'
-            print('Opening : ', sFilePath+fileName)
-            textfile = open(sFilePath+fileName)
-            filetext = textfile.read()
-            textfile.close()
-            
-            
-            result = re.findall(r"Test Final score\s[:| ]\s*(\d*.\d*)",filetext)
-            print(result[len(result)-1])
-            value.append(result[len(result)-1])
-            
-        value = pd.DataFrame(value)
-        value = value.T
-        value.columns = liVecDim
-        display(value)
-
-folders=['on_off_noinact_auto30']
-fileName='globalAccuPerPatientSVR_Test.log'
-read_log_results_to_excel(folders, fileName)
-
-folders=['on_off_noinact_auto30_320fl']
-fileName='globalAccuEveryoneSVR_Test.log'
-read_log_results_to_excel(folders, fileName)
-```
-
-
-🛑TODO: Explain how results are obtained 
-🛑TODO: How to automatize (get to Excel) 
+So far, it was only developed for Per Patient SVR and Everyone SVR results.
+For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
 ### Evaluation steps 
 
