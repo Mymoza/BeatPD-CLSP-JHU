@@ -55,14 +55,17 @@ Dyskinesia:
 
 This step-by-step guide will cover the following steps: 
 
-1. Prepare the data
-2. TSFRESH + XGBOOST 
-3. Extract ivectors 
-    
-    - SVR
-    
-    - SVR Per Patient
+1. [Prepare the data](#prepare-data)
+2. [Embeddings](#embeddings)
+    1. [MFCC](#2.1-mfcc) 
+    2. AutoEncoder (AE)
+        1. Train the AutoEncoder
+        2. Save AE Features
+    3. Get results for SVR/SVR Per Patient/SVR Everyone
+3. TSFRESH + XGBOOST 
+4. Fusion 
 
+<a name="prepare-data"></a>
 ## 1. Prepare the data 
 
 All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
@@ -76,30 +79,45 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ```
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. 
 
-## 2. AutoEncoder features 
+<a name="embeddings"></a>
+## 2. Embeddings 
 
-### 2.1 Train the AutoEncoder 
+<a name="2.1-mfcc"></a>
+### 2.1 MFCC 
+
+🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. 
+
+### 2.2 AutoEncoder features 
+
+#### 2.2.1 Train the AutoEncoder 
 
 🛑TODO: - Ask Bhati for help. How to train the AutoEncoder? 
 Code needs to be in github 
 
 🛑TODO: How to Create the keras_tf environment
 
-### 2.2 Get AutoEncoder (AE) Features 
+#### 2.2.2 Get AutoEncoder (AE) Features 
 
 1. `git checkout ml_dl`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
 3. `source activate keras_tf2`
 4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features.
 
-## 3. Create i-vectors 
+### 2.2.3 Create i-vectors 
 
-After creating Autoencoder features, we can create i-vectors. You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
+🛑TODO: "Create i-vectors": Correct vocabulary? 
+
+After creating Autoencoder features, we can create i-vectors.
+
+You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
 🛑TODO: Ask Laureano how he suggest to do this from GitHub 
+🛑TODO: "This is where all the ivectors will be created" : is it the correct vocabulary? 
 
-1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec`
-2. `mkdir *****` 
+The following steps will vary a lot depending on what ivector you want to create. One way to decide which ivector to create is to view the [Google spreadsheet results](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/edit?usp=sharing) and find out which result you are interested in replicating. The column "C" has notes for each appropriate cell with the name of the ivector folder we use. You can use the same nomenclature to replicate our experiments. 
+
+1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec` : This is where all the ivectors will be created 
+2. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create
 3. `cd ****`
 4. `mkdir data`
 5. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/v2_auto/. ./`
@@ -112,11 +130,76 @@ Replace "****" with either `on_off`, `trem` or `dysk`
 11. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/****`
 12. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_orig_auto60_400fl -o /export/b19/mpgill/outputs/outputs_dysk_orig_auto60_400fl runFor.sh`
 
+🛑TODO: Good vocabulary? 
+Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as well as the KNN/SVRs schemes. 
+
+### 2.2.4 Get results 
+
+#### 2.2.4.1 Manually - for one size of ivector 
+The following example will retrieve results for the following ivector: `trem_noinact_auto30`.
+
+1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
+2. `cd ivec_350` : Then, choose an ivector size 
+3. `ls` : 
+```
+globalAccuPLDA.log : Result for PLDA 
+globalAccuKNN.log : Result for KNN
+globalAccuSVR_Test.log : Result for SVR 
+globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR 
+globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
+```
+
+#### 2.2.4.2 Extract results for different ivector sizes 
+
+As of now, the automation is present in the `drafts.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
+
+It works only for Per Patient SVR and Everyone SVR.
+
+```
+import pandas as pd 
+import re
+
+
+def read_log_results_to_excel(folders, fileName):
+    for folder in folders:#'trem_noinact_auto30']:#,'trem_noinact_auto30_320fl','trem_noinact_auto30_240fl','trem_noinact_auto60_400fl']:
+        print(folder)
+        value = []
+        liVecDim = [350,450,500,550]
+        for ivecDim in liVecDim:
+            sFilePath='/export/c08/lmorove1/kaldi/egs/beatPDivec/'+folder+'/exp/ivec_'+str(ivecDim)+'/'
+            print('Opening : ', sFilePath+fileName)
+            textfile = open(sFilePath+fileName)
+            filetext = textfile.read()
+            textfile.close()
+            
+            
+            result = re.findall(r"Test Final score\s[:| ]\s*(\d*.\d*)",filetext)
+            print(result[len(result)-1])
+            value.append(result[len(result)-1])
+            
+        value = pd.DataFrame(value)
+        value = value.T
+        value.columns = liVecDim
+        display(value)
+
+folders=['on_off_noinact_auto30']
+fileName='globalAccuPerPatientSVR_Test.log'
+read_log_results_to_excel(folders, fileName)
+
+folders=['on_off_noinact_auto30_320fl']
+fileName='globalAccuEveryoneSVR_Test.log'
+read_log_results_to_excel(folders, fileName)
+```
+
+
+🛑TODO: Explain how results are obtained 
+🛑TODO: How to automatize (get to Excel) 
+
 ### Evaluation steps 
 
 #### Automatisation to generate the results 
 
-_TODO: To update_
+🛑TODO: To update
 
 To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`) for the SVR model, use this script:
 1. `./run_SVR_pkl_files.sh` 
@@ -236,39 +319,7 @@ Make sure `local/evaluate_global_everyone_SVR.sh` is ran also following the `run
 To get results: 
 `./evaluate_global_everyone_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
 
-### Automation to get results directly to Excel format 
 
-As of now, the automation is present in the `drafts.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet: 
-
-```
-import pandas as pd 
-import re
-
-
-#/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/
-#trem_noinact_auto30
-for folder in ['trem_noinact_auto60_480fl']:#'trem_noinact_auto30']:#,'trem_noinact_auto30_320fl','trem_noinact_auto30_240fl','trem_noinact_auto60_400fl']:
-    print(folder)
-    value = []
-    liVecDim = [350,400,450,500, 550]
-    for ivecDim in liVecDim:
-        sFilePath='/export/c08/lmorove1/kaldi/egs/beatPDivec/'+folder+'/exp/ivec_'+str(ivecDim)+'/'
-
-        config_pattern = re.compile(r"Test Final score\s:\s*(\d*.\d*)")
-
-        with open(sFilePath+"globalAccuPerPatientSVR_Test.log") as f:
-            for line in f:
-                match = config_pattern.search(line)
-                if match:
-                    #print(match.groups()[0])
-                    value.append(match.groups()[0])
-                    #yield line.strip()
-
-    value = pd.DataFrame(value)
-    value = value.T
-    value.columns = liVecDim
-    display(value)
-```
 
 # Get Predictions 
 
