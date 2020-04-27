@@ -80,21 +80,23 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 
 ### 2.1 Train the AutoEncoder 
 
-TODO - Ask Bhati for help 
-reeeeed
+🛑TODO: - Ask Bhati for help. How to train the AutoEncoder? 
+Code needs to be in github 
 
-<span style="color:red">TODO: Create the keras_tf environment</span>
+🛑TODO: How to Create the keras_tf environment
 
-### 2.2 Get AutoEncoder Features 
+### 2.2 Get AutoEncoder (AE) Features 
 
 1. `git checkout ml_dl`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
-3. `cd source activate keras_tf2`
-
+3. `source activate keras_tf2`
+4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features.
 
 ## 3. Create i-vectors 
 
-After creating Autoencoder features, we can create i-vectors. You need to have Kaldi installed first. Follow Kaldi's instructions to install. 
+After creating Autoencoder features, we can create i-vectors. You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
+
+🛑TODO: Ask Laureano how he suggest to do this from GitHub 
 
 1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec`
 2. `mkdir *****` 
