@@ -13,6 +13,7 @@ from scipy.signal import butter, freqz, lfilter
 
 # KFold
 from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 
 # Import required modules
 from sklearn.preprocessing import StandardScaler
@@ -113,6 +114,120 @@ def interesting_patients(df_train_label, list_measurement_id):
 
     return df_train_label
 
+def get_k_fold(df_train_label,
+               data_dir,
+               data_type,
+               n_splits=5,
+               subject_id=None,
+               data_subset='training_data',
+               data_real_subtype=""):
+    """
+    Function that returns a list of X dataframes (X is according to the number of n_splits chosen)
+
+    The dataframes are the labels needed according to the split 
+
+    Keyword Arguments:
+    - df_train_label: Dataframe containing the labels
+    - n_split: Optional. The number of folds. Default: 5
+    - subject_id: Optional. Specify a subject_id to get measurement_id only for that subject_id 
+    - data_real_subtype: Only for REAL-PD database
+    """
+    kf = StratifiedKFold(n_splits) # shuffle??? 
+
+    # Building the dataframe to split
+    X = []
+
+    # if we want the data split for one specific subject_id
+    if subject_id:
+        df_train_label_subject_id = df_train_label.groupby("subject_id")
+        X = df_train_label_subject_id.get_group(subject_id)
+    else:
+        # if we want to have all a split for all data no matter the subject_id
+        # NOTE: I didn't make sure to have one subject_id represented in both train/test
+        for idx in df_train_label.index:
+            X.append([df_train_label["measurement_id"][idx]])
+        X = pd.DataFrame(X)
+
+    kf.get_n_splits(X)
+
+    # Building lists of df_train_label because we have by default 5 splits,
+    # so the lists will contain 5 DataFrames with different split indices required
+    list_df_train_label = list()
+    list_df_test_label = list()
+    split_idx = 0
+    
+    # Removing NaN values only for the purpose of kf.split as stratified kfold don't like NaN values
+#     print(type(X))
+#     print('Before contains NaN ? : ', X.isnull().sum())
+    X = prepro_missing_values(X)
+#     print('After contains NaN ? : ', X_no_nan.isnull().sum())
+    
+    if subject_id == 1046:
+        # 1046 is balanced on tremor because that's the only labels we have for that patient
+        y = X.iloc[:,-1]
+    else:
+        # We do the KFOLDs on a balanced on/off only 
+        y = X.iloc[:,-3] 
+
+    print("----- " + str(subject_id) + " -----")
+    for train_index, test_index in kf.split(X, y):
+        print(len(X))
+        print(len(df_train_label))
+        df_train_label = X.iloc[train_index]
+        df_test_label = X.iloc[test_index]
+        
+        # Following is just to see if the splits are balanced or not 
+        train_y, test_y = y.iloc[train_index], y.iloc[test_index]
+        
+        train_0, train_1, train_2, train_3, train_4 = len(train_y[train_y==0]), \
+                                                        len(train_y[train_y==1]), \
+                                                        len(train_y[train_y==2]), \
+                                                        len(train_y[train_y==3]), \
+                                                        len(train_y[train_y==4])
+        test_0, test_1, test_2, test_3, test_4  = len(test_y[test_y==0]), \
+                                                  len(test_y[test_y==1]), \
+                                                  len(test_y[test_y==2]), \
+                                                  len(test_y[test_y==3]), \
+                                                  len(test_y[test_y==4])
+        print('>Train: 0=%d, 1=%d, 2=%d, 3=%d, 4=%d Test: 0=%d, 1=%d, 2=%d, 3=%d, 4=%d' % (train_0, train_1, train_2, train_3, train_4, \
+                                                        test_0, test_1, test_2, test_3, test_4))
+        
+        list_df_train_label.append(df_train_label)
+        list_df_test_label.append(df_test_label)
+
+        # name of the file according to its database and type
+        # NOTE: Be careful that the end of the name of the folder where to save the kfolds is hardcoded here
+        path_save_k_fold_dataframes = (
+            data_dir + data_type + "-pd."+data_subset+".k_fold_v2/" + data_real_subtype + "/"
+        )
+        
+        # If the derivative_path folder doesn't exists, we need to create it 
+        if not os.path.exists(path_save_k_fold_dataframes):
+            os.makedirs(path_save_k_fold_dataframes)
+            print('The kfold folder was created : ', path_save_k_fold_dataframes)
+
+    
+        df_train_label.to_csv(
+            path_save_k_fold_dataframes
+            + str(subject_id)
+            + "_train_kfold_"
+            + str(split_idx)
+            + ".csv",
+            index=False,
+            header=["measurement_id", "subject_id", "on_off", "dyskinesia", "tremor"],
+        )
+        df_test_label.to_csv(
+            path_save_k_fold_dataframes
+            + str(subject_id)
+            + "_test_kfold_"
+            + str(split_idx)
+            + ".csv",
+            index=False,
+            header=["measurement_id", "subject_id", "on_off", "dyskinesia", "tremor"],
+        )
+        split_idx = split_idx + 1
+    return list_df_train_label, list_df_test_label
+
 ############################################
 ############ DERIVATIVE ############
 ############################################
@@ -134,8 +249,6 @@ def get_derivative_value(df_train_data_context, m):
 def get_first_derivative(measurement_id, path_train_data, derivative_path, n_zero=3, padding=False, mask_path=None):
     """
     TODO 
-    
-    cis-pd.training_data.velocity_original_data: Original data, which means the inactivity is untouched 
     
     Keyword arguments:
     - path_train_data: TODO
@@ -218,6 +331,12 @@ def get_first_derivative(measurement_id, path_train_data, derivative_path, n_zer
     # Build the DataFrame with all the columns together so we can save it to CSV
     df_velocity = pd.DataFrame(df_velocity, columns=['X','Y','Z'])
 
+    # If the derivative_path folder doesn't exists, we need to create it 
+    if not os.path.exists(derivative_path):
+        os.makedirs(derivative_path)
+        print('The derivative_path folder was created : ', derivative_path)
+            
+            
     df_velocity.to_csv(
         derivative_path + measurement_id + ".csv",
         index=False,
@@ -298,6 +417,11 @@ def high_pass_filter(df_train_label, high_pass_path, path_train_data, data_type)
                                                 Y_filtered_data,
                                                 Z_filtered_data]).T,columns= [x_axis_data_type, "X", "Y", "Z"])
         
+        # If the high_pass folder doesn't exists, we need to create it 
+        if not os.path.exists(high_pass_path):
+            os.makedirs(high_pass_path)
+            print('The high pass folder was created : ', high_pass_path)
+            
         # Save to a folder 
         df_high_pass.to_csv(
             high_pass_path + df_train_label["measurement_id"][idx] + ".csv",
@@ -346,13 +470,13 @@ def remove_inactivity_highpass(
                                 Flag to determine if we want to plot the accelerometer after the inactivity
                                 is removed
     """
-    # Filter requirements.
-    order = 10
-    fs = 50.0  # sample rate, Hz
-    cutoff = 0.5  # 3.667  # desired cutoff frequency of the filter, Hz
+#     # Filter requirements.
+#     order = 10
+#     fs = 50.0  # sample rate, Hz
+#     cutoff = 0.5  # 3.667  # desired cutoff frequency of the filter, Hz
 
-    # Get the filter coefficients so we can check its frequency response.
-    b, a = butter_highpass(cutoff, fs, order)
+#     # Get the filter coefficients so we can check its frequency response.
+#     b, a = butter_highpass(cutoff, fs, order)
 
     # Load every training file for each "row of labels" we have loaded in df_train_label
     for idx in df_train_label.index:
@@ -441,6 +565,11 @@ def remove_inactivity_highpass(
 #         unique, counts = np.unique(df_zeros, return_counts=True)
 #         print(dict(zip(unique, counts)))
 
+        # If the mask_path folder doesn't exists, we need to create it 
+        if not os.path.exists(mask_path):
+            os.makedirs(mask_path)
+            print('The mask path folder was created : ', mask_path)
+            
         # Save 0/1 candidates to csv
         # I use 1-df_zeros to swap the 0s and 1s.
         # 1: we want to keep this measure
@@ -538,7 +667,9 @@ def apply_mask(path_train_data, measurement_id, mask_path):
     Apply a mask on the list of measurement_ids provided through df_train_label 
     
     Keyword arguments:
-    - TODO
+    - path_train_data: Absolute path to the data we want to apply the mask on
+    - measurement_id: Measurement_id from which we want to remove inactivity 
+    - mask_path: Absolute path to the mask we want to apply 
     """
     print("Apply_Mask function: Inactivity is being removed.") 
     # Load the training data
@@ -566,12 +697,12 @@ def apply_mask(path_train_data, measurement_id, mask_path):
     return df_train_data
 
 
-#### Remove inactivity and mean offset to make the data at 0 
-
 def remove_inactivity_mean_offset(df_train_label):
     """
     Removal of inactivity segments detected with a threshold after the energy is centered over the mean
     This function is expected to be less efficient than removal of inactivity with the highpass threshold 
+    
+    This function was not used in any experiments.
     
     Keyword arguments: 
     - df_train_label: DataFrame containing the following columns 
@@ -806,7 +937,7 @@ def create_cis_wav_files(data_subset, data_dir, sAxis, data_type="cis", bMask=Fa
     with ProcessPoolExecutor(num_jobs) as ex:
         results = list(ex.map(do_work, df_train_label['measurement_id']))
     
-def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real"): 
+def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real", bMask=False): 
     """
     Create wav files for the REAL-PD database 
     
@@ -815,12 +946,10 @@ def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real"):
     - data_dir:
     - sAxis: {'X', 'Y', 'Z'}
     - data_type="real" 
+    - bMask: Flag to determine if inactivity should be removed or not 
     """
     for data_real_subtype in ['smartphone_accelerometer', 'smartwatch_accelerometer', 'smartwatch_gyroscope']:
         path_train_data, df_train_label = define_data_type(data_type, data_dir, data_subset, data_real_subtype)
-    #     list_mesurement_id=['33f5a031-43a8-496a-89ee-0b9d99019617']
-        # Filter df_train_label according to the measurement_id we are most interested in
-    #     df_train_label = interesting_patients(df_train_label=df_train_label, list_measurement_id=list_measurement_id)
 
         for idx in df_train_label.index:
             try:            
@@ -830,13 +959,18 @@ def create_real_wav_files(data_subset, data_dir, sAxis, data_type="real"):
                       ' as it doesn\'t exist for ' +
                       data_real_subtype)
                 df_train_label = df_train_label.drop(idx)
-
+        if bMask: 
+            mask_path = data_dir+'/real-pd.'+data_subset+'.high_pass_mask/'+data_real_subtype+'/'
+            wav_path=data_dir+'real-pd.'+data_subset+'.high_pass_mask.wav_'+sAxis+'/'+data_real_subtype+'/'
+        else:
+            mask_path = None 
+            wav_path = data_dir+'real-pd.'+data_subset+'.wav_'+sAxis+'/'+data_real_subtype+'/'
         do_work = partial(
             write_wav, 
             path_train_data=path_train_data,
-            wav_path=data_dir+'real-pd.'+data_subset+'.wav_'+sAxis+'/'+data_real_subtype+'/',
+            wav_path=wav_path,
             sAxis=sAxis,
-            mask_path=data_dir+'/real-pd.'+data_subset+'.high_pass_mask/'+data_real_subtype+'/'
+            mask_path=mask_path
         )
 
         num_jobs = 8

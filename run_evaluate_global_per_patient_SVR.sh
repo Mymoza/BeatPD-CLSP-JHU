@@ -9,7 +9,6 @@ export PATH="./local:$PATH"
 #if [ -f path.sh ]; then . ./path.sh; fi
 #. parse_options.sh || exit 1;
 
-
 for ivecDim in 350 400 450 500 550; do
     sFileTrai=/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto60_480fl/exp/ivec_$ivecDim/
     sOut=$sFileTrai
