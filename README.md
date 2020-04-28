@@ -163,7 +163,7 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 ### Per Patient SVR 
 
-#### Option 1 
+#### Option 1 - For the test subset of the challenge 
 
 🛑TODO: Make sure these are the right steps with Laureano 
 
@@ -188,7 +188,7 @@ conda deactivate
 
 ⚠️ TODO work in progress
 
-#### Option 2 (manual - a bit bad way)
+#### Option 2 (manual - a bit bad way) -- For training/test folds 
 
 1. Open the notebook `drafts_and_tests.ipynb` 
 2. Go to the section [Get Predictions Per Patient SVR](http://localhost:6099/notebooks/drafts_and_tests.ipynb#Get-Predictions-for-Per-Patient-SVR)
