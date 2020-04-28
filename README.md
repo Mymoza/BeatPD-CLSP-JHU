@@ -167,7 +167,7 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 🛑TODO: Make sure these are the right steps with Laureano 
 
-1. `cd` to the ivector location. 
+1. `cd` to the ivector location, for example `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the ivector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
 2. In the file `local/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
 
 ```
@@ -182,11 +182,35 @@ $cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log 
      --bPatientPredictionsPkl
 conda deactivate
 ```
-3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create this folder for the test subset `resiVecPerPatientSVR_Fold_all`.
+3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create the folder `resiVecPerPatientSVR_Fold_all` for the test subset.
 
-4. Go to `CreateCSV_test.ipynb`
+4. Go to `CreateCSV_test.ipynb`. We will use the function `generateCSVtest_per_patient` to create a CSV containing test predictions for all subject_ids. 
 
-⚠️ TODO work in progress
+7. Provide the variables `best_config`, `dest_dir`, and `src_dir` like so:
+
+```
+best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
+ 1007: ['/objs_100_kernel_linear_c_0.002_eps_0.1.pkl', 0.09115239389591206],
+ 1019: ['/objs_400_kernel_linear_c_0.2_eps_0.1.pkl', 0.686931370820251],
+ 1023: ['/objs_300_kernel_linear_c_0.2_eps_0.1.pkl', 0.8462093717280431],
+ 1034: ['/objs_100_kernel_linear_c_20.0_eps_0.1.pkl', 0.7961188257851409],
+ 1038: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 0.3530848340426855],
+ 1039: ['/objs_450_kernel_linear_c_0.2_eps_0.1.pkl', 0.3826339325882311],
+ 1043: ['/objs_300_kernel_linear_c_0.2_eps_0.1.pkl', 0.5525085362997469],
+ 1044: ['/objs_50_kernel_linear_c_0.002_eps_0.1.pkl', 0.09694768640213237],
+ 1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
+ 1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
+
+dest_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+src_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+
+generateCSVtest_per_patient(src_dir, dest_dir, best_config)
+```
+
+The dictionary for best_config is obtained in this file: 
+`cat /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
+
+8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
 #### Option 2 (manual - a bit bad way) -- For training/test folds 
 
