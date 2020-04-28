@@ -13,6 +13,7 @@ from scipy.signal import butter, freqz, lfilter
 
 # KFold
 from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 
 # Import required modules
 from sklearn.preprocessing import StandardScaler
@@ -115,6 +116,7 @@ def interesting_patients(df_train_label, list_measurement_id):
 
 def get_k_fold(df_train_label,
                data_dir,
+               data_type,
                n_splits=5,
                subject_id=None,
                data_subset='training_data',
@@ -196,8 +198,15 @@ def get_k_fold(df_train_label,
         # name of the file according to its database and type
         # NOTE: Be careful that the end of the name of the folder where to save the kfolds is hardcoded here
         path_save_k_fold_dataframes = (
-            data_dir + data_type + "-pd."+data_subset+".k_fold_v3/" + data_real_subtype + "/"
+            data_dir + data_type + "-pd."+data_subset+".k_fold_v2/" + data_real_subtype + "/"
         )
+        
+        # If the derivative_path folder doesn't exists, we need to create it 
+        if not os.path.exists(path_save_k_fold_dataframes):
+            os.makedirs(path_save_k_fold_dataframes)
+            print('The kfold folder was created : ', path_save_k_fold_dataframes)
+
+    
         df_train_label.to_csv(
             path_save_k_fold_dataframes
             + str(subject_id)
