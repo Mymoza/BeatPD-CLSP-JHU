@@ -108,7 +108,7 @@ Code needs to be in github
 
 🛑TODO: "Create i-vectors": Correct vocabulary? 
 
-After creating Autoencoder features, we can create i-vectors.
+After creating Autoencoder features or the MFCC, we can create i-vectors.
 
 You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
@@ -136,6 +136,8 @@ Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as we
 
 ### 2.2.4 Get results 
 
+The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
+
 #### 2.2.4.1 Manually - for one size of ivector 
 The following example will retrieve results for the following ivector: `trem_noinact_auto30`.
 
@@ -157,145 +159,44 @@ As of now, the automation is present in the `get_excel_results.ipynb`, and just 
 So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
-### Evaluation steps 
-
-#### Automatisation to generate the results 
-
-🛑TODO: To update
-
-To get all the results for all the combinations of `ivecDim` for every class (`on/off`, `tremor`, `dysk`) for the SVR model, use this script:
-1. `./run_SVR_pkl_files.sh` 
-2. `./run_all_evaluation_SVR.sh`
-
-#### Manually 
-1. To create the pkl files that are going to let you get the challenge final score afterward: 
-
-- `./runSVRFold.sh $sOut $ivecDim $sDirFeats`
-- `./runKNNFold.sh $sOut $ivecDim $sDirFeats`
-- `./runEveryoneSVRFold.sh ${sOut} $ivecDim $sDirFeats`
-
-Or simply use a script like this to automate the ivectors dimension for a provided folder of features: 
-
-```
-echo Working on tremor
-
-#sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/
-#sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc
-
-sOut=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/
-sDirFeats=/export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30
-
-for ivecDim in 50 100 150 200 250 300 350 400 450 500 550; do
-    echo Working on ${ivecDim}
-    ./runKNNFold.sh ${sOut} $ivecDim $sDirFeats
-done
-```
-Many examples are available on the repository in the folder `run_SVR/`. 
-
-2. If pickle files are already created and you just want to get the final score as used in the challenge (weighted MSE): 
-
-#### For KNN 
-
-- `./evaluate_global_acc_knn.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/ /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/ivec_350/`
-
-To get a final score for KNN, only add the `--is-knn` flag, like so: 
-
-```
-$cmd $sOut/globalAccuKNN_Test.log \
-     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-     --is-knn
-```
-
-#### For SVR 
-
-- `./evaluate_global_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
-
-_FIXME: Is it really that sh file?_ 
-
-This script will generate a `.log` file from the name and location provided in `evaluate_global_acc.sh`, like so:
-
-```
-$cmd $sOut/globalAccuSVR_Test.log \
-     ${filePath}get_final_scores_accuracy.py  --file-path $sFileTrai \
-     --is-svr
-```
-
-The result will be stored in `/export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/globalAccuSVR_Test.log`
-
-#### For SVR Per Patient 
-
-The SVR Per Patient uses the pkl files created for the original SVR. That means it uses pkl files that were created per configuration, but for all patients. 
-
-These files provide the MSE per patient for each configuration.
-
-To get results, it's actually in the file `get_final_scores_accuracy.py`. These is the function called `get_final_scores_SVR_lowest_mse_for_subjectid` that gets final Scores for the individual SVR but with using different parameters for each patient depending on what set of parameters worked best for that patient.
-
-##### Option 1 (the best one)
-
-Use the `runFor.sh` file in the repository. For example:
-
-`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/`
-
-If you don't need to run the extractions of ivectors and other stuff, make sure to comment some code in the `runFor.sh` file before running it. 
-
-`qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_noinact_auto30 -o /export/b19/mpgill/outputs/outputs_dysk_noinact_auto30 runFor.sh`
-
-`vim runFor.sh` : Edit this file to run stage 5. You can comment the part that extracts ivectors if that's already done. 
-
-Make sure `local/evaluate_global_per_patient_SVR.sh` is ran also following the `run_auto.sh` stage 5 to create the log files with results (all done in the `runFor.sh` file). 
-
-##### Option 2 (in your own repo, on a specific branch for example)
-
-For this type of results, pkl files are the same as the one for regular SVR. When `.pkl` files are present in `resiVecSVR_Fold*` folders, than you can find the best set of hyperparameters with a function in the file `get_final_scores_accuracy.py` and get a final score. 
-
-You need to edit the file `run_evaluate_global_per_patient_SVR.sh` and write manually the name of the folder with the ivectors you want to get results for, as well as for what dimensions of ivectors as it will loop over all the ivector dimensions given. 
-
-Here's a command as an example: 
-
-```
-qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/error_file -o /export/b19/mpgill/outputs/output_file run_evaluate_global_per_patient_SVR.sh
-```
-
-The file `run_evaluate_global_per_patient_SVR.sh` actually calls the file `evaluate_global_per_patient_SVR.sh` that creates the log files with the results we are looking for : `/export/c08/lmorove1/kaldi/egs/beatPDivec/***/exp/ivec_***/globalAccuPerPatientSVR_Test.log`
-
-##### Option 3 (very manual)
-
-If you only want to have results for one ivector dimension, you can do this directly like this: 
-
-`./evaluate_global_per_patient_SVR_patient_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/` 
-
-#### For SVR Everyone 
-
-##### Option 1 (the best one)
-
-To create `.pkl` files for SVR Everyone, `stage=6` needs to be ran. 
-
-`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
-
-`vim runFor.sh` : Edit this file to run stage 6. You can comment the part that extracts ivectors if that's already done. 
-
-Make sure `local/evaluate_global_everyone_SVR.sh` is ran also following the `run_auto.sh` stage 6 to create the log files with results. 
-
-##### Option 3 
-
-To get results: 
-`./evaluate_global_everyone_SVR.sh /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/ /export/c08/lmorove1/kaldi/egs/beatPDivec/v1_autoenc/exp/ivec_50/`
-
-
-
 # Get Predictions 
 
 ### Per Patient SVR 
 
-#### Option 1 (manual - a bit bad way)
+#### Option 1 
 
-1. Open the notebook `drafts.ipynb` 
+🛑TODO: Make sure these are the right steps with Laureano 
+
+1. `cd` to the ivector location. 
+2. In the file `local/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
+
+```
+$cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log \
+     pca_knn_bpd2.py --input-trai $sFileTrai \
+     --input-test $sFileTest \
+     --output-file $sOut \
+     --iComponents $iComponents \
+     --sKernel $sKernel \
+     --fCValue $fCValue \
+     --fEpsilon $fEpsilon \
+     --bPatientPredictionsPkl
+conda deactivate
+```
+3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create this folder for the test subset `resiVecPerPatientSVR_Fold_all`.
+
+4. Go to `CreateCSV_test.ipynb`
+
+⚠️ TODO work in progress
+
+#### Option 2 (manual - a bit bad way)
+
+1. Open the notebook `drafts_and_tests.ipynb` 
 2. Go to the section [Get Predictions Per Patient SVR](http://localhost:6099/notebooks/drafts_and_tests.ipynb#Get-Predictions-for-Per-Patient-SVR)
 3. For the subchallenge of your choice, like `Dysk Best Config`, change the variables to point to the best config you want to get predictions for. Change the folder of the features (in this case, it is `dysk_orig_auto60_400fl`) and the ivectors dimension (in this case it is `650`). 
 
 ```
 sFileTrai="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/ivectors_Training_Fold"+fold+"/ivector.scp"
-    sFileTest="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/ivectors_Testing_Fold"+fold+"/ivector.scp"
+   sFileTest="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/ivectors_Testing_Fold"+fold+"/ivector.scp"
 
 sOut="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold"+fold
 ```
@@ -344,7 +245,7 @@ src_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/iv
 generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
-8. Run that cell, and it will create a `csv` file in the provided location `dst_dir`. 
+8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
 # Working in Jupyter Notebooks 
 
