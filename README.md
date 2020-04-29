@@ -249,21 +249,35 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
 
-`generator.py` : Feature extraction for CIS
-`generator_realpd.py` : Feature extraction for REAL
+```
+generator.py : Feature extraction for CIS
+generator_realpd.py : Feature extraction for REAL
+    input: csv lists and output file
 
-`test3.py` : gridsearch
+test3.py: gridsearch
+```
 
 QUESTIONS: 
 - What did he do with the kfolds? He merged them? 
 
 - What's the difference between root folder (`/export/b15/nchen/BeatPD`)  and `new_features/` ?
+`/export/b15/nchen/BeatPD/` : files for the first two submissions 
+`/export/b15/nchen/BeatPD/new_features/` : 3rd and 4th submission 
+Two features were added for the 3rd and 4th submission: FFT and absolute value of the delta signal 
 
 - https://github.com/blue-yonder/tsfresh/blob/master/docs/text/introduction.rst Why does it says there `What not to do with tsfresh? to train models on the features (we do not want to reinvent the wheel, check out the python package scikit-learn for example)`
 
 
 STEPS: 
+🔴TODO: Nanxin will send me more user-friendly instruction 
+
+1. generator 
+2. test3.py to get the best parameters 
+3. Change the hyperparameter predict.py
+
 - Create a virtual environment 
+🔴TODO: Nanxin will send me the list of requirements 
+🔴TODO: Marie: add Nanxin's list to the BeatPd requirements file 
 
 -  Prepare kfolds? 
 
