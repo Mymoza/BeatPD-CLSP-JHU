@@ -55,16 +55,17 @@ Dyskinesia:
 
 This step-by-step guide will cover the following steps: 
 
-1. [Prepare the data](#prepare-data)
-2. [Embeddings](#embeddings)
+1. [Prepare the data](#1-prepare-data)
+2. [Embeddings](#2-embeddings)
     1. [MFCC](#2.1-mfcc) 
     2. [AutoEncoder (AE)](#2.2-autoencoder)
         1. [Train the AutoEncoder](#2.2.1-train-ae)
         2. [Save AE Features](#2.2.2-get-ae-features)
-    3. [Create i-vectors]()
-    4. Get results for SVR/SVR Per Patient/SVR Everyone
-3. TSFRESH + XGBOOST 
-4. Fusion 
+    3. [Create i-vectors](#2.3-create-ivectors)
+    4. [Get results for SVR/SVR Per Patient/SVR Everyone](#2.4-get-results)
+    5. [Get predictions CSV](#2.5-get-predictions)
+3. [TSFRESH + XGBOOST](#3-tsfresh)
+4. [Fusion](#4-fusion)
 
 <a name="prepare-data"></a>
 ## 1. Prepare the data 
@@ -162,7 +163,8 @@ As of now, the automation is present in the `get_excel_results.ipynb`, and just 
 So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
-# Get Predictions 
+<a name="2.5-get-predictions"></a>
+### Get Predictions CSV 
 
 ### Per Patient SVR 
 
@@ -273,6 +275,21 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
+
+
+<a name="3-tsfresh"></a>
+## tsfresh + xgboost  
+
+
+`generator.py` : Feature extraction for CIS
+`generator_realpd.py` : Feature extraction for REAL
+
+`test3.py` : gridsearch
+
+- What did he do with the kfolds? He merged them? 
+
+- What's the difference between root folder (`/export/b15/nchen/BeatPD`)  and `new_features/` ?
+
 
 # Working in Jupyter Notebooks 
 
