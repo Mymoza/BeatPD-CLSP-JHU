@@ -15,40 +15,6 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
-# Where are the i-vectors? 
-
-The directory of the ivectors are all reported in our [Google Spreadsheet](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/) presenting our results for the different experiments. 
-
-## MFCC 
-`cd /export/c08/lmorove1/kaldi/egs/beatPDivec/*/exp/ivectors_Training_Fold0/ivector.scp`
-- `/v1/*/*/ivector.scp`:  on/off using the x axis and 20 mfcc
-
-- `v1_3ax/exp3x/` : on/off using the three axis and 10 mfcc 
-- `v1_3ax_10mfcc_dysk/exp3x/` : dysk using the three axis and 10 mfcc
-- `v1_3ax_10mfcc_tr/exp3x/`: tremor using the three axis and 10 mfcc
-
-- `v1_autoenc` : on/off using the three axis and autoencoder (30 ft AE) 
-- `v1_dysk_auto` : dyskenisia using the three axis and autoencoder (30ft AE)
-- `v1_trem_auto` : tremor using the three axis and autoencoder (30ft AE)
-
-## Autoencoder 
-
-On/Off: 
-- `on_off_hpf_auto30` : High Pass filtered data. Inactivity is not removed.
-- `on_off_noinact_auto30`: Inactivity removed on original training data. 30 fts.
-- `on_off_combhpfnoinact_auto30`: High Pass filtered data. Inactivity is removed. 
-
-Tremor: 
-- `trem_hpf_auto30` 
-- `trem_noinact_auto30`
-- `trem_combhpfnoinact_auto30`
-
-Dyskinesia: 
-- `dysk_hpf_auto30`
-- `dysk_noinact_auto30`
-- `dysk_combhpfnoinact_auto30`
-
-
 # Step-By-Step guide 
 
 This step-by-step guide will cover the following steps: 
@@ -71,13 +37,13 @@ This step-by-step guide will cover the following steps:
 All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
 
 1. Open the notebook
-2. Change the `data_dir` variable for the absolute path to the folder that contains the data given by the challenge. In this folder, you should already have the following directories: 
+2. Change the `data_dir` variable for the absolute path to the folder that contains the data given by the challenge. In this folder, you should already have the following directories downloaded from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/596118): 
 ```
 /export/b19/mpgill/BeatPD_data  $ ls
 cis-pd.ancillary_data  cis-pd.testing_data   real-pd.ancillary_data  real-pd.testing_data
 cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.training_data
 ```
-3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. 
+3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
 <a name="embeddings"></a>
 ## 2. Embeddings 
@@ -107,17 +73,22 @@ Code needs to be in github
 4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features.
 
 ### 2.2.3 Create i-vectors 
-
-🛑TODO: "Create i-vectors": Correct vocabulary? 
-
-After creating Autoencoder features or the MFCC, we can create i-vectors.
+ 
+After creating Autoencoder features or the MFCC, we can create i-vectors. 
 
 You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
-🛑TODO: Ask Laureano how he suggest to do this from GitHub 
-🛑TODO: "This is where all the ivectors will be created" : is it the correct vocabulary? 
-
 The following steps will vary a lot depending on what ivector you want to create. One way to decide which ivector to create is to view the [Google spreadsheet results](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/edit?usp=sharing) and find out which result you are interested in replicating. The column "C" has notes for each appropriate cell with the name of the ivector folder we use. You can use the same nomenclature to replicate our experiments. 
+
+The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature).
+
+🛑TODO: Add a screenshot of an example of a note
+
+🛑TODO: "Create i-vectors": Correct vocabulary?
+
+🛑TODO: Ask Laureano how he suggest to do this from GitHub
+
+🛑TODO: "This is where all the ivectors will be created" : is it the correct vocabulary? 
 
 1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec` : This is where all the ivectors will be created 
 2. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create
@@ -301,6 +272,15 @@ STEPS:
 - Hyperparameters tuning / Normalization if wanted 
 
 - Get Predictions 
+
+# References 
+
+- Challenge website https://www.synapse.org/#!Synapse:syn20825169/wiki/596118 
+- tsfresh github 
+- ivectors paper? 
+
+🛑TODO: Check that all links to the wiki are still valid 
+
 
 # Working in Jupyter Notebooks 
 
