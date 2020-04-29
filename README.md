@@ -15,8 +15,6 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
-
-
 # Where are the i-vectors? 
 
 The directory of the ivectors are all reported in our [Google Spreadsheet](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/) presenting our results for the different experiments. 
@@ -280,16 +278,29 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
 
-
 `generator.py` : Feature extraction for CIS
 `generator_realpd.py` : Feature extraction for REAL
 
 `test3.py` : gridsearch
 
+QUESTIONS: 
 - What did he do with the kfolds? He merged them? 
 
 - What's the difference between root folder (`/export/b15/nchen/BeatPD`)  and `new_features/` ?
 
+- https://github.com/blue-yonder/tsfresh/blob/master/docs/text/introduction.rst Why does it says there `What not to do with tsfresh? to train models on the features (we do not want to reinvent the wheel, check out the python package scikit-learn for example)`
+
+
+STEPS: 
+- Create a virtual environment 
+
+-  Prepare kfolds? 
+
+- Extract features 
+
+- Hyperparameters tuning / Normalization if wanted 
+
+- Get Predictions 
 
 # Working in Jupyter Notebooks 
 
