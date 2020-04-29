@@ -58,10 +58,10 @@ This step-by-step guide will cover the following steps:
 1. [Prepare the data](#prepare-data)
 2. [Embeddings](#embeddings)
     1. [MFCC](#2.1-mfcc) 
-    2. AutoEncoder (AE)
-        1. Train the AutoEncoder
-        2. Save AE Features
-    3. Create i-vectors
+    2. [AutoEncoder (AE)](#2.2-autoencoder)
+        1. [Train the AutoEncoder](#2.2.1-train-ae)
+        2. [Save AE Features](#2.2.2-get-ae-features)
+    3. [Create i-vectors]()
     4. Get results for SVR/SVR Per Patient/SVR Everyone
 3. TSFRESH + XGBOOST 
 4. Fusion 
@@ -88,8 +88,10 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 
 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. 
 
+<a name="2.2-autoencoder"></a>
 ### 2.2 AutoEncoder features 
 
+<a name="2.2.1-train-ae"></a>
 #### 2.2.1 Train the AutoEncoder 
 
 🛑TODO: - Ask Bhati for help. How to train the AutoEncoder? 
@@ -97,6 +99,7 @@ Code needs to be in github
 
 🛑TODO: How to Create the keras_tf environment
 
+<a name="2.2.2-get-ae-features"></a>
 #### 2.2.2 Get AutoEncoder (AE) Features 
 
 1. `git checkout ml_dl`: The code to get features from the AutoEncoder is in another branch. 
