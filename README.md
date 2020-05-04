@@ -275,6 +275,10 @@ Two features were added for the 3rd and 4th submission: FFT and absolute value o
 
 
 STEPS: 
+for CIS-PD
+1. `./run.sh`
+
+
 🔴TODO: Nanxin will send me more user-friendly instruction 
 
 1. generator 
