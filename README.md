@@ -86,8 +86,6 @@ You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first
 
 The following steps will vary a lot depending on what ivector you want to create. One way to decide which ivector to create is to view the [Google spreadsheet results](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/edit?usp=sharing) and find out which result you are interested in replicating. The column "C" has notes for each appropriate cell with the name of the ivector folder we use. You can use the same nomenclature to replicate our experiments. 
 
-The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature).
-
 🛑TODO: Add a screenshot of an example of a note
 
 🛑TODO: "Create i-vectors": Correct vocabulary?
@@ -96,22 +94,22 @@ The nomenclature we used to name the ivectors we created was also [documented in
 
 🛑TODO: "This is where all the ivectors will be created" : is it the correct vocabulary? 
 
-1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec` : This is where all the ivectors will be created 
-2. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create
-3. `cd ****`
+1. `cd /your/path/to/ivectors/` : Change your directory to where you want to store the ivectors 
+2. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create. The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature).
+3. `cd ****` : Change your directory to the ivector folder you just created 
 4. `mkdir data`
-5. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/v2_auto/. ./`
-6. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/autoencData/****/. data/.` 
-Replace "****" with either `on_off`, `trem` or `dysk`
-7. `cp ../on_off_noinact_auto60_480fl/run_auto.sh .` I use `on_off_noinact_auto60_480fl/run_auto.sh` only because we made a few changes to the one copied over from step 5 to make it faster on the grid. We also removed KNN and PLDA step as at this time we're focusing on SVR results. 
-8. `cp ../on_off_noinact_auto60_400fl/runFor.sh .` Copy a `runFor` from another folder as it's not being copied over from step 5. Be careful that the folder you decide to copy it from as the `local/evaluate SVR` line inside. 
-9. In `runFor.sh`, change the `sDirFeats` variable pointing to a folder of AutoEncoder features
-10. `screen -R name_of_your_screen`
-11. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/****`
-12. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_orig_auto60_400fl -o /export/b19/mpgill/outputs/outputs_dysk_orig_auto60_400fl runFor.sh`
+5. `cp -rf github-repo-path/beatPDivec/default_data/v2_auto/. ./` : Copy the files from the GitHub repo to where you want to create the ivectors
+6. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/autoencData/****/. data/.` Replace "****" with either `on_off`, `trem` or `dysk`
+7. `vim runFor.sh` : Edit the following variables: 
+    - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
+    - `sDirFeats`: use the absolute path to the AE features you want to use 
+8. `screen -R name_of_your_screen`
+9. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_orig_auto60_400fl -o /export/b19/mpgill/outputs/outputs_dysk_orig_auto60_400fl runFor.sh`
+
+Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as well as the KNN/SVRs schemes. 
 
 🛑TODO: Good vocabulary? 
-Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as well as the KNN/SVRs schemes. 
+
 
 ### 2.2.4 Get results 
 
@@ -279,13 +277,12 @@ for CIS-PD
 1. `./run.sh`
 
 
-🔴TODO: Nanxin will send me more user-friendly instruction 
-
 1. generator 
 2. test3.py to get the best parameters 
 3. Change the hyperparameter predict.py
 
-- Create a virtual environment 
+- Create a virtual environment ?? 
+
 🔴TODO: Nanxin will send me the list of requirements 
 🔴TODO: Marie: add Nanxin's list to the BeatPd requirements file 
 
