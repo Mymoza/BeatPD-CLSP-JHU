@@ -54,23 +54,32 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. 
 
 <a name="2.2-autoencoder"></a>
-### 2.2 AutoEncoder features 
+### 2.2 AutoEncoder (AE) features 
 
 <a name="2.2.1-train-ae"></a>
 #### 2.2.1 Train the AutoEncoder 
 
-🛑TODO: - Ask Bhati for help. How to train the AutoEncoder? 
-Code needs to be in github 
+1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
+2. `conda env create --file environment_ae.yml` : This will create the `keras_tf2` environment you need to run AE experiments.
+3. Train an AE model & save their features:
+    - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the AE models. 
+    - For REAL-PD: At line 53 of the `train_AE_real.py` file, change the `save_dir` path to the directory where you want to store the AE models.
+4. Launch the training for the configurations you want. Some examples are available in this wiki page about [Creating AutoEncoder Features](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features). To reproduce the results of submission 4, you will need the following command which uses features of length 60 and 400 as frame length: 
 
-🛑TODO: How to Create the keras_tf environment
+```
+python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig/"
+```
+5. This should create the following file `mlp_encoder_uad_False_ld_60.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
+
+🟡TODO: Is this corect as per Bhati ? :) 
 
 <a name="2.2.2-get-ae-features"></a>
 #### 2.2.2 Get AutoEncoder (AE) Features 
 
-1. `git checkout ml_dl`: The code to get features from the AutoEncoder is in another branch. 
+1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
 3. `source activate keras_tf2`
-4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features.
+4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features. If you only want to get features without creating models, you need to create some sections of the `train_AE.py` and `train_AE_real.py` files.
 
 ### 2.2.3 Create i-vectors 
  
