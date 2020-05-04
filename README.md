@@ -70,15 +70,13 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 
 5. This should create the following file `mlp_encoder_uad_False_ld_60.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
 
-🟡TODO: Is this corect as per Bhati ? :) 
-
 <a name="2.2.2-get-ae-features"></a>
 #### 2.2.2 Get AutoEncoder (AE) Features 
 
 1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
 3. `source activate keras_tf2`
-4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features. If you only want to get features without creating models, you need to create some sections of the `train_AE.py` and `train_AE_real.py` files.
+4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features. If you only want to get features without creating models, you need to comment a section of the `train_AE.py` and `train_AE_real.py` files. The section needed to be commented is identified directly in the file. 
 
 ### 2.2.3 Create i-vectors 
  
