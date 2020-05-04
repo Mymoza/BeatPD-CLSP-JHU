@@ -105,8 +105,10 @@ if use_ancillarydata:
     anci_params['data_path'] = ancillary_data_path
     anci_cleanParams = copy.copy(cleanParams)
     anci_cleanParams['data_path'] = ancillary_data_path
-    #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
-'''
+    # Start to comment starting here if your model is already trained and you just want to 
+    # get features without training a new model
+    df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
+
 train_X = load_data_all(df_train_label,cleanParams)
 if use_ancillarydata:
     train_X_anci = load_data_all(df_ancillary_label,anci_cleanParams)
@@ -153,7 +155,8 @@ model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epo
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
-'''
+# End of section to be commented if the model is already created and you just want to load it
+
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:

@@ -154,7 +154,8 @@ def select_valid_ind(data_frame_in,file_list):
 ind = select_valid_ind(df_train_label,file_list)
 df_train_label = df_train_label.iloc[ind]
 df_train_label = df_train_label.reset_index(drop=True)
-'''
+
+#''' Start commenting here if you just want to load a model and not create one 
 train_X = []
 
 for idx in df_train_label.index:
@@ -185,7 +186,9 @@ model.fit(train_X,train_X,validation_split=0.2,batch_size=batch_size,epochs=epoc
 
 model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
-'''
+
+#''' End of the section to be commented if you just want to load a model without creating a new one
+
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
 
 if saveAEFeats:
