@@ -1,19 +1,7 @@
 # BEATPD 
 
-## Set up the environment : 
-```
-$ conda create -n BeatPD python=3.5
-$ source activate BeatPD 
-$ conda install --file requirements.txt
-```
+This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. 
 
-Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
-
-If the conda environment isn't showing in Jupyter kernels (Kernel > Change Kernel > BeatPD), run: 
-```
-$ ipython kernel install --user --name=BeatPD
-```
-You will then be able to select `BeatPD` as your kernel. 
 
 # Step-By-Step guide 
 
@@ -30,6 +18,21 @@ This step-by-step guide will cover the following steps:
     5. [Get predictions CSV](#2.5-get-predictions)
 3. [TSFRESH + XGBOOST](#3-tsfresh)
 4. [Fusion](#4-fusion)
+
+## Set up the environment : 
+```
+$ conda create -n BeatPD python=3.5
+$ source activate BeatPD 
+$ conda install --file requirements.txt
+```
+
+Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
+
+If the conda environment isn't showing in Jupyter kernels (Kernel > Change Kernel > BeatPD), run: 
+```
+$ ipython kernel install --user --name=BeatPD
+```
+You will then be able to select `BeatPD` as your kernel. 
 
 <a name="prepare-data"></a>
 ## 1. Prepare the data 
