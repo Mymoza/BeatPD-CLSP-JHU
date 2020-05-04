@@ -12,6 +12,14 @@ import sys
 from tsfresh.feature_extraction import feature_calculators
 import mmap
 
+"""
+
+Feature extraction for tsfresh
+
+Author: Nanxin Chen 
+
+"""
+
 def get_num_lines(file_path):
     fp = open(file_path, "r+")
     buf = mmap.mmap(fp.fileno(), 0)
