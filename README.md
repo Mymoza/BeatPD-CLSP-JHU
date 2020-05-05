@@ -287,6 +287,16 @@ For this scheme, all the files are in `tsfresh/submit/`.
 
 🛑TODO: What about REAL-PD? 
 
+<a name="4-fusion"></a>
+## Fusion
+
+For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
+
+🛑TODO: This whole section 
+
+
+
+
 # References 
 
 - Challenge website https://www.synapse.org/#!Synapse:syn20825169/wiki/596118 
@@ -294,27 +304,3 @@ For this scheme, all the files are in `tsfresh/submit/`.
 - ivectors paper? 
 
 🛑TODO: Check that all links to the wiki are still valid 
-
-
-# Working in Jupyter Notebooks 
-
-## Import functions 
-
-If you're working in Jupyter notebooks, you will probably need to import functions from python files. 
-
-You should use these two lines to make sure that if you make changes to the python files, the code that is being called from your Jupyter Notebook will be updated: 
-
-```
-%load_ext autoreload
-%autoreload 2
-
-from transform_data import *
-from create_graphs import *
-```
-
-## Opening Jupyter notebooks on the grid - example 
-
-1. `ssh -L 8805:b19:8805 -J mpgill@login.clsp.jhu.edu mpgill@b19`
-2. `screen -R marie-jup`
-3. `cd /home/sjoshi/codes/python/BeatPD`
-4. `jupyter-notebook --no-browser --port 8805`
