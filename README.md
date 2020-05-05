@@ -256,46 +256,10 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
 
-```
-generator.py : Feature extraction for CIS
-generator_realpd.py : Feature extraction for REAL
-    input: csv lists and output file
-
-test3.py: gridsearch
-```
-
-QUESTIONS: 
-- What did he do with the kfolds? He merged them? 
-
-- What's the difference between root folder (`/export/b15/nchen/BeatPD`)  and `new_features/` ?
-`/export/b15/nchen/BeatPD/` : files for the first two submissions 
-`/export/b15/nchen/BeatPD/new_features/` : 3rd and 4th submission 
-Two features were added for the 3rd and 4th submission: FFT and absolute value of the delta signal 
-
-- https://github.com/blue-yonder/tsfresh/blob/master/docs/text/introduction.rst Why does it says there `What not to do with tsfresh? to train models on the features (we do not want to reinvent the wheel, check out the python package scikit-learn for example)`
-
-
-STEPS: 
-for CIS-PD
-1. `./run.sh`
-
-
-1. generator 
-2. test3.py to get the best parameters 
-3. Change the hyperparameter predict.py
-
-- Create a virtual environment ?? 
-
-🔴TODO: Nanxin will send me the list of requirements 
-🔴TODO: Marie: add Nanxin's list to the BeatPd requirements file 
-
--  Prepare kfolds? 
-
-- Extract features 
-
-- Hyperparameters tuning / Normalization if wanted 
-
-- Get Predictions 
+1. From `cd tsfresh/submit/`, run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid. 
+    - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory
+    - Then it will perform a GridSearch
+    - Finally, it will create predictions files to be submitted in the `submission/` folder 
 
 # References 
 
