@@ -256,10 +256,36 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
 
-1. From `cd tsfresh/submit/`, run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid. 
+For this scheme, all the files are in `tsfresh/submit/`. 
+
+```
+|-- conf: ?
+|-- data: ? 
+|-- exp: ? 
+|-- features: Folder containing the extracted features 
+|-- mdl: ? 
+|-- src: Folder containing the files to generate features and predictions 
+     |
+     |--- generator.py: Feature extraction for CIS 
+     |--- gridsearch.py: Performs gridsearch 
+     |--- predict.py: Predicts and creates submission files 
+|
+|-- submission: Folder containing the CSV files with predictions to submit
+|-- submit.sh: ? 
+|-- utils: soft link to kaldi/egs/wsj/s5/utils/
+```
+1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
+2. `cd tsfresh/submit/`
+3. `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
     - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory
     - Then it will perform a GridSearch
     - Finally, it will create predictions files to be submitted in the `submission/` folder 
+
+🛑TODO: What about the stop criterion? 
+
+🛑TODO: What about how to do per patient tuning? 
+
+🛑TODO: What about REAL-PD? 
 
 # References 
 
