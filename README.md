@@ -281,7 +281,16 @@ For this scheme, all the files are in `tsfresh/submit/`.
     - Then it will perform a GridSearch
     - Finally, it will create predictions files to be submitted in the `submission/` folder 
 
-🛑TODO: What about the stop criterion? 
+
+**Stop criteria on training data:**
+
+For the 4th submission, we performed early stop with the training data, as that led to some small improvements. To do so, you need to change two lines in the file `src/predict.py`. 
+
+`eval_set=[(tr, tr_y), (te, te_y)]` becomes `eval_set=[(tr, tr_y)]`
+
+`sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
+
+
 
 🛑TODO: What about how to do per patient tuning? 
 
