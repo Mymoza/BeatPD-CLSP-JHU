@@ -267,8 +267,12 @@ For this scheme, all the files are in `tsfresh/submit/`.
 |-- src: Folder containing the files to generate features and predictions 
      |
      |--- generator.py: Feature extraction for CIS 
-     |--- gridsearch.py: Performs gridsearch 
-     |--- predict.py: Predicts and creates submission files 
+     |
+     |--- gridsearch.py: Performs gridsearch
+     |--- gridsearch_perpatient.py: ????? per patient tuning? used to be test5
+     |
+     |--- predict.py: Predicts and creates submission files
+     |--- predict_perpatient.py: Predict with perpatient tuning 
 |
 |-- submission: Folder containing the CSV files with predictions to submit
 |-- submit.sh: ? 
@@ -290,7 +294,13 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 `sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
 
+🦠 Test: without early stop criteria 
 
+**Per Patient Tuning**
+
+Filter out each patient by subject_id and then run the same code 
+
+🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
 
 🛑TODO: What about how to do per patient tuning? 
 
