@@ -298,6 +298,11 @@ For this scheme, all the files are in `tsfresh/submit/`.
     - Then it will perform a GridSearch, saving the best config 
     - Finally, it will create predictions files to be submitted in the `submission/` folder 
 
+The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
+
+For CIS-PD, the best performance was obtained with tremor. 
+For REAL-PD, it was watch_gyr tremor. 
+
 
 **Stop criteria on training data:**
 
@@ -311,13 +316,8 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 **Per Patient Tuning**
 
-The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
-
-For CIS-PD, the best performance was obtained with tremor. 
-For REAL-PD, it was watch_gyr tremor. 
-
 1. `./run_perpatient.sh`
-    - It will perform `gridsearch_perpatient` on tremor only to find the best parameters for each speaker. We only use tremor because we chose not to tune each hyperparameters for each subchallenge in hope to achieve a better generalization. Tremor was giving us the best results on our tests folds so we picked this one. 
+    - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
     - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
 
 🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
