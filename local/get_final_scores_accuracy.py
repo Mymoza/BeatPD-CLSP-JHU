@@ -39,7 +39,7 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
     nb_files_per_subjectId = []
     
     for subject_id in np.unique(vParID):
-        print('--- SUBJECT ID ', subject_id, '---')
+#         print('--- SUBJECT ID ', subject_id, '---')
         
         vSubjectId = (vParID == subject_id)
 
@@ -51,8 +51,8 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
         
         print('MSE : ', mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
     
-    print('--- FUSION ---')
-    final_score(mse_per_subjectId, nb_files_per_subjectId, "Fusion ")
+    print('--- MSEscore ---')
+    final_score(mse_per_subjectId, nb_files_per_subjectId)
     
 def find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR): 
     lComponents = [] 
