@@ -259,17 +259,30 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 For this scheme, all the files are in `tsfresh/submit/`. 
 
 ```
+|-- run.sh : run the tsfresh + xgboost scheme without per patient tuning 
+|-- run_perpatient.sh : run the tsfresh + xgboost scheme with per patient tuning
+|
 |-- conf: ?
-|-- data: ? 
+|-- data: ?
+     |-- label.csv : ??? 
 |-- exp: ? 
-|-- features: Folder containing the extracted features 
-|-- mdl: ? 
+|-- features: Folder containing the extracted features
+     |-- cis-pd.training.csv
+     |-- cis-pd.testing.csv 
+|
+|-- mdl:
+     |-- cis-pd.conf : best config for the three subchallenges 
+     |-- cis-pd.****.conf : best config tuned per patient for the three subchallenges 
+|
 |-- src: Folder containing the files to generate features and predictions 
      |
      |--- generator.py: Feature extraction for CIS 
      |
-     |--- gridsearch.py: Performs gridsearch
-     |--- gridsearch_perpatient.py: ????? per patient tuning? used to be test5
+     |--- gridsearch.py: Find best hyperparams and save them to a file
+                         (same params for all subjects)
+     |
+     |--- gridsearch_perpatient.py: Find best hyperparams for each subject
+                                    and save them to a file
      |
      |--- predict.py: Predicts and creates submission files
      |--- predict_perpatient.py: Predict with perpatient tuning 
@@ -281,8 +294,8 @@ For this scheme, all the files are in `tsfresh/submit/`.
 1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
 2. `cd tsfresh/submit/`
 3. `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
-    - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory
-    - Then it will perform a GridSearch
+    - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
+    - Then it will perform a GridSearch, saving the best config 
     - Finally, it will create predictions files to be submitted in the `submission/` folder 
 
 
@@ -298,7 +311,14 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 **Per Patient Tuning**
 
-Filter out each patient by subject_id and then run the same code 
+The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
+
+For CIS-PD, the best performance was obtained with tremor. 
+For REAL-PD, it was watch_gyr tremor. 
+
+1. `./run_perpatient.sh`
+    - It will perform `gridsearch_perpatient` on tremor only to find the best parameters for each speaker. We only use tremor because we chose not to tune each hyperparameters for each subchallenge in hope to achieve a better generalization. Tremor was giving us the best results on our tests folds so we picked this one. 
+    - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
 
 🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
 
