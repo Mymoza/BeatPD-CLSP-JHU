@@ -1,9 +1,8 @@
 
 # tsfresh
-exp/*.sh
-exp/*.log
-
-
+tsfresh/submit/exp/*
+tsfresh/submit/features/*
+tsfresh/submit/submission/*.csv
 
 resx*
 *.pkl
