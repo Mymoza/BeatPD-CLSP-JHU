@@ -259,8 +259,9 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 For this scheme, all the files are in `tsfresh/submit/`. 
 
 ```
-|-- run.sh : run the tsfresh + xgboost scheme without per patient tuning 
-|-- run_perpatient.sh : run the tsfresh + xgboost scheme with per patient tuning
+|-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
+|-- run_perpatient.sh : CIS-PD - Submission 4 - run the tsfresh + xgboost scheme with per patient tuning
+|-- run_realpd.sh : REAL-PD - Submission 4 - run the tsfresh + xgboost scheme without per patient tuning  
 |
 |-- conf: ?
 |-- data: ?
@@ -325,6 +326,8 @@ For the 4th submission, we performed early stop with the training data, as that 
 🛑TODO: What about how to do per patient tuning? 
 
 🛑TODO: What about REAL-PD? 
+
+🛑TODO: How was this created? watchacc_order.csv
 
 <a name="4-fusion"></a>
 ## Fusion
