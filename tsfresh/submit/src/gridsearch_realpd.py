@@ -7,7 +7,6 @@ import xgboost as xgb
 from xgboost import plot_importance
 import numpy as np
 import pickle
-import datetime
 
 obj = sys.argv[1]
 all_obj = ["on_off", "tremor", "dyskinesia"]
@@ -30,14 +29,23 @@ al = al.drop(remove, axis=1)
 #al = al.drop([obj, 'measurement_id'], axis=1)
 #mean_value = al.groupby('subject_id').mean().reset_index().add_suffix('_mean')
 #mean_value.columns = ['subject_id' if x=='subject_id_mean' else x for x in mean_value.columns]
-al = pd.merge(al, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
+al = pd.merge(al, pd.read_csv(sys.argv[4]), how='inner', on=["measurement_id"])
 weight = al.groupby(['subject_id', 'fold_id']).count().reset_index()[["subject_id", "fold_id", obj]].rename(columns={obj: 'spcount'})
 al = pd.merge(al, weight, on=['subject_id', 'fold_id'])
-#subject_id = pd.get_dummies(al.subject_id, columns='subject_id', prefix='spk_')
+subject_id = pd.get_dummies(al.subject_id, columns='subject_id', prefix='spk_')
 #al = pd.merge(al, mean_value, on='subject_id')
-#al = pd.concat([al, subject_id], axis=1)
+al = pd.concat([al, subject_id], axis=1)
 #al = al.astype(pd.np.float32)
-spks = al['subject_id'].unique()
+
+Y = al[obj].to_numpy()
+W = al['spcount'].to_numpy() ** -0.5
+foldid = al['fold_id'].to_numpy().astype(int)
+from sklearn.model_selection import PredefinedSplit
+cv = PredefinedSplit(foldid)
+
+X = al.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32).to_numpy()
+print('X.shape : ', X.shape)
+print('foldid.shape : ', foldid.shape)
 
 param_grid = {
         'objective': ['reg:squarederror'],
@@ -52,44 +60,39 @@ param_grid = {
         'reg_lambda': [0.1, 1.0, 5.0, 10.0, 50.0, 100.0],
         'n_estimators': [50, 100, 500, 1000]}
 
-ret = {}
-for i in spks:
-    print("{0}:{1}".format(datetime.datetime.now(), i))
-    al_spk = al.loc[al['subject_id'] == int(i)]
-    Y = al_spk[obj].to_numpy()
-    W = al_spk['spcount'].to_numpy() ** -0.5
-    foldid = al_spk['fold_id'].to_numpy().astype(int)
-    from sklearn.model_selection import PredefinedSplit
-    cv = PredefinedSplit(foldid)
-    
-    X = al_spk.drop([obj, 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32).to_numpy()
-    
-    
-    from sklearn.model_selection import RandomizedSearchCV
-    clf = xgb.XGBRegressor()
-    rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
-                                n_jobs=8, verbose=1, cv=cv,
-                                refit=False, random_state=42, scoring='neg_mean_squared_error')
-    rs_clf.fit(X, Y, sample_weight=W) 
-    best_params = rs_clf.best_params_
-    print(i)
-    print(best_params)
-    with open('mdl/cis-pd.'+obj+'.'+str(i)+'.conf', 'wb') as f:
-        pickle.dump(best_params, f)
-#print(rs_clf.best_score_)
+from sklearn.model_selection import RandomizedSearchCV
+clf = xgb.XGBRegressor()
+rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
+                            n_jobs=8, verbose=2, cv=cv,
+                            refit=False, random_state=42, scoring='neg_mean_squared_error')
+rs_clf.fit(X, Y, sample_weight=W) 
+best_params = rs_clf.best_params_
+print(best_params)
+print(rs_clf.best_score_)
+#with open('hypsearch.model', 'wb') as f:
+with open('mdl/real-pd.conf', 'wb') as f:
+    pickle.dump(rs_clf, f)
 
-#best_params = {'min_child_weight': 3.0, 'learning_rate': 0.1, 'n_estimators': 50, 'colsample_bylevel': 0.5, 'objective': 'reg:squarederror', 'subsample': 0.6, 'max_depth': 3, 'gamma': 0.5, 'silent': False, 'colsample_bytree': 0.4, 'reg_lambda': 100.0}
-#best_params = {'min_child_weight': 5.0, 'objective': 'reg:squarederror', 'colsample_bylevel': 0.4, 'subsample': 1.0, 'gamma': 1.0, 'silent': False, 'reg_lambda': 100.0, 'n_estimators': 500, 'learning_rate': 0.3, 'max_depth': 6, 'colsample_bytree': 0.4}
-#best_params = {'min_child_weight': 0.5, 'gamma': 0, 'subsample': 0.8, 'objective': 'reg:squarederror', 'max_depth': 3, 'silent': False, 'reg_lambda': 100.0, 'n_estimators': 500, 'colsample_bylevel': 0.8, 'colsample_bytree': 1.0, 'learning_rate': 0.01}
+## Best Params hardcoded here for future reference 
+
+# tremor phone acc 
 #best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
-#with open('hypsearch_spk.model', 'wb') as f:
-#    pickle.dump(ret, f)
+#best_params = {'learning_rate': 0.3, 'max_depth': 4, 'colsample_bylevel': 0.7, 'subsample': 1.0, 'silent': False, 'colsample_bytree': 0.9, 'reg_lambda': 100.0, 'min_child_weight': 10.0, 'objective': 'reg:squarederror', 'n_estimators': 50, 'gamma': 0.25} #phone acc tremor
+
+# tremor watchacc
+#best_params = {'colsample_bylevel': 0.4, 'silent': False, 'reg_lambda': 100.0, 'colsample_bytree': 0.4, 'subsample': 1.0, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'min_child_weight': 5.0, 'max_depth': 6, 'n_estimators': 500, 'gamma': 1.0} #watch acc tremor
+
+# tremor  watch_gyr
+best_params = {'max_depth': 3, 'colsample_bylevel': 0.8, 'colsample_bytree': 0.4, 'silent': False, 'n_estimators': 100, 'learning_rate': 0.3, 'objective': 'reg:squarederror', 'reg_lambda': 50.0, 'min_child_weight': 5.0, 'subsample': 0.7, 'gamma': 1.0} #watch gyr tremor
+#with open('hypsearch.model', 'wb') as f:
+#    pickle.dump(rs_clf, f)
+
 exit()
 
 results = []
-#baselines = []
+baselines = []
 
-#preds = []
+preds = []
 for i in range(5, len(sys.argv)):
     test = pd.read_csv(sys.argv[i]).squeeze()
     idx = al['measurement_id'].isin(test)
@@ -116,32 +119,32 @@ for i in range(5, len(sys.argv)):
     clf.fit(
         tr, tr_y,
         sample_weight=tr_w,
-        eval_set=[(tr, tr_y)],#, (te, te_y)],
+        eval_set=[(tr, tr_y), (te, te_y)],
         #eval_metric=',
-        sample_weight_eval_set=[tr_w],#, te_w],
+        sample_weight_eval_set=[tr_w, te_w],
         verbose=0,
         early_stopping_rounds=100
     )
     pred = clf.predict(te).clip(0, 4)
     mse = (pred - te_y) ** 2
     #mse = te_y.to_numpy() ** 2
-    #mse2 = te_y ** 2
+    mse2 = te_y ** 2
     #ret = pd.concat([sub, mse], axis=1)
     #ret.to_csv('tmp.csv')
     #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
     #cnt = cnt ** 0.5
-    #res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
-    #res = pd.merge(res, avg, on='subject_id')
-    #res[obj] += res['sp_' + obj]
-    #res = res[["measurement_id", obj]]
-    #preds.append(res)
+    res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
+    res = pd.merge(res, avg, on='subject_id')
+    res[obj] += res['sp_' + obj]
+    res = res[["measurement_id", obj]]
+    preds.append(res)
     results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
-    #baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
-#preds = pd.concat(preds)
-#preds.to_csv('kfold_prediction_{0}.csv'.format(obj), index=False)
+    baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
+preds = pd.concat(preds)
+preds.to_csv('kfold_prediction_{0}.csv'.format(obj), index=False)
 #print(clf.get_booster().get_score(importance_type='gain'))
-#print(np.mean(results))
-#print(np.mean(baselines))
+print(np.mean(results))
+print(np.mean(baselines))
 plot_importance(clf,max_num_features=10)
 plt.savefig('importance.png')
