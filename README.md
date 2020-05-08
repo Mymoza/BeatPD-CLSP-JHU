@@ -325,8 +325,11 @@ For the 4th submission, we performed early stop with the training data, as that 
 **REAL-PD - Submission 4**
 4th submission of REAL-PD used gridsearch and global normalization.
 
-1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd_nanxin.sh`
-
+1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd.sh`
+    - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
+    - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
+    - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
+    
 
 🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
 
