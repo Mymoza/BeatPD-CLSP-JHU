@@ -1,5 +1,9 @@
 #!/bin/bash
 
+####################################
+# REPRODUCE SUBMISSION 3 FOR CIS-PD 
+#####################################
+
 
 # create features for training and testing
 recog_set="cis-pd.training cis-pd.testing"
@@ -34,7 +38,6 @@ logdir=exp
 # run grid search
 echo "Starting Gridsearch" 
 python src/gridsearch.py tremor features/cis-pd.training.csv data/label.csv
-#python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv data/label.csv
 echo "End of the gridsarch"
 
 #generate submission files
@@ -44,5 +47,12 @@ python src/predict.py dyskinesia features/cis-pd.training.csv data/label.csv fea
 python src/predict.py on_off features/cis-pd.training.csv data/label.csv features/cis-pd.testing.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
 
 #echo "End of generating submission files"
-echo "Run.sh is all done" 
 
+echo "Section checking if there are differences between your submission files and the 3rd submission of JHU-CLSP"
+echo "For CIS-PD 3rd Submission" 
+diff -q submission/cis-pd.tremor.csv submission3_preds/cis-pd.tremor.csv 
+diff -q submission/cis-pd.dyskinesia.csv submission3_preds/cis-pd.tremor.csv
+diff -q submission/cis-pd.on_off.csv submission3_preds/cis-pd.on_off.csv
+echo "End of the section checking if there is any difference between your submission files and the 3rd submission of JHU-CLSP"
+
+echo "run.sh is all done"
