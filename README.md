@@ -321,11 +321,20 @@ For the 4th submission, we performed early stop with the training data, as that 
     - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
     - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
 
+
+**REAL-PD - Submission 4**
+4th submission of REAL-PD used gridsearch and global normalization.
+
+1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd_nanxin.sh`
+
+
 🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
 
-🛑TODO: What about how to do per patient tuning? 
+🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
 
-🛑TODO: What about REAL-PD? 
+🛑TODO: When I reproduce the experiments, do I get the same hyperparameters as Nanxin? 
+
+🛑TODO: Can I remove avec exit() in the gridsearch files? useless?
 
 🛑TODO: How was this created? watchacc_order.csv
 
