@@ -1,5 +1,6 @@
 
 # tsfresh
+tsfresh/submit/mdl/*
 tsfresh/submit/exp/*
 tsfresh/submit/features/*
 tsfresh/submit/submission/*.csv
