@@ -292,8 +292,13 @@ For this scheme, all the files are in `tsfresh/submit/`.
 |-- submit.sh: ? 
 |-- utils: soft link to kaldi/egs/wsj/s5/utils/
 ```
+Prepare the environment and create a symbolic link:
+
 1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
 2. `cd tsfresh/submit/`
+3. `conda create -n BeatPD_xgboost`
+4. `source activate BeatPD`
+4. `conda install --file requirements_tsfresh_xgboost.txt`
 
 As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
 
@@ -309,6 +314,10 @@ The same hyperparameters were used for all three tasks so I expect the hyperpara
 
 For CIS-PD, the best performance was obtained with tremor. 
 For REAL-PD, it was watch_gyr tremor. 
+
+For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
+
+🔴 TODO: Compare myself the results in my predictions vs the one 
 
 ### Dyskinesia & On/Off - Submission 4 - CIS-PD
 
