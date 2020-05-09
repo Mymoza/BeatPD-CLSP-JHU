@@ -124,11 +124,15 @@ Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as we
 
 5. `cd ****` : Change your directory to the ivector folder you just created 
 
+7. `mkdir data`
+
+8. `cp -rf path-github-repo/beatPDivec/default_data/v2_auto/. .`
+9. `cp -rf path-github-repo/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
+
 6. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 
-7. `mkdir data`
-8. `cp -rf path-github-repo/beatPDivec/default_data/v2_auto/. .`
-9. `cp -rf path-github-repo/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.`
+
+
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
     - `sDirFeats`: use the absolute path to the AE features you want to use 
