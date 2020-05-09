@@ -294,7 +294,13 @@ For this scheme, all the files are in `tsfresh/submit/`.
 ```
 1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
 2. `cd tsfresh/submit/`
-3. `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
+
+As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
+
+The following sections explains how to reproduce our final submission. 
+
+### Tremor - Submission 3 for CIS-PD
+1. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
     - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
     - Then it will perform a GridSearch, saving the best config 
     - Finally, it will create predictions files to be submitted in the `submission/` folder 
@@ -304,6 +310,23 @@ The same hyperparameters were used for all three tasks so I expect the hyperpara
 For CIS-PD, the best performance was obtained with tremor. 
 For REAL-PD, it was watch_gyr tremor. 
 
+### Dyskinesia & On/Off - Submission 4 - CIS-PD
+
+The following performs per Patient Tuning.
+
+1. `./run_perpatient.sh`
+    - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
+    - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
+
+
+### Tremor, Dyskinesia & On/Off - Submission 4 - REAL-PD **
+
+The 4th submission of REAL-PD used gridsearch and global normalization.
+
+1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd.sh`
+    - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
+    - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
+    - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
 
 **Stop criteria on training data:**
 
@@ -315,23 +338,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 🦠 Test: without early stop criteria 
 
-**Per Patient Tuning**
 
-1. `./run_perpatient.sh`
-    - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
-    - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
-
-
-**REAL-PD - Submission 4**
-4th submission of REAL-PD used gridsearch and global normalization.
-
-1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd.sh`
-    - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
-    - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
-    - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
-    
-
-🟡 QUESTION: How/Where did he find what are the best hyperparameters for each patient? 
 
 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
 
