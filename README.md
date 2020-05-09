@@ -113,6 +113,24 @@ Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as we
 
 🛑TODO: Good vocabulary? 
 
+🛑TODO: Did I explain how to create `AE_60ft_400fl_orig` ? 
+
+1. `cd kaldi/egs/` : Change your directory to where you installed Kaldi. 
+2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the ivectors. 
+
+
+
+
+3. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create. The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`. 
+4. `cd ****` : Change your directory to the ivector folder you just created 
+5. `mkdir data`
+6. `cp -rf /home/mpgill/BeatPD/BeatPD-CLSP-JHU/beatPDivec/default_data/v2_auto/. .`
+7. `cp -rf /home/mpgill/BeatPD/BeatPD-CLSP-JHU/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.`
+8. `vim runFor.sh`: Edit the following variables:
+    - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
+    - `sDirFeats`: use the absolute path to the AE features you want to use 
+9. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_trem_auto30_noinact_laureano -o /export/b19/mpgill/outputs/outputs_trem_auto30_noinact_laureano runFor.sh`
+
 
 ### 2.2.4 Get results 
 
