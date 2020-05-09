@@ -67,9 +67,11 @@ rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
                             refit=False, random_state=42, scoring='neg_mean_squared_error')
 rs_clf.fit(X, Y, sample_weight=W) 
 best_params = rs_clf.best_params_
+print('Best Params : ')
+print(best_params)
 
 # Best parameters used for submission 3
-best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
+#best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
 
 with open('mdl/cis-pd.conf','wb') as f:
     pickle.dump(best_params, f)

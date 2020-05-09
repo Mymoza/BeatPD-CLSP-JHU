@@ -41,10 +41,6 @@ test_fea = pd.concat([test_fea, subject_id], axis=1)
 #    "objective": "reg:squarederror",
 #}
 
-import pickle
-with open('mdl/real-pd.conf', 'wb') as f:
-    params=pickle.load(f)
-
 avg = al.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
 tr = pd.merge(al, avg, on='subject_id')
 remove = []
@@ -68,6 +64,10 @@ te = te.drop(remove, axis=1)
 te_id = te.measurement_id
 te_sid = te.subject_id
 te = te.drop(['measurement_id', 'subject_id', 'prediction'], axis=1).astype(pd.np.float32)
+
+import pickle
+with open('mdl/real-pd.conf', 'rb') as f:
+    params=pickle.load(f)
 
 clf = xgb.XGBRegressor(**params)
 #clf = xgb.XGBClassifier(**params)

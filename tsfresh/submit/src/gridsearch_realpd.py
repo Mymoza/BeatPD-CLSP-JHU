@@ -71,7 +71,7 @@ print(best_params)
 print(rs_clf.best_score_)
 #with open('hypsearch.model', 'wb') as f:
 with open('mdl/real-pd.conf', 'wb') as f:
-    pickle.dump(rs_clf, f)
+    pickle.dump(best_params, f)
 
 ## Best Params hardcoded here for future reference 
 

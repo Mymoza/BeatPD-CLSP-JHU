@@ -4,6 +4,7 @@
 # REPRODUCE SUBMISSION 3 FOR CIS-PD 
 #####################################
 
+conda activate BeatPD_xgboost
 
 # create features for training and testing
 recog_set="cis-pd.training cis-pd.testing"
@@ -51,8 +52,9 @@ python src/predict.py on_off features/cis-pd.training.csv data/label.csv feature
 echo "Section checking if there are differences between your submission files and the 3rd submission of JHU-CLSP"
 echo "For CIS-PD 3rd Submission" 
 diff -q submission/cis-pd.tremor.csv submission3_preds/cis-pd.tremor.csv 
-diff -q submission/cis-pd.dyskinesia.csv submission3_preds/cis-pd.tremor.csv
+diff -q submission/cis-pd.dyskinesia.csv submission3_preds/cis-pd.dyskinesia.csv
 diff -q submission/cis-pd.on_off.csv submission3_preds/cis-pd.on_off.csv
 echo "End of the section checking if there is any difference between your submission files and the 3rd submission of JHU-CLSP"
 
+conda deactivate
 echo "run.sh is all done"
