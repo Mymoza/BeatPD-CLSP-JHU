@@ -21,7 +21,7 @@ set -e
 #    split_segments="$split_segments $logdir/${rtask}.$n"
 #  done
 
-#  utils/split_scp.pl ${rtask} $split_segments
+#  utils/split_scp.pl data/${rtask} $split_segments
 #  ${decode_cmd} JOB=1:${nj} $logdir/${rtask}.JOB.log \
 #    ./submit_realpd.sh $logdir/${rtask}.JOB $logdir/${rtask}.JOB.csv
 #) &

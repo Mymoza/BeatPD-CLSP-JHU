@@ -7,8 +7,7 @@
 # create features for training and testing
 recog_set="cis-pd.training cis-pd.testing"
 nj=32
-#logdir=exp
-logdir=text 
+logdir=exp
 
 #source /export/b16/nchen/pytorch/bin/activate
 conda activate BeatPD_xgboost 
