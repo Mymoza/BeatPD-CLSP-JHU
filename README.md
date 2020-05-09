@@ -118,6 +118,7 @@ Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as we
 1. `cd kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the ivectors. 
 
+sym link
 
 
 
