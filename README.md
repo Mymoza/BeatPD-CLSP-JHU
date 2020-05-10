@@ -377,7 +377,9 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
 
-🛑TODO: This whole section 
+The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
+
+
 
 
 
