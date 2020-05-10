@@ -1,5 +1,8 @@
+##########
+# This file creates ivector_TrainingFinal ivectors and pkl files on the test subset of the challenge
+
 chmod 755 ./run_Final_auto.sh
-#dyskinesia
+
 stage=0
 sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig_inactivity_removed
 sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_30ft_orig_inactivity_removed
@@ -9,9 +12,9 @@ sKernel=linear
 fC=0.2
 fEpsilon=0.1
 
-#./run_Final_auto.sh $sDirFeatsTrai $sDirFeatsTest $ivecDim $stage $iNumComponents $sKernel $fC $fEpsilon
+./run_Final_auto.sh $sDirFeatsTrai $sDirFeatsTest $ivecDim $stage $iNumComponents $sKernel $fC $fEpsilon
 
-stage=5
+stage=2
 for iNumComponents in 50; do
     for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
 	x=-13
