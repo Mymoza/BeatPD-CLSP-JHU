@@ -59,18 +59,11 @@ If you submitted multiple predictions, please specify which is the difference am
 sub-paragraph for each submission.
 ```
 
-🔴TODO: What about REAL-PD in the submissions? 
-
-
 ## Data Preparation  
 
 [[/images/features-diagram.png|Different input data used]]
 
 *Figure ?: Different data we used as input.*
-
-🟡TODO: I don't remember why we had to apply a high pass filter to remove inactivity? I know without it we couldn't detect inactivity. Probably because it wasn't around 0 obviously but why... 
-
-🟡TODO: Consequences in general of a signal not centered at 0? 
 
 When we received the data and plotted it in a graph, it was obvious that some measurements had very straight lines that looked like the subject had to remove their watch as they were completely still. Also, the signal wasn't centered around zero. Those inactive lines could be higher than 0, so a high pass filter was applied to correct it. It was then possible to detect inactivity and remove it.
 
@@ -92,12 +85,6 @@ For all the submissions, we focused our work on the CIS-PD database.
 We empirically decided to do a 5-fold cross-validation per patient. All the measurements of a patient were divided into 5 groups, where we tried to make the groups as balanced as possible, using only on/off as the unique label to balance the groups. In CIS-PD, the subject `1046` did not have any labels for on/off, so tremor was used for that subject. 
 
 Creating folds on a multilabel dataset certainly proved to be a challenge, where there might still be some room for improvement.
-
-🙌: Add some graphs explaining the balancing? 
-
-🙌: For REAL-PD, are there subjects without any labels for on/off? If so, then we're not optimal by not manually selecting another label for that subject 
-
-🟡TODO: How could we improve the balancing? 
 
 ## Intermediate submissions 
 
@@ -248,10 +235,6 @@ The parameters used are the same as for the first submission, and they are shown
 
 *Figure ?: Pipeline for dyskinesia in the 2nd submission*
 
-🟡TODO: What is global normalization? 
-
-🟡TODO: What is gradient boosting regression for fusion? any parameters? 
-
 For the first two submissions, we found the best hyperparameters with CIS-PD database and we used the same ones for REAL-PD. 
 
 For the REAL-PD database, we used the same hyperparameters. However, global normalization was nor performed like it was the case for CIS-PD in this second submission. 
@@ -401,7 +384,7 @@ The ivector used for this 4th submission was extracted/trained(🧐?) on trainin
 
 The SVR Per-Patient tuning predictions are made by training one SVR per subject. However, the hyperparameters for the SVR are tuned for each subject individually, so they have different values for the `C` parameter of the SVR and also a different number of components when PCA is performed. 
 
-To find which configuration is the best for each subject, we compute the weighted final score(*) over the 5 folds for each subject. Then, we choose the configuration that has the lowest weighted final score as the best configuration. 
+To find which configuration is the best for each subject, we compute the weighted final score over the 5 folds for each subject. Then, we choose the configuration that has the lowest weighted final score as the best configuration. 
 
 Initially, we made some experiments with different kernels and epsilon values, but the best results were obtained with a linear kernel and an epsilon of 0.1, so these values are constant in the results reported in the table. The gamma was also set at auto. 
 
