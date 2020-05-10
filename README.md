@@ -79,7 +79,15 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
 3. `source activate keras_tf2`
-4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features. If you only want to get features without creating models, you need to comment a section of the `train_AE.py` and `train_AE_real.py` files. The section needed to be commented is identified directly in the file. 
+4. Go to this [wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/3--Creating-AutoEncoder-Features#create-autoencoder-features) that lists many examples of commands you can use the create the required AE features. If you only want to get features without creating models, you need to comment a section of the `train_AE.py` and `train_AE_real.py` files. The section needed to be commented is identified directly in the file.
+5. Run the command you are interested in getting!
+
+**Submission 4**
+To reproduce it, you will need to create the following:
+- `AE_30ft_orig_inactivity_removed`
+- `cis_testing_AE_30ft_orig_inactivity_removed`
+
+We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `cis_testing_AE_60ft_orig`) as that provided us with better crossvalidation results, we ended up using the wrong features! 
 
 ### 2.2.3 Create i-vectors 
  
@@ -89,57 +97,24 @@ You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first
 
 The following steps will vary a lot depending on what ivector you want to create. One way to decide which ivector to create is to view the [Google spreadsheet results](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/edit?usp=sharing) and find out which result you are interested in replicating. The column "C" has notes for each appropriate cell with the name of the ivector folder we use. You can use the same nomenclature to replicate our experiments. 
 
-🛑TODO: Add a screenshot of an example of a note
-
-🛑TODO: "Create i-vectors": Correct vocabulary?
-
-🛑TODO: Ask Laureano how he suggest to do this from GitHub
-
-🛑TODO: "This is where all the ivectors will be created" : is it the correct vocabulary? 
-
-1. `cd /your/path/to/ivectors/` : Change your directory to where you want to store the ivectors 
-2. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create. The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature).
-3. `cd ****` : Change your directory to the ivector folder you just created 
-4. `mkdir data`
-5. `cp -rf github-repo-path/beatPDivec/default_data/v2_auto/. ./` : Copy the files from the GitHub repo to where you want to create the ivectors
-6. `cp -rf /export/c08/lmorove1/kaldi/egs/beatPDivec/default_data/autoencData/****/. data/.` Replace "****" with either `on_off`, `trem` or `dysk`
-7. `vim runFor.sh` : Edit the following variables: 
-    - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use 
-8. `screen -R name_of_your_screen`
-9. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_dysk_orig_auto60_400fl -o /export/b19/mpgill/outputs/outputs_dysk_orig_auto60_400fl runFor.sh`
-
-Launching the `runFor.sh` file will launch the i-vectors / UBM extraction, as well as the KNN/SVRs schemes. 
-
 🛑TODO: Good vocabulary? 
-
-🛑TODO: Did I explain how to create `AE_60ft_400fl_orig` ? 
 
 1. `cd kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the ivectors. 
-
 3.  `cp path-github-repo/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
-
 4. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create. The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`.
-
 5. `cd ****` : Change your directory to the ivector folder you just created 
-
-7. `mkdir data`
-
-8. `cp -rf path-github-repo/beatPDivec/default_data/v2_auto/. .`
-9. `cp -rf path-github-repo/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
-
-6. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
-
-
-
+6. `mkdir data`
+7. `cp -rf path-github-repo/beatPDivec/default_data/v2_auto/. .`
+8. `cp -rf path-github-repo/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
+9. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use 
+    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig` 
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_trem_auto30_noinact_laureano -o /export/b19/mpgill/outputs/outputs_trem_auto30_noinact_laureano runFor.sh`
 
 
-### 2.2.4 Get results 
+### 2.2.4 Get results on test folds
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
 
@@ -173,7 +148,7 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 🛑TODO: Make sure these are the right steps with Laureano 
 
-1. `cd` to the ivector location, for example `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the ivector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
+1. `cd` to the ivector location, for example `cd kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the ivector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
 2. In the file `local/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
 
 ```
@@ -188,11 +163,16 @@ $cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log 
      --bPatientPredictionsPkl
 conda deactivate
 ```
-3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create the folder `resiVecPerPatientSVR_Fold_all` for the test subset.
+
+3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create the folder `resiVecPerPatientSVR_Fold_all` for the test subset. But first, you need to edit some things:
+    - `sDirFeatsTest` to point to the folder where you have extracted testing features with the AE 
+    - `sDirFeatsTrai` to point to the folder where  there is the training data
+    - `ivecDim` : The ivector size you are interested in. 
+    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
 
 4. Go to `CreateCSV_test.ipynb`. We will use the function `generateCSVtest_per_patient` to create a CSV containing test predictions for all subject_ids. 
 
-7. Provide the variables `best_config`, `dest_dir`, and `src_dir` like so:
+7. Provide the variables `best_config`, `dest_dir`, and `src_dir`. The example below are the results of per patient tuning on `dysk_orig_auto60_400fl, ivec: 650`. 
 
 ```
 best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
@@ -217,6 +197,21 @@ The dictionary for best_config is obtained in this file:
 `cat /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
+
+**Submission 4**
+
+Again, for this one, we made the mistake of using the best hyperparaneters for Per Patient tuned on `dysk_auto60_400fl_orig` but applied to the wrong features on the test subset : `dysk_auto30_400fl_orig_inactivity_removed`.
+
+We used : 
+```
+sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig_inactivity_removed
+sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_30ft_orig_inactivity_removed
+```
+instead of : 
+```
+sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_60ft_orig
+sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig
+```
 
 #### Option 2 (manual - a bit bad way) -- For training/test folds 
 
@@ -372,15 +367,10 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 🦠 Test: without early stop criteria 
 
-
-
 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
 
 🛑TODO: When I reproduce the experiments, do I get the same hyperparameters as Nanxin? 
 
-🛑TODO: Can I remove avec exit() in the gridsearch files? useless?
-
-🛑TODO: How was this created? watchacc_order.csv
 
 <a name="4-fusion"></a>
 ## Fusion
