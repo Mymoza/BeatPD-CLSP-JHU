@@ -12,6 +12,10 @@ resx*
 
 # ivectors training
 *.dat
+*/.backup/
+*/.backup/*
+beatPDivec/default_data/autoencData/data/tremor/allfiles/.backup/
+
 
 # out errors 
 out_* 
