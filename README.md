@@ -309,7 +309,7 @@ The following sections explains how to reproduce our final submission.
 1. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
     - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
     - Then it will perform a GridSearch, saving the best config 
-    - Finally, it will create predictions files to be submitted in the `submission/` folder 
+    - Finally, it will create predictions files to be submitted in the `submission/` folder.  
 
 The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
 
@@ -320,13 +320,15 @@ For this one, we were not able to reproduce the exact same predictions, we suspe
 
 🔴 TODO: Compare myself the results in my predictions vs the one 
 
+🔴 TODO: Write how to get kfold_predictions on the kfold and not just on the test subset of the challenge
+
 ### Dyskinesia & On/Off - Submission 4 - CIS-PD
 
 The following performs per Patient Tuning.
 
 1. `./run_perpatient.sh`
     - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
-    - Then, it will create predictions files to be submitted, like so : `submission/cis-pd.on_off.perpatient.csv`
+    - Then, it will create predictions files to be submitted, in the `submission` folder like so : `submission/cis-pd.on_off.perpatient.csv`. 
 
 
 ### Tremor, Dyskinesia & On/Off - Submission 4 - REAL-PD **
