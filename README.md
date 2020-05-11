@@ -213,39 +213,20 @@ sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_60ft_orig
 sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig
 ```
 
-#### Option 2 (manual - a bit bad way) -- For training/test folds 
+#### Option 2 -- For training/test folds 
 
-1. Open the notebook `drafts_and_tests.ipynb` 
-2. Go to the section [Get Predictions Per Patient SVR](http://localhost:6099/notebooks/drafts_and_tests.ipynb#Get-Predictions-for-Per-Patient-SVR)
-3. For the subchallenge of your choice, like `Dysk Best Config`, change the variables to point to the best config you want to get predictions for. Change the folder of the features (in this case, it is `dysk_orig_auto60_400fl`) and the ivectors dimension (in this case it is `650`). 
+Just run in `runFor.sh` the script `local/evaluate_global_per_patient_SVR.sh` which will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if ivectors files are already created for these dimensions:
 
 ```
-sFileTrai="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/ivectors_Training_Fold"+fold+"/ivector.scp"
-   sFileTest="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/ivectors_Testing_Fold"+fold+"/ivector.scp"
+stage=5 #Features and UBM are already calculated
+for  ivecDim in 600 650 700;  do
 
-sOut="/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold"+fold
+        sDirRes=`pwd`/exp/ivec_${ivecDim}/
+        sDirOut=`pwd`/exp/ivec_${ivecDim}
+
+        local/evaluate_global_per_patient_SVR.sh $sDirRes $sDirOut dysk
+done
 ```
-
-4. Provide the `components` and `c value` you want to create pkl files for. In an ideal world, we would be able to provide for each patient their configuration we're interested in getting. At this time unfortunately, each configuration provided will create pkl files for all patients and not just the one we are interested in. You will know what configurations you need to provide by looking at the log file for the configuration, like this : 
-
-```
------- GLOBAL WINNER PARAMETERS ------
-{1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
- 1007: ['/objs_100_kernel_linear_c_0.002_eps_0.1.pkl', 0.09115239389591206],
- 1019: ['/objs_400_kernel_linear_c_0.2_eps_0.1.pkl', 0.686931370820251],
- 1023: ['/objs_300_kernel_linear_c_0.2_eps_0.1.pkl', 0.8462093717280431],
- 1034: ['/objs_100_kernel_linear_c_20.0_eps_0.1.pkl', 0.7961188257851409],
- 1038: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 0.3530848340426855],
- 1039: ['/objs_450_kernel_linear_c_0.2_eps_0.1.pkl', 0.3826339325882311],
- 1043: ['/objs_300_kernel_linear_c_0.2_eps_0.1.pkl', 0.5525085362997469],
- 1044: ['/objs_50_kernel_linear_c_0.002_eps_0.1.pkl', 0.09694768640213237],
- 1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
- 1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
-Train Final score :  0.06395586325048086
-Test Final score :  0.4771436603152803
-```
-
-5. Run that cell. It will create individual pkl files for each patient containing the predictions provided. 
 
 6. Open `CreateFoldsCsv.ipynb`. We will use the function `generateCSVresults_per_patient` to create a CSV containing test predictions for all patients. 
 
@@ -271,7 +252,6 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
-
 
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
