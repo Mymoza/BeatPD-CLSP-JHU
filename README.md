@@ -359,9 +359,26 @@ For the second and fourth submission, we performed some fusion of the prediction
 
 The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
 
+It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2`, like so:
 
+```
+sFilePred1='/home/mpgill/BeatPD/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
+sFilePred2='/export/b19/mpgill/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
+```
 
+You will get results: 
 
+```
+--- MSEscore ---
+Final score :  0.4830357155225596
+Overall MSE Classif. 1 - tsfresh:  None
+--- MSEscore ---
+Final score :  0.5144468970875267
+Overall MSE Classif. 2 - ivec:  None
+--- MSEscore ---
+Final score :  0.48601343286255055
+Overall MSE Fusion - average :  None
+```
 
 
 # References 
