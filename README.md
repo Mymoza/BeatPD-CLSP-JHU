@@ -213,6 +213,7 @@ sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_60ft_orig
 sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig
 ```
 
+<a name="get-preds-trainingtestfolds-perpatient-svr"></a>
 #### Option 2 -- For training/test folds 
 
 Just run in `runFor.sh` the script `local/evaluate_global_per_patient_SVR.sh` which will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if ivectors files are already created for these dimensions:
@@ -251,7 +252,7 @@ src_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/iv
 generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
-8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
+8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
 <a name="3-tsfresh"></a>
 ## tsfresh + xgboost  
@@ -359,7 +360,7 @@ For the second and fourth submission, we performed some fusion of the prediction
 
 The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
 
-It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2`, like so:
+It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
 
 ```
 sFilePred1='/home/mpgill/BeatPD/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
