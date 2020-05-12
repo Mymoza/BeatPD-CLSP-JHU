@@ -9,17 +9,10 @@ This GitHub repository contains the code to reproduce the results obtained by th
 
 This step-by-step guide will cover the following steps: 
 
-1. [Prepare the data](#1-prepare-data)
-2. [Embeddings](#2-embeddings)
-    1. [MFCC](#2.1-mfcc) 
-    2. [AutoEncoder (AE)](#2.2-autoencoder)
-        1. [Train the AutoEncoder](#2.2.1-train-ae)
-        2. [Save AE Features](#2.2.2-get-ae-features)
-    3. [Create i-vectors](#2.3-create-i-vectors)
-    4. [Get results on test folds for SVRs](#2.4-get-results)
-    5. [Get predictions CSV](#2.5-get-predictions)
-3. [TSFRESH + XGBOOST](#3-tsfresh)
-4. [Fusion](#4-fusion)
+[Prepare the data](#1-prepare-data)
+Approach I :  [AutoEncoder (AE)] + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
+Approach II : [TSFRESH + XGBOOST](#3-tsfresh)
+Approach III : [Fusion](#4-fusion)
 
 ## Set up the environment : 
 ```
@@ -37,7 +30,7 @@ $ ipython kernel install --user --name=BeatPD
 You will then be able to select `BeatPD` as your kernel. 
 
 <a name="1-prepare-data"></a>
-## 1. Prepare the data 
+## Prepare the data 
 
 All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
 
@@ -50,21 +43,13 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ```
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
+##  Approach I
+
 <a name="2-embeddings"></a>
-## 2. Embeddings 
-
-<a name="2.1-mfcc"></a>
-### 2.1 MFCC 
-
-<i> 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. </i> <br>
-Mel Frequency Cepstral Co-efficients (MFCC) are commonly used features in speech and audio processing. The pipleline for MFCC extraction  includes pre-emphasis, windowing, Discrete Fourier Transform (DFT), warping the log of the magnitude spectrum of DFT on mel-scale, DCT, adding enegery, delta and delta-delta co-efficents.
-
-
-<a name="2.2-autoencoder"></a>
-### 2.2 AutoEncoder (AE) features 
+### AutoEncoder (AE) features 
 
 <a name="2.2.1-train-ae"></a>
-#### 2.2.1 Train the AutoEncoder 
+#### Train the AutoEncoder 
 
 1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
 2. `conda env create --file environment_ae.yml` : This will create the `keras_tf2` environment you need to run AE experiments.
@@ -78,7 +63,7 @@ Mel Frequency Cepstral Co-efficients (MFCC) are commonly used features in speech
 5. This should create the following file `mlp_encoder_uad_False_ld_60.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
 
 <a name="2.2.2-get-ae-features"></a>
-#### 2.2.2 Get AutoEncoder (AE) Features 
+#### Get AutoEncoder (AE) Features 
 
 1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
@@ -94,7 +79,7 @@ To reproduce it, you will need to create the following:
 We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `cis_testing_AE_60ft_orig`) as that provided us with better crossvalidation results, we ended up using the wrong features! 
 
 <a name="2.3-create-i-vectors"></a>
-### 2.3 Create i-vectors 
+### Create i-vectors 
  
 After creating Autoencoder features or the MFCC, we can create i-vectors. 
 
@@ -121,11 +106,11 @@ The following steps will vary a lot depending on what i-vector you want to creat
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
 
 <a name="2.4-get-results"></a>
-### 2.4 Get results on test folds for SVR
+### Get results on test folds for SVR
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
 
-#### 2.4.1 Manually - for one size of i-vector 
+#### Manually - for one size of i-vector 
 The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
 1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
@@ -139,7 +124,7 @@ globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR
 globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
 ```
 
-#### 2.4.2 Extract results for different i-vector sizes 
+#### Extract results for different i-vector sizes 
 
 As of now, the automation is present in the `get_excel_results.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
 
@@ -147,7 +132,7 @@ So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
 <a name="2.5-get-predictions"></a>
-### 2.5 Get Predictions CSV 
+### Get Predictions CSV 
 
 ### Per Patient SVR 
 
@@ -262,7 +247,7 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
 <a name="3-tsfresh"></a>
-## 3. tsfresh + xgboost  
+##  Approach II : tsfresh + xgboost  
 
 For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
 
@@ -363,7 +348,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 
 <a name="4-fusion"></a>
-## 4. Fusion
+## Approach III : Fusion
 
 For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
 
