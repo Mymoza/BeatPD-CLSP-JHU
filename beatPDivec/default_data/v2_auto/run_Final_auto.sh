@@ -110,8 +110,9 @@ fi
 sFileTrai=${expDir}/ivec_${ivecDim}/ivectors_TrainingFinal/ivector.scp
 sFileTest=${expDir}/ivec_${ivecDim}/ivectors_TestingFinal/ivector.scp
 
+#FIXME: I think we can remove foldN everywhere? This variable is not used
 if [ $stage -le 5 ]; then  # Just SVR
-    sOut=$expDir/ivec_${ivecDim}/resiVecSVR_Fold${foldN}
+    sOut=$expDir/ivec_${ivecDim}/resiVecSVR_Fold_all${foldN}
     echo Component is ${iNumComponents}
     local/pca_svr_bpd2.sh $sFileTrai $sFileTest $sOut $iNumComponents $sKernel $fC $fEpsilon
 
