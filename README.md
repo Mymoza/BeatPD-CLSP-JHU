@@ -116,12 +116,12 @@ The following steps will vary a lot depending on what ivector you want to create
     - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig` 
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_trem_auto30_noinact_laureano -o /export/b19/mpgill/outputs/outputs_trem_auto30_noinact_laureano runFor.sh`
 
-
-### 2.2.4 Get results on test folds
+<a name="2.4-get-results"></a>
+### 2.4 Get results on test folds
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
 
-#### 2.2.4.1 Manually - for one size of ivector 
+#### 2.4.1 Manually - for one size of ivector 
 The following example will retrieve results for the following ivector: `trem_noinact_auto30`.
 
 1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
@@ -135,7 +135,7 @@ globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR
 globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
 ```
 
-#### 2.2.4.2 Extract results for different ivector sizes 
+#### 2.4.2 Extract results for different ivector sizes 
 
 As of now, the automation is present in the `get_excel_results.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
 
