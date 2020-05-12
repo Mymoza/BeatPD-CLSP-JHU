@@ -100,7 +100,7 @@ After creating Autoencoder features or the MFCC, we can create i-vectors.
 
 You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
-The following steps will vary a lot depending on what i-vector you want to create. 
+The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` for the 4th submission. 
 
 🛑TODO: Write down which ones we need to create for the final submission
 
@@ -117,8 +117,8 @@ The following steps will vary a lot depending on what i-vector you want to creat
 9. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=/mpgill/BeatPD/AE_60ft_400fl_orig` 
-11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_trem_auto30_noinact -o outputs/outputs_trem_auto30_noinact runFor.sh`
+    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats={path-to-AE-features}/AE_30ft_orig_inactivity_removed` 
+11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
 
 <a name="2.4-get-results"></a>
 ### 2.4 Get results on test folds for SVR
