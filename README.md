@@ -2,8 +2,6 @@
 
 This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. 
 
-🔴 TODO: Could change everything with Approach 1 / Approach 2 to follow the writeup 
-
 
 # Step-By-Step guide 
 
