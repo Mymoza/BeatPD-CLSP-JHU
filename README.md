@@ -34,7 +34,7 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
-<a name="prepare-data"></a>
+<a name="1-prepare-data"></a>
 ## 1. Prepare the data 
 
 All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
@@ -48,7 +48,7 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ```
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
-<a name="embeddings"></a>
+<a name="2-embeddings"></a>
 ## 2. Embeddings 
 
 <a name="2.1-mfcc"></a>
