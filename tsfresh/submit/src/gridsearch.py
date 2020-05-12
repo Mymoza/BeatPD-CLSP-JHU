@@ -76,4 +76,69 @@ print(best_params)
 with open('mdl/cis-pd.conf','wb') as f:
     pickle.dump(best_params, f)
 
+exit() 
 
+########################################################################
+# The following section is only used if you want to generate a predictions files
+# on the test kfolds 
+######################################################################
+
+results = []
+baselines = []
+
+preds = []
+for i in range(5):
+    #test = pd.read_csv(sys.argv[i]).squeeze()
+    #idx = al['measurement_id'].isin(test)
+    idx = al['fold_id'] == i
+
+    #tr_w = al[~idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+    #tr = pd.merge(al[~idx], tr_w, on='subject_id')
+    tr = al[~idx].drop(['fold_id'], axis=1)
+    tr_w = tr['spcount'] ** -0.5
+    tr_y = tr[obj].astype(pd.np.float32)
+    tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+    #te_w = al[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+    #te = pd.merge(al[idx], te_w, on='subject_id')
+    te = al[idx].drop(['fold_id'], axis=1)
+    te_w = te['spcount'] ** -0.5
+    te_y = te[obj].astype(pd.np.float32)
+    sub = te['subject_id']
+    sid = te.subject_id
+    tid = te.measurement_id
+    te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+    clf = xgb.XGBRegressor(**best_params)
+    #clf = xgb.XGBClassifier(**params)
+    clf.fit(
+        tr, tr_y,
+        sample_weight=tr_w,
+        eval_set=[(tr, tr_y), (te, te_y)],
+        #eval_metric=',
+        sample_weight_eval_set=[tr_w, te_w],
+        verbose=0,
+        early_stopping_rounds=100
+    )
+    pred = clf.predict(te).clip(0, 4)
+    mse = (pred - te_y) ** 2
+    #mse = te_y.to_numpy() ** 2
+    mse2 = te_y ** 2
+    #ret = pd.concat([sub, mse], axis=1)
+    #ret.to_csv('tmp.csv')
+    #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
+    #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
+    #cnt = cnt ** 0.5
+    res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
+    res = pd.merge(res, avg, on='subject_id')
+    res[obj] += res['sp_' + obj]
+    res = res[["measurement_id", obj]]
+    preds.append(res)
+    results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
+    baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
+preds = pd.concat(preds)
+preds.to_csv('kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
+#print(clf.get_booster().get_score(importance_type='gain'))
+print("baseline {0} result {1}".format(np.mean(baselines),np.mean(results)))
+#plot_importance(clf,max_num_features=10)
+#plt.savefig('importance.png')

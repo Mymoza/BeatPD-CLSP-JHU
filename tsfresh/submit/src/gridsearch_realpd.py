@@ -82,8 +82,74 @@ with open('mdl/real-pd.conf', 'wb') as f:
 # tremor watchacc
 #best_params = {'colsample_bylevel': 0.4, 'silent': False, 'reg_lambda': 100.0, 'colsample_bytree': 0.4, 'subsample': 1.0, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'min_child_weight': 5.0, 'max_depth': 6, 'n_estimators': 500, 'gamma': 1.0} #watch acc tremor
 
-# tremor  watch_gyr
-best_params = {'max_depth': 3, 'colsample_bylevel': 0.8, 'colsample_bytree': 0.4, 'silent': False, 'n_estimators': 100, 'learning_rate': 0.3, 'objective': 'reg:squarederror', 'reg_lambda': 50.0, 'min_child_weight': 5.0, 'subsample': 0.7, 'gamma': 1.0} #watch gyr tremor
-#with open('hypsearch.model', 'wb') as f:
-#    pickle.dump(rs_clf, f)
+# tremor  watch_gyr ---- These parameters are the ones we used for the fourth submission
+#print('best_params for gridsearch_realpd are currently hardcoded')
+#best_params = {'max_depth': 3, 'colsample_bylevel': 0.8, 'colsample_bytree': 0.4, 'silent': False, 'n_estimators': 100, 'learning_rate': 0.3, 'objective': 'reg:squarederror', 'reg_lambda': 50.0, 'min_child_weight': 5.0, 'subsample': 0.7, 'gamma': 1.0} #watch gyr tremor
 
+exit()
+
+#############################################
+# The following section is only used to create a predictions file on the test folds. 
+# Comment the exit() line to make it run
+#############################################
+
+
+results = []
+baselines = []
+
+preds = []
+for i in range(5, len(sys.argv)):
+    test = pd.read_csv(sys.argv[i]).squeeze()
+    idx = al['measurement_id'].isin(test)
+
+    #tr_w = al[~idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+    #tr = pd.merge(al[~idx], tr_w, on='subject_id')
+    tr = al[~idx].drop(['fold_id'], axis=1)
+    tr_w = tr['spcount'] ** -0.5
+    tr_y = tr[obj].astype(pd.np.float32)
+    tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+    #te_w = al[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+    #te = pd.merge(al[idx], te_w, on='subject_id')
+    te = al[idx].drop(['fold_id'], axis=1)
+    te_w = te['spcount'] ** -0.5
+    te_y = te[obj].astype(pd.np.float32)
+    sub = te['subject_id']
+    sid = te.subject_id
+    tid = te.measurement_id
+    te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+    clf = xgb.XGBRegressor(**best_params)
+    #clf = xgb.XGBClassifier(**params)
+    clf.fit(
+        tr, tr_y,
+        sample_weight=tr_w,
+        eval_set=[(tr, tr_y), (te, te_y)],
+        #eval_metric=',
+        sample_weight_eval_set=[tr_w, te_w],
+        verbose=0,
+        early_stopping_rounds=100
+    )
+    pred = clf.predict(te).clip(0, 4)
+    mse = (pred - te_y) ** 2
+    #mse = te_y.to_numpy() ** 2
+    mse2 = te_y ** 2
+    #ret = pd.concat([sub, mse], axis=1)
+    #ret.to_csv('tmp.csv')
+    #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
+    #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
+    #cnt = cnt ** 0.5
+    res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
+    res = pd.merge(res, avg, on='subject_id')
+    res[obj] += res['sp_' + obj]
+    res = res[["measurement_id", obj]]
+    preds.append(res)
+    results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
+    baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
+preds = pd.concat(preds)
+preds.to_csv('kfold_prediction_{0}.csv'.format(obj), index=False)
+#print(clf.get_booster().get_score(importance_type='gain'))
+print(np.mean(results))
+print(np.mean(baselines))
+plot_importance(clf,max_num_features=10)
+plt.savefig('importance.png')
