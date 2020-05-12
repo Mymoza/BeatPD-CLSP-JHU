@@ -1,3 +1,12 @@
+
+# tsfresh
+tsfresh/submit/tmp
+tsfresh/submit/utils/*
+tsfresh/submit/mdl/*
+tsfresh/submit/exp/*
+tsfresh/submit/features/*
+tsfresh/submit/submission/*.csv
+
 resx*
 *.pkl
 
