@@ -100,7 +100,9 @@ After creating Autoencoder features or the MFCC, we can create i-vectors.
 
 You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
-The following steps will vary a lot depending on what ivector you want to create. One way to decide which ivector to create is to view the [Google spreadsheet results](https://docs.google.com/spreadsheets/d/11l7S49szMllpebGg2gji2aBea35iqLqO5qrlOBSJnIc/edit?usp=sharing) and find out which result you are interested in replicating. The column "C" has notes for each appropriate cell with the name of the ivector folder we use. You can use the same nomenclature to replicate our experiments. 
+The following steps will vary a lot depending on what ivector you want to create. 
+
+🛑TODO: Write down which ones we need to create for the final submission
 
 🛑TODO: Good vocabulary? 
 
