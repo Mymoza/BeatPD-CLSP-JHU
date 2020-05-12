@@ -55,6 +55,8 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ### 2.1 MFCC 
 
 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. 
+Mel Frequency Cepstral Co-efficients (MFCC) are commonly used features in speech and audio processing. The pipleline for MFCC extraction  includes pre-emphasis, windowing, Discrete Fourier Transform (DFT), warping the log of the magnitude spectrum of DFT on mel-scale, DCT, adding enegery, delta and delta-delta co-efficents.
+
 
 <a name="2.2-autoencoder"></a>
 ### 2.2 AutoEncoder (AE) features 
