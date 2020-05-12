@@ -100,36 +100,36 @@ After creating Autoencoder features or the MFCC, we can create i-vectors.
 
 You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
 
-The following steps will vary a lot depending on what ivector you want to create. 
+The following steps will vary a lot depending on what i-vector you want to create. 
 
 🛑TODO: Write down which ones we need to create for the final submission
 
 🛑TODO: Good vocabulary? 
 
-1. `cd kaldi/egs/` : Change your directory to where you installed Kaldi. 
-2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the ivectors. 
+1. `cd {path-to-kaldi}/kaldi/egs/` : Change your directory to where you installed Kaldi. 
+2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the i-vectors. 
 3.  `cp path-github-repo/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
-4. `mkdir *****` : Create a folder with a meaningful name about the ivectors we want to create. The nomenclature we used to name the ivectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`.
-5. `cd ****` : Change your directory to the ivector folder you just created 
+4. `mkdir *****` : Create a folder with a meaningful name about the i-vectors we want to create. The nomenclature we used to name the i-vectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`.
+5. `cd ****` : Change your directory to the i-vector folder you just created 
 6. `mkdir data`
-7. `cp -rf path-github-repo/beatPDivec/default_data/v2_auto/. .`
-8. `cp -rf path-github-repo/beatPDivec/default_data/autoencData/data/dyskinesia/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
+7. `cp -rf {path-github-repo}/beatPDivec/default_data/v2_auto/. .`
+8. `cp -rf {path-github-repo}/beatPDivec/default_data/autoencData/data/{onoff - tremor - dyskinesia}/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
 9. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig` 
-11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_trem_auto30_noinact_laureano -o /export/b19/mpgill/outputs/outputs_trem_auto30_noinact_laureano runFor.sh`
+    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=/mpgill/BeatPD/AE_60ft_400fl_orig` 
+11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_trem_auto30_noinact -o outputs/outputs_trem_auto30_noinact runFor.sh`
 
 <a name="2.4-get-results"></a>
 ### 2.4 Get results on test folds for SVR
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
 
-#### 2.4.1 Manually - for one size of ivector 
-The following example will retrieve results for the following ivector: `trem_noinact_auto30`.
+#### 2.4.1 Manually - for one size of i-vector 
+The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
-1. `cd /export/c08/lmorove1/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
-2. `cd ivec_350` : Then, choose an ivector size 
+1. `cd {path-to-kaldi}/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
+2. `cd ivec_350` : Then, choose an i-vector size 
 3. `ls` : 
 ```
 globalAccuPLDA.log : Result for PLDA 
@@ -139,7 +139,7 @@ globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR
 globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
 ```
 
-#### 2.4.2 Extract results for different ivector sizes 
+#### 2.4.2 Extract results for different i-vector sizes 
 
 As of now, the automation is present in the `get_excel_results.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
 
@@ -155,8 +155,8 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 🛑TODO: Make sure these are the right steps with Laureano 
 
-1. `cd` to the ivector location, for example `cd kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the ivector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
-2. In the file `local/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
+1. `cd` to the i-vector location, for example `cd {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
+2. In the file `{path-to-github-repo}/beatPDivec/default_data/v2_auto/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
 
 ```
 $cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log \
@@ -174,8 +174,8 @@ conda deactivate
 3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create the folder `resiVecPerPatientSVR_Fold_all` for the test subset. But first, you need to edit some things:
     - `sDirFeatsTest` to point to the folder where you have extracted testing features with the AE 
     - `sDirFeatsTrai` to point to the folder where  there is the training data
-    - `ivecDim` : The ivector size you are interested in. 
-    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
+    - `ivecDim` : The i-vector size you are interested in. 
+    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
 
 4. Go to `CreateCSV_test.ipynb`. We will use the function `generateCSVtest_per_patient` to create a CSV containing test predictions for all subject_ids. 
 
@@ -194,14 +194,14 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
-src_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+dest_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+src_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
 
 generateCSVtest_per_patient(src_dir, dest_dir, best_config)
 ```
 
 The dictionary for best_config is obtained in this file: 
-`cat /export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
+`cat {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
@@ -211,19 +211,19 @@ Again, for this one, we made the mistake of using the best hyperparaneters for P
 
 We used : 
 ```
-sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_30ft_orig_inactivity_removed
-sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_30ft_orig_inactivity_removed
+sDirFeatsTest={path-to-AE-features}/cis_testing_AE_30ft_orig_inactivity_removed
+sDirFeatsTrai={path-to-AE-features}/AE_30ft_orig_inactivity_removed
 ```
 instead of : 
 ```
-sDirFeatsTest=/export/b19/mpgill/BeatPD/cis_testing_AE_60ft_orig
-sDirFeatsTrai=/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig
+sDirFeatsTest={path-to-AE-features}/cis_testing_AE_60ft_orig
+sDirFeatsTrai={path-to-AE-features}/AE_60ft_400fl_orig
 ```
 
 <a name="get-preds-trainingtestfolds-perpatient-svr"></a>
 #### Option 2 -- For training/test folds 
 
-Just run in `runFor.sh` the script `local/evaluate_global_per_patient_SVR.sh` which will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if ivectors files are already created for these dimensions:
+Run `runFor.sh`, which will call the script `{path-to-github-repo}/beatPDivec/default_data/v2_auto/local/evaluate_global_per_patient_SVR.sh` that will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if i-vectors files are already created for these dimensions:
 
 ```
 stage=5 #Features and UBM are already calculated
@@ -253,18 +253,18 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
-src_dir='/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold'
+dest_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
+src_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold'
 
 generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
-8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
+8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
 <a name="3-tsfresh"></a>
 ## 3. tsfresh + xgboost  
 
-For this scheme, all the files are in `tsfresh/submit/`. 
+For this scheme, all the files are in `{path-to-github-repo}/tsfresh/submit/`. 
 
 ```
 |-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
@@ -274,7 +274,7 @@ For this scheme, all the files are in `tsfresh/submit/`.
 |-- conf: ?
 |-- data: ?
      |-- label.csv : ??? 
-|-- exp: ? 
+|-- exp: Feature extraction jobs that were divided in 32 subsets
 |-- features: Folder containing the extracted features
      |-- cis-pd.training.csv
      |-- cis-pd.testing.csv 
@@ -342,7 +342,7 @@ The following performs per Patient Tuning.
 
 The 4th submission of REAL-PD used gridsearch and global normalization.
 
-1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_real_pd_features -o /export/b19/mpgill/outputs/outputs_real_pd_features run_realpd.sh`
+1. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /errors/errors_real_pd_features -o /outputs/outputs_real_pd_features run_realpd.sh`
     - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
     - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
     - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
@@ -372,8 +372,8 @@ The code to perform the fusion for the fourth submission is in the notebook call
 It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
 
 ```
-sFilePred1='/home/mpgill/BeatPD/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
-sFilePred2='/export/b19/mpgill/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
+sFilePred1='{path-to-github-repo}/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
+sFilePred2='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
 ```
 
 You will get results: 
@@ -393,8 +393,8 @@ Overall MSE Fusion - average :  None
 
 # References 
 
-- Challenge website https://www.synapse.org/#!Synapse:syn20825169/wiki/596118 
-- tsfresh https://github.com/blue-yonder/tsfresh
+- [The Biomarker and Endpoint Assessment to Track Parkinson's Disease (BEAT-PD) Challenge](https://www.synapse.org/#!Synapse:syn20825169/wiki/596118)
+- Christ, M., Braun, N., Neuffer, J. and Kempa-Liehr A.W. (2018). Time Series FeatuRe Extraction on basis of Scalable Hypothesis tests (tsfresh -- A Python package). Neurocomputing 307 (2018) 72-77, doi:10.1016/j.neucom.2018.03.067. [GitHub](https://github.com/blue-yonder/tsfresh)
 - Dehak, Najim, et al. "Front-end factor analysis for speaker verification." IEEE Transactions on Audio, Speech, and Language Processing 19.4 (2010): 788-798. 
 
 🛑TODO: Check that all links to the wiki are still valid
