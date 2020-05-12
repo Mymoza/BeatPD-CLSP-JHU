@@ -56,7 +56,7 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 <a name="2.1-mfcc"></a>
 ### 2.1 MFCC 
 
-<i> 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. </i>
+<i> 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. </i> <br>
 Mel Frequency Cepstral Co-efficients (MFCC) are commonly used features in speech and audio processing. The pipleline for MFCC extraction  includes pre-emphasis, windowing, Discrete Fourier Transform (DFT), warping the log of the magnitude spectrum of DFT on mel-scale, DCT, adding enegery, delta and delta-delta co-efficents.
 
 
@@ -98,7 +98,7 @@ We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `c
  
 After creating Autoencoder features or the MFCC, we can create i-vectors. 
 
-You need to have [Kaldi](https://kaldi-asr.org/doc/install.html) installed first. Follow Kaldi's instructions to install. 
+You need to have install [Kaldi](https://kaldi-asr.org) using either [official install instructions](https://kaldi-asr.org/doc/install.html) or [easy install instructions]((http://jrmeyer.github.io/asr/2016/01/26/Installing-Kaldi.html) if you find the official one difficult to follow.
 
 The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` for the 4th submission. 
 
@@ -106,9 +106,9 @@ The following steps will vary a lot depending on what i-vector you want to creat
 
 🛑TODO: Good vocabulary? 
 
-1. `cd {path-to-kaldi}/kaldi/egs/` : Change your directory to where you installed Kaldi. 
+1. `cd <your-path-to-kaldi>/kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the i-vectors. 
-3.  `cp path-github-repo/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
+3.  `cp <your-path-github-repo>/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
 4. `mkdir *****` : Create a folder with a meaningful name about the i-vectors we want to create. The nomenclature we used to name the i-vectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-ivectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`.
 5. `cd ****` : Change your directory to the i-vector folder you just created 
 6. `mkdir data`
@@ -128,7 +128,7 @@ The file `runFor.sh` will create the log files with the results of the experimen
 #### 2.4.1 Manually - for one size of i-vector 
 The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
-1. `cd {path-to-kaldi}/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
+1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
 2. `cd ivec_350` : Then, choose an i-vector size 
 3. `ls` : 
 ```
@@ -155,8 +155,8 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 🛑TODO: Make sure these are the right steps with Laureano 
 
-1. `cd` to the i-vector location, for example `cd {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
-2. In the file `{path-to-github-repo}/beatPDivec/default_data/v2_auto/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
+1. `cd` to the i-vector location, for example `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
+2. In the file `<your-path-to-github-repo>/beatPDivec/default_data/v2_auto/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
 
 ```
 $cmd $sOut/pca_${iComponents}_svr_${sKernel}_${fCValueStr}_${fEpsilon}Testx.log \
@@ -175,7 +175,7 @@ conda deactivate
     - `sDirFeatsTest` to point to the folder where you have extracted testing features with the AE 
     - `sDirFeatsTrai` to point to the folder where  there is the training data
     - `ivecDim` : The i-vector size you are interested in. 
-    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
+    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
 
 4. Go to `CreateCSV_test.ipynb`. We will use the function `generateCSVtest_per_patient` to create a CSV containing test predictions for all subject_ids. 
 
@@ -194,14 +194,14 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
-src_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
 
 generateCSVtest_per_patient(src_dir, dest_dir, best_config)
 ```
 
 The dictionary for best_config is obtained in this file: 
-`cat {path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
+`cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
@@ -211,19 +211,19 @@ Again, for this one, we made the mistake of using the best hyperparaneters for P
 
 We used : 
 ```
-sDirFeatsTest={path-to-AE-features}/cis_testing_AE_30ft_orig_inactivity_removed
-sDirFeatsTrai={path-to-AE-features}/AE_30ft_orig_inactivity_removed
+sDirFeatsTest=<your-path-to-AE-features>/cis_testing_AE_30ft_orig_inactivity_removed
+sDirFeatsTrai=<your-path-to-AE-features>/AE_30ft_orig_inactivity_removed
 ```
 instead of : 
 ```
-sDirFeatsTest={path-to-AE-features}/cis_testing_AE_60ft_orig
-sDirFeatsTrai={path-to-AE-features}/AE_60ft_400fl_orig
+sDirFeatsTest=<your-path-to-AE-features>/cis_testing_AE_60ft_orig
+sDirFeatsTrai=<your-path-to-AE-features>/AE_60ft_400fl_orig
 ```
 
 <a name="get-preds-trainingtestfolds-perpatient-svr"></a>
 #### Option 2 -- For training/test folds 
 
-Run `runFor.sh`, which will call the script `{path-to-github-repo}/beatPDivec/default_data/v2_auto/local/evaluate_global_per_patient_SVR.sh` that will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if i-vectors files are already created for these dimensions:
+Run `runFor.sh`, which will call the script `<your-path-to-github-repo>/beatPDivec/default_data/v2_auto/local/evaluate_global_per_patient_SVR.sh` that will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if i-vectors files are already created for these dimensions:
 
 ```
 stage=5 #Features and UBM are already calculated
@@ -253,18 +253,18 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
-src_dir='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold'
+dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
+src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecPerPatientSVR_Fold'
 
 generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
-8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
+8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
 <a name="3-tsfresh"></a>
 ## 3. tsfresh + xgboost  
 
-For this scheme, all the files are in `{path-to-github-repo}/tsfresh/submit/`. 
+For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
 
 ```
 |-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
@@ -372,8 +372,8 @@ The code to perform the fusion for the fourth submission is in the notebook call
 It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
 
 ```
-sFilePred1='{path-to-github-repo}/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
-sFilePred2='{path-to-kaldi}/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
+sFilePred1='<your-path-to-github-repo>/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
+sFilePred2='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
 ```
 
 You will get results: 
