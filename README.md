@@ -13,7 +13,7 @@ This step-by-step guide will cover the following steps:
     2. [AutoEncoder (AE)](#2.2-autoencoder)
         1. [Train the AutoEncoder](#2.2.1-train-ae)
         2. [Save AE Features](#2.2.2-get-ae-features)
-    3. [Create i-vectors](#2.3-create-ivectors)
+    3. [Create i-vectors](#2.3-create-i-vectors)
     4. [Get results for SVR/SVR Per Patient/SVR Everyone](#2.4-get-results)
     5. [Get predictions CSV](#2.5-get-predictions)
 3. [TSFRESH + XGBOOST](#3-tsfresh)
@@ -91,7 +91,8 @@ To reproduce it, you will need to create the following:
 
 We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `cis_testing_AE_60ft_orig`) as that provided us with better crossvalidation results, we ended up using the wrong features! 
 
-### 2.2.3 Create i-vectors 
+<a name="2.3-create-i-vectors"></a>
+### 2.3 Create i-vectors 
  
 After creating Autoencoder features or the MFCC, we can create i-vectors. 
 
