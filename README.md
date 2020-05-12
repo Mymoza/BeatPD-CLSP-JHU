@@ -8,7 +8,7 @@ This GitHub repository contains the code to reproduce the results obtained by th
 This step-by-step guide will cover the following steps: 
 
 - [Prepare the data](#1-prepare-data)
-- Approach I :  [AutoEncoder (AE)] (2.2.2-get-ae-features)+ [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
+- Approach I :  [AutoEncoder (AE)](#2.2.2-get-ae-features)+ [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
 - Approach II : [TSFRESH + XGBOOST](#3-tsfresh)
 - Approach III : [Fusion](#4-fusion)
 
