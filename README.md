@@ -14,7 +14,7 @@ This step-by-step guide will cover the following steps:
         1. [Train the AutoEncoder](#2.2.1-train-ae)
         2. [Save AE Features](#2.2.2-get-ae-features)
     3. [Create i-vectors](#2.3-create-i-vectors)
-    4. [Get results for SVR/SVR Per Patient/SVR Everyone](#2.4-get-results)
+    4. [Get results for SVR/SVR Per Patient/SVR Everyone](#2.4-get-results) {🛑 Header mismatch here & later}
     5. [Get predictions CSV](#2.5-get-predictions)
 3. [TSFRESH + XGBOOST](#3-tsfresh)
 4. [Fusion](#4-fusion)
@@ -54,7 +54,7 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 <a name="2.1-mfcc"></a>
 ### 2.1 MFCC 
 
-🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. 
+<i> 🙅‍♀️: This section hasn't been written yet. It is not a priority as MFCCs did not provide best results and they were not used for submission. </i>
 Mel Frequency Cepstral Co-efficients (MFCC) are commonly used features in speech and audio processing. The pipleline for MFCC extraction  includes pre-emphasis, windowing, Discrete Fourier Transform (DFT), warping the log of the magnitude spectrum of DFT on mel-scale, DCT, adding enegery, delta and delta-delta co-efficents.
 
 
@@ -258,7 +258,7 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `/export/c08/lmorove1/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
 <a name="3-tsfresh"></a>
-## tsfresh + xgboost  
+## 3. tsfresh + xgboost  
 
 For this scheme, all the files are in `tsfresh/submit/`. 
 
@@ -359,7 +359,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 
 <a name="4-fusion"></a>
-## Fusion
+## 4. Fusion
 
 For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
 
