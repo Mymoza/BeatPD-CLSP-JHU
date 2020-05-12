@@ -49,7 +49,7 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
         mse_per_subjectId.append(mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
         nb_files_per_subjectId.append(len(vPredictions_subjectId))
         
-        print('MSE : ', mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
+#         print('MSE : ', mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
     
     print('--- MSEscore ---')
     final_score(mse_per_subjectId, nb_files_per_subjectId)
