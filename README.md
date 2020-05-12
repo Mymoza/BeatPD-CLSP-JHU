@@ -390,7 +390,7 @@ Overall MSE Fusion - average :  None
 # References 
 
 - Challenge website https://www.synapse.org/#!Synapse:syn20825169/wiki/596118 
-- tsfresh github 
-- ivectors paper? 
+- tsfresh https://github.com/blue-yonder/tsfresh
+- Dehak, Najim, et al. "Front-end factor analysis for speaker verification." IEEE Transactions on Audio, Speech, and Language Processing 19.4 (2010): 788-798. 
 
-🛑TODO: Check that all links to the wiki are still valid 
+🛑TODO: Check that all links to the wiki are still valid
