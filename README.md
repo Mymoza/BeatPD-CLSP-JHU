@@ -2,6 +2,8 @@
 
 This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. 
 
+🔴 TODO: Could change everything with Approach 1 / Approach 2 to follow the writeup 
+
 
 # Step-By-Step guide 
 
@@ -14,7 +16,7 @@ This step-by-step guide will cover the following steps:
         1. [Train the AutoEncoder](#2.2.1-train-ae)
         2. [Save AE Features](#2.2.2-get-ae-features)
     3. [Create i-vectors](#2.3-create-i-vectors)
-    4. [Get results for SVR/SVR Per Patient/SVR Everyone](#2.4-get-results) {🛑 Header mismatch here & later}
+    4. [Get results on test folds for SVRs](#2.4-get-results)
     5. [Get predictions CSV](#2.5-get-predictions)
 3. [TSFRESH + XGBOOST](#3-tsfresh)
 4. [Fusion](#4-fusion)
@@ -117,7 +119,7 @@ The following steps will vary a lot depending on what ivector you want to create
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_trem_auto30_noinact_laureano -o /export/b19/mpgill/outputs/outputs_trem_auto30_noinact_laureano runFor.sh`
 
 <a name="2.4-get-results"></a>
-### 2.4 Get results on test folds
+### 2.4 Get results on test folds for SVR
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. If you are looking for more manual way of getting results without running `runFor.sh`, there is some documentation in [this wiki page](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4--Manual-Evaluation-Alternatives).
 
@@ -143,7 +145,7 @@ So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
 <a name="2.5-get-predictions"></a>
-### Get Predictions CSV 
+### 2.5 Get Predictions CSV 
 
 ### Per Patient SVR 
 
