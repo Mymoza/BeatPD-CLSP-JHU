@@ -7,8 +7,10 @@ This GitHub repository contains the code to reproduce the results obtained by th
 
 This step-by-step guide will cover the following steps: 
 
-- [Prepare the data](#1-prepare-data)
-- Approach I :  [AutoEncoder (AE)](#2.2.2-get-ae-features)+ [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
+🔴TODO : Fix because the Approach number are inversed from the write up 
+
+- [Data Pre-Processing](#1-data-pre-processing)
+- Approach I :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
 - Approach II : [TSFRESH + XGBOOST](#3-tsfresh)
 - Approach III : [Fusion](#4-fusion)
 
@@ -27,8 +29,8 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
-<a name="1-prepare-data"></a>
-## Prepare the data 
+<a name="1-data-pre-processing"></a>
+## Data Pre-Processing 
 
 All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
 
@@ -288,7 +290,7 @@ Prepare the environment and create a symbolic link:
 1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
 2. `cd tsfresh/submit/`
 3. `conda create -n BeatPD_xgboost`
-4. `source activate BeatPD`
+4. `source activate BeatPD_xgboost`
 4. `conda install --file requirements_tsfresh_xgboost.txt`
 
 As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
