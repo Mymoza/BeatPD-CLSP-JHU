@@ -83,11 +83,9 @@ We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `c
  
 After creating Autoencoder features or the MFCC, we can create i-vectors. 
 
-You need to have install [Kaldi](https://kaldi-asr.org) using either [official install instructions](https://kaldi-asr.org/doc/install.html) or [easy install instructions]((http://jrmeyer.github.io/asr/2016/01/26/Installing-Kaldi.html) if you find the official one difficult to follow.
+You need to install [Kaldi](https://kaldi-asr.org) using either [official install instructions](https://kaldi-asr.org/doc/install.html) or [easy install instructions](http://jrmeyer.github.io/asr/2016/01/26/Installing-Kaldi.html) if you find the official one difficult to follow.
 
-The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` for the 4th submission. 
-
-🛑TODO: Write down which ones we need to create for the final submission
+The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_orig_auto60_400fl` for the 4th submission.
 
 🛑TODO: Good vocabulary? 
 
@@ -104,6 +102,8 @@ The following steps will vary a lot depending on what i-vector you want to creat
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
     - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats={path-to-AE-features}/AE_30ft_orig_inactivity_removed` 
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
+
+🔴TODO : remove qsub instructions? 
 
 <a name="2.4-get-results"></a>
 ### Get results on test folds for SVR
@@ -136,8 +136,6 @@ For the other back-ends, you still need to get the results by hand like it was e
 ### Per Patient SVR 
 
 #### Option 1 - For the test subset of the challenge 
-
-🛑TODO: Make sure these are the right steps with Laureano 
 
 1. `cd` to the i-vector location, for example `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
 2. In the file `<your-path-to-github-repo>/beatPDivec/default_data/v2_auto/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
@@ -191,7 +189,7 @@ The dictionary for best_config is obtained in this file:
 
 **Submission 4**
 
-Again, for this one, we made the mistake of using the best hyperparaneters for Per Patient tuned on `dysk_auto60_400fl_orig` but applied to the wrong features on the test subset : `dysk_auto30_400fl_orig_inactivity_removed`.
+For this submission, we made the mistake of using the best hyperparameters for Per Patient tuned on `dysk_auto60_400fl_orig` but applied to the wrong features on the test subset : `dysk_auto30_400fl_orig_inactivity_removed`. But similar cross-validation results were obtained on both these i-vectors.
 
 We used : 
 ```
@@ -255,9 +253,9 @@ For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit
 |-- run_perpatient.sh : CIS-PD - Submission 4 - run the tsfresh + xgboost scheme with per patient tuning
 |-- run_realpd.sh : REAL-PD - Submission 4 - run the tsfresh + xgboost scheme without per patient tuning  
 |
-|-- conf: ?
-|-- data: ?
-     |-- label.csv : ??? 
+|-- conf: 
+|-- data: Challenge data
+     |-- label.csv  
 |-- exp: Feature extraction jobs that were divided in 32 subsets
 |-- features: Folder containing the extracted features
      |-- cis-pd.training.csv
@@ -309,10 +307,6 @@ For REAL-PD, it was watch_gyr tremor.
 
 For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
 
-🔴 TODO: Compare myself the results in my predictions vs the one 
-
-🔴 TODO: Write how to get kfold_predictions on the kfold and not just on the test subset of the challenge
-
 ### Dyskinesia & On/Off - Submission 4 - CIS-PD
 
 The following performs per Patient Tuning.
@@ -339,12 +333,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 `sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
 
-🦠 Test: without early stop criteria 
-
 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
-
-🛑TODO: When I reproduce the experiments, do I get the same hyperparameters as Nanxin? 
-
 
 <a name="4-fusion"></a>
 ## Approach III : Fusion
