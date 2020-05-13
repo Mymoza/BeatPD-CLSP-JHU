@@ -9,7 +9,6 @@ recog_set="cis-pd.training cis-pd.testing"
 nj=32
 logdir=exp
 
-#source /export/b16/nchen/pytorch/bin/activate
 conda activate BeatPD_xgboost 
 
 ################################################
@@ -36,20 +35,20 @@ done
 i=0; for pid in "${pids[@]}"; do wait ${pid} || ((++i)); done
 [ ${i} -gt 0 ] && echo "$0: ${i} background jobs are failed." && false
 
-#for rtask in ${recog_set}; do
-#  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
-#done
-#echo "Finished"
+for rtask in ${recog_set}; do
+  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
+done
+echo "Finished"
 
 ############################
 # Performs grid search
 ###########################
 
-#echo "Starting PerPatient Gridsearch" 
-#python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv data/label.csv
-#python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv data/label.csv
-#python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv data/label.csv
-#echo "End of the PerPatient Gridsearch"
+echo "Starting PerPatient Gridsearch" 
+python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv data/label.csv
+python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv data/label.csv
+python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv data/label.csv
+echo "End of the PerPatient Gridsearch"
 
 ##########################
 #generate submission files
