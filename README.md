@@ -16,7 +16,27 @@ For the final submission, we submitted:
     
 <br>
 
-This README walks you through re-creating our final submission. If you would like to re-create all submissions, please follow our [wiki documentation](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up). The wiki also contains detailed explanation of all our approaches.
+This README walks you through re-creating our final submission. If you would like to re-create all submissions, please follow our [wiki documentation](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up). 
+
+<br>
+
+## Approaches
+We have followed 3 approaches during the course of all our submissions :
+Please note that due to a lack of development dataset, for all approaches, we performed 5-fold cross-validation and analyzed results of each dataset (CIS-PD and Real-PD) separately.
+
+- Approach I : TSFRESH + XGBOOST
+
+tsfresh extracts statistical data features from the signal and xgboost handles tabular data extraction and uses decision trees to select important features and combine them to make strong predictions.
+
+- Approach II :  AutoEncoder (AE)
+
+The problem with using Deep Neural Network-based techniques directly on signals from wearble devices is that there is only one label for a 20 minute file. So, the first step is to reduce the raw singal to features. We used an DNN based auto-encoder (AE) to extract features. Later we use respresentatial learning method called `i-vector` to represent the features in a compact way (all signals are mapped to its respresentive vector of a fixed size, regardless of the length of the signal). In this way, we used a combination of trained AE and i-vector extractor to obtain a single vector per measurement. Using i-vectors as features, we used Support Vector Regression (SVR) with linear kernel to predict the labels
+
+- Approach III : Fusion
+
+A fusion of the predictions from Approach 1 (tsfresh + xgboost) and Approach 2 (autoencoder-ivectors-SVR) was done using gradient boosting regression. The regressor was trained with the predicted labels from the testing folds from cross-validations.
+
+
 <br>
 
 # Step-By-Step guide 
@@ -24,9 +44,7 @@ This README walks you through re-creating our final submission. If you would lik
 This step-by-step guide will cover the following steps: 
 - [Set up the environment](#0-set-up-env)
 - [Data Pre-Processing](#1-data-pre-processing)
-- Approach I : [TSFRESH + XGBOOST](#3-tsfresh)
-- Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
-- Approach III : [Fusion](#4-fusion)
+
 
 <hr>
 
