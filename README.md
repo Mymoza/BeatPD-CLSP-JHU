@@ -24,7 +24,7 @@ For the final submission, we submitted:
     
 <br>
 
-This README walks you through re-creating our final submission. If you would like to re-create all submissions, please follow our [wiki documentation](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up). 
+This README walks you through re-creating our final submission. For detailed write-up and to re-create all submissions, please follow our [wiki documentation](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up). 
 
 <br>
 
