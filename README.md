@@ -13,6 +13,8 @@ This step-by-step guide will cover the following steps:
 - Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
 - Approach III : [Fusion](#4-fusion)
 
+[[https://github.com/Mymoza/BeatPD-CLSP-JHU/blob/master/images/all_approaches.png]]
+
 <hr>
 
 ## Set up the environment : 
