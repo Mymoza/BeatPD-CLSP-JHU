@@ -1,6 +1,6 @@
 # BEATPD 
 
-This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. The challenge had 4 submission rounds before the final submission (hereafter addressed as 1<sup>st</sup> submission, 2<sup>nd</sup> submission, 3<sup>rd</sup> submission, 4<sup>th</sup> submission, final submission)
+This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. The challenge had 4 submission rounds before the final submission (hereafter addressed as 1st submission, 2nd submission, 3rd submission, 4th submission, final submission)
 <br>
 
 For the final submission, we submitted:
@@ -22,8 +22,7 @@ This README walks you through re-creating our final submission. If you would lik
 # Step-By-Step guide 
 
 This step-by-step guide will cover the following steps: 
-
-
+- [Set up the environment](#0-set-up-env)
 - [Data Pre-Processing](#1-data-pre-processing)
 - Approach I : [TSFRESH + XGBOOST](#3-tsfresh)
 - Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
@@ -31,14 +30,17 @@ This step-by-step guide will cover the following steps:
 
 <hr>
 
+<a name="0-set-up-env"></a>
 ## Set up the environment : 
+We use python for majority of our scripts. We use jupyter notebook to facilitate an interactive envirnment. To run our scripts, please create an environment using `requirements.txt` file by following these steps:
+
 ```
 $ conda create -n BeatPD python=3.5
 $ source activate BeatPD 
 $ conda install --file requirements.txt
 ```
 
-Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
+<b>Note:</b> Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
 
 If the conda environment isn't showing in Jupyter kernels (Kernel > Change Kernel > BeatPD), run: 
 ```
