@@ -144,7 +144,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
 
 
-
+<hr>
 
 ##  Approach II
 
@@ -351,8 +351,8 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 
 
 
-
 <hr>
+
 <a name="4-fusion"></a>
 ## Approach III : Fusion
 
@@ -380,6 +380,8 @@ Overall MSE Classif. 2 - ivec:  None
 Final score :  0.48601343286255055
 Overall MSE Fusion - average :  None
 ```
+
+<hr>
 
 
 # References 
