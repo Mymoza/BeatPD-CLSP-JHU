@@ -14,10 +14,10 @@ The challenge had 4 submission rounds before the final submission. Hereafter, th
 For the final submission, we submitted:
 - `ON/OFF`:
     - CIS-PD: same as 3rd submission + foldaverage
-    - REAL-PD: same as 4th submission + foldaverage 
+    - REAL-PD: same as 3rd submission + foldaverage 
 - `Tremor`:
     - CIS-PD: same as 3rd submission
-    - REAL-PD: same as 4th submission
+    - REAL-PD: same as 3rd submission
 - `Dyskinesia`:
     - CIS-PD: same as 4th submission
     - REAL-PD: same as 4th submission
@@ -241,7 +241,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 `sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
 
-🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
+<!-- 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be --!>
 
 
 <hr>
@@ -286,8 +286,6 @@ We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `c
  
 After creating Autoencoder features or the MFCC, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_orig_auto60_400fl` for the 4th submission.
 
-🛑TODO: Good vocabulary? 
-
 1. `cd <your-path-to-kaldi>/kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the i-vectors. 
 3.  `cp <your-path-github-repo>/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
@@ -301,8 +299,6 @@ After creating Autoencoder features or the MFCC, we can create i-vectors. The fo
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
     - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats={path-to-AE-features}/AE_30ft_orig_inactivity_removed` 
 11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
-
-🔴TODO : remove qsub instructions? 
 
 <a name="2.4-get-results"></a>
 ### Get results on test folds for SVR
@@ -441,8 +437,6 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
-
-
 
 
 
