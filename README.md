@@ -14,6 +14,7 @@ This step-by-step guide will cover the following steps:
 - Approach III : [Fusion](#4-fusion)
 
 <hr>
+
 ## Set up the environment : 
 ```
 $ conda create -n BeatPD python=3.5
@@ -30,6 +31,7 @@ $ ipython kernel install --user --name=BeatPD
 You will then be able to select `BeatPD` as your kernel. 
 
 <hr>
+
 <a name="1-data-pre-processing"></a>
 ## Data Pre-Processing 
 
@@ -45,6 +47,7 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
 <hr>
+
 <a name="3-tsfresh"></a>
 ##  Approach I : tsfresh + xgboost  
 
