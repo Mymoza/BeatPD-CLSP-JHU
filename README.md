@@ -1,7 +1,23 @@
 # BEATPD 
 
-This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. The challenge had 4 submission rounds and the documentation addresses all four, focussing on the final (4<sup>th</sup>) submission. For detailed explanation regarding the methods, please refer to [documentation on wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-WriteUp). 
+This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. The challenge had 4 submission rounds before the final submission (hereafter addressed as 1<sup>st</sup> submission, 2<sup>nd</sup> submission, 3<sup>rd</sup> submission, 4<sup>th</sup> submission, final submission)
+<br>
 
+For the final submission, we submitted:
+- `ON/OFF`:
+    - CIS-PD: same as 4th submission
+    - REAL-PD: same as 4th submission
+- `Tremor`:
+    - CIS-PD: same as 3rd submission
+    - REAL-PD: same as 4th submission
+- `Dyskinesia`:
+    - CIS-PD: same as 4th submission
+    - REAL-PD: same as 4th submission
+    
+<br>
+
+This README walks you through re-creating our final submission. If you would like to re-create all submissions, please follow our [wiki documentation](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up). The wiki also contains detailed explanation of all our approaches.
+<br>
 
 # Step-By-Step guide 
 
@@ -85,17 +101,17 @@ For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit
 |
 |-- submission: Folder containing the CSV files with predictions to submit
 |-- submit.sh: ? 
-|-- utils: soft link to kaldi/egs/wsj/s5/utils/
+|-- utils: soft link to <your_path_to_kaldi>/kaldi/egs/wsj/s5/utils/
 ```
 Prepare the environment and create a symbolic link:
 
-1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
-2. `cd tsfresh/submit/`
+1. Create a softlink to `<your_path_to_kaldi>/kaldi/egs/wsj/s5/utils/` at `<your-path-to-AE-features>/tsfresh/submit/utils/` using `ln -s <your_path_to_kaldi>/kaldi/egs/wsj/s5/utils/ to <your-path-to-AE-features>/tsfresh/submit/utils/`
+2. `cd <your-path-to-AE-features>/tsfresh/submit/`
 3. `conda create -n BeatPD_xgboost`
 4. `source activate BeatPD_xgboost`
 4. `conda install --file requirements_tsfresh_xgboost.txt`
 
-As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
+As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4<sup>th </sup> submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
 
 The following sections explains how to reproduce our final submission. 
 
