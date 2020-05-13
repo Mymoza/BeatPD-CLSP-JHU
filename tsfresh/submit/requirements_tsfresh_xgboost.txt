@@ -85,7 +85,7 @@ statsmodels==0.9.0
 tblib==1.6.0
 tensorboard==1.11.0
 tensorboardX==1.1
-tensorflow==1.11.0
+tensorflow==1.15.2
 tensorflow-cpu==0.0.0
 termcolor==1.1.0
 Theano==1.0.3
