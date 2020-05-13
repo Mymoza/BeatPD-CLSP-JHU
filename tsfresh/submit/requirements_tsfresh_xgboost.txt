@@ -99,7 +99,7 @@ tsfresh==0.14.2.dev2+g74b3f2b
 tsnecuda==2.1.0
 Unidecode==1.0.22
 urllib3==1.23
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 wrapt==1.10.11
 xgboost==1.0.2
 zict==2.0.0
