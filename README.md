@@ -59,7 +59,7 @@ This step-by-step guide will cover the following steps:
 - [Clone our repository from git](#git-clone)
 - [Set up the environment](#0-set-up-env)
 - [Data Pre-Processing](#1-data-pre-processing)
-- [Code for all approaches](#2-basic-prep)
+- [Code for all approaches](#2-code)
     - Approach I : [TSFRESH + XGBOOST](#3-tsfresh)
     - Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
     - Approach III : [Fusion](#4-fusion)
@@ -134,7 +134,7 @@ For the final submission, we submitted:
 <hr>
 <br>
 
-<a name="#-basic-prep"></a>
+<a name="2-code"></a>
 ## Code for all approaches
 
 <a name="3-tsfresh"></a>
