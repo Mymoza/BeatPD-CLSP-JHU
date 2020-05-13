@@ -115,22 +115,6 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 
 
 <br>
-
-For the final submission, we submitted:
-- `ON/OFF`:
-    - CIS-PD: same as 4th submission
-    - REAL-PD: same as 4th submission
-- `Tremor`:
-    - CIS-PD: same as 3rd submission
-    - REAL-PD: same as 4th submission
-- `Dyskinesia`:
-    - CIS-PD: same as 4th submission
-    - REAL-PD: same as 4th submission
-    
-<br>
-
-
-<br>
 <hr>
 <br>
 
