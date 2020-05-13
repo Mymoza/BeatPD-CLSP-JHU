@@ -179,7 +179,7 @@ Prepare the environment and create a symbolic link:
 
 
 
-###  Approach II (AE + i-vector + SVR)
+###  - Approach II (AE + i-vector + SVR)
 
 <a name="2-embeddings"></a>
 ### AutoEncoder (AE) features 
@@ -364,7 +364,7 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 
 <a name="4-fusion"></a>
 
-## Approach III : Fusion
+## - Approach III : Fusion
 
 For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
 
