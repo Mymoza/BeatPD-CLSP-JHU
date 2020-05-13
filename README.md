@@ -30,6 +30,9 @@ This README walks you through re-creating our final submission. If you would lik
 
 ## Approaches
 We have followed 3 approaches during the course of all our submissions :
+
+[[https://github.com/Mymoza/BeatPD-CLSP-JHU/blob/master/images/all_approaches.png | Summary of the three approaches followed]]
+
 Please note that due to a lack of development dataset, for all approaches, we performed 5-fold cross-validation and analyzed results of each dataset (CIS-PD and Real-PD) separately.
 
 - <b> Approach I : TSFRESH + XGBOOST </b> 
