@@ -1,6 +1,6 @@
 # BEATPD 
 
-This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. 
+This GitHub repository contains the code to reproduce the results obtained by the team JHU-CLSP during the BeatPD challenge. The challenge had 4 submission rounds and the documentation addresses all four, focussing on the final (4<sup>th</sup>) submission. For detailed explanation regarding the methods, please refer to <Link_to_wiki>. 
 
 
 # Step-By-Step guide 
