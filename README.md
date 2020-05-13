@@ -241,8 +241,9 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 `sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
 
-<!-- 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be --!>
-
+<!---
+ 🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be
+-->
 
 <hr>
 
