@@ -131,7 +131,7 @@ The steps here decribe the basic code and set-up to run the three approaches.
 
 
 <a name="3-tsfresh"></a>
-###  Approach I : tsfresh + xgboost  
+###  - Approach I : tsfresh + xgboost  
 
 For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
 
