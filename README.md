@@ -87,7 +87,9 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
+<br>
 <hr>
+<br>
 
 <a name="1-data-pre-processing"></a>
 ## Data Pre-Processing 
@@ -115,7 +117,9 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
     - REAL-PD: same as 4th submission
 
 
+<br>
 <hr>
+<br>
 
 <a name="#-basic-prep"></a>
 ## Basic Prepartion for all approaches
@@ -362,8 +366,11 @@ For the second and fourth submission, we performed some fusion of the prediction
 
 The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
 
+<br>
+<hr>
+<br>
 
-##  Reproducing results for final submission
+#  Reproducing results for final submission
 
 ### Reproducing results for Approach I (tsfresh + xgboost)
 
@@ -468,7 +475,9 @@ Final score :  0.48601343286255055
 Overall MSE Fusion - average :  None
 ```
 
+<br>
 <hr>
+<br>
 
 
 # References 
