@@ -7,11 +7,10 @@ This GitHub repository contains the code to reproduce the results obtained by th
 
 This step-by-step guide will cover the following steps: 
 
-🔴TODO : Fix because the Approach number are inversed from the write up 
 
 - [Data Pre-Processing](#1-data-pre-processing)
-- Approach I :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
-- Approach II : [TSFRESH + XGBOOST](#3-tsfresh)
+- Approach I : [TSFRESH + XGBOOST](#3-tsfresh)
+- Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
 - Approach III : [Fusion](#4-fusion)
 
 ## Set up the environment : 
@@ -43,7 +42,106 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ```
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
-##  Approach I
+
+<a name="3-tsfresh"></a>
+##  Approach I : tsfresh + xgboost  
+
+For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
+
+```
+|-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
+|-- run_perpatient.sh : CIS-PD - Submission 4 - run the tsfresh + xgboost scheme with per patient tuning
+|-- run_realpd.sh : REAL-PD - Submission 4 - run the tsfresh + xgboost scheme without per patient tuning  
+|
+|-- conf: 
+|-- data: Challenge data
+     |-- label.csv  
+|-- exp: Feature extraction jobs that were divided in 32 subsets
+|-- features: Folder containing the extracted features
+     |-- cis-pd.training.csv
+     |-- cis-pd.testing.csv 
+|
+|-- mdl:
+     |-- cis-pd.conf : best config for the three subchallenges 
+     |-- cis-pd.****.conf : best config tuned per patient for the three subchallenges 
+|
+|-- src: Folder containing the files to generate features and predictions 
+     |
+     |--- generator.py: Feature extraction for CIS 
+     |
+     |--- gridsearch.py: Find best hyperparams and save them to a file
+                         (same params for all subjects)
+     |
+     |--- gridsearch_perpatient.py: Find best hyperparams for each subject
+                                    and save them to a file
+     |
+     |--- predict.py: Predicts and creates submission files
+     |--- predict_perpatient.py: Predict with perpatient tuning 
+|
+|-- submission: Folder containing the CSV files with predictions to submit
+|-- submit.sh: ? 
+|-- utils: soft link to kaldi/egs/wsj/s5/utils/
+```
+Prepare the environment and create a symbolic link:
+
+1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
+2. `cd tsfresh/submit/`
+3. `conda create -n BeatPD_xgboost`
+4. `source activate BeatPD_xgboost`
+4. `conda install --file requirements_tsfresh_xgboost.txt`
+
+As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
+
+The following sections explains how to reproduce our final submission. 
+
+### Tremor - Submission 3 for CIS-PD
+1. In `run.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
+2. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
+    - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
+    - Then it will perform a GridSearch, saving the best config 
+    - Finally, it will create predictions files to be submitted in the `submission/` folder.  
+
+The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
+
+For CIS-PD, the best performance was obtained with tremor. 
+For REAL-PD, it was watch_gyr tremor. 
+
+For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
+
+### Dyskinesia & On/Off - Submission 4 - CIS-PD
+
+The following performs per Patient Tuning.
+
+1. In `run_perpatient.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
+2. `./run_perpatient.sh`
+    - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
+    - Then, it will create predictions files to be submitted, in the `submission` folder like so : `submission/cis-pd.on_off.perpatient.csv`. 
+
+
+### Tremor, Dyskinesia & On/Off - Submission 4 - REAL-PD **
+
+The 4th submission of REAL-PD used gridsearch and global normalization.
+
+1. In `run_realpd.sh`, edit the absolute path hardcoded to the REAL-PD labels and write your own path to the labels you downloaded from the website of the challenge. 
+2. Run `./run_realpd.sh`
+    - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
+    - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
+    - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
+
+**Stop criteria on training data:**
+
+For the 4th submission, we performed early stop with the training data, as that led to some small improvements. To do so, you need to change two lines in the file `src/predict.py`. 
+
+`eval_set=[(tr, tr_y), (te, te_y)]` becomes `eval_set=[(tr, tr_y)]`
+
+`sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
+
+🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
+
+
+
+
+##  Approach II
 
 <a name="2-embeddings"></a>
 ### AutoEncoder (AE) features 
@@ -243,100 +341,12 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
 
-<a name="3-tsfresh"></a>
-##  Approach II : tsfresh + xgboost  
-
-For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
-
-```
-|-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
-|-- run_perpatient.sh : CIS-PD - Submission 4 - run the tsfresh + xgboost scheme with per patient tuning
-|-- run_realpd.sh : REAL-PD - Submission 4 - run the tsfresh + xgboost scheme without per patient tuning  
-|
-|-- conf: 
-|-- data: Challenge data
-     |-- label.csv  
-|-- exp: Feature extraction jobs that were divided in 32 subsets
-|-- features: Folder containing the extracted features
-     |-- cis-pd.training.csv
-     |-- cis-pd.testing.csv 
-|
-|-- mdl:
-     |-- cis-pd.conf : best config for the three subchallenges 
-     |-- cis-pd.****.conf : best config tuned per patient for the three subchallenges 
-|
-|-- src: Folder containing the files to generate features and predictions 
-     |
-     |--- generator.py: Feature extraction for CIS 
-     |
-     |--- gridsearch.py: Find best hyperparams and save them to a file
-                         (same params for all subjects)
-     |
-     |--- gridsearch_perpatient.py: Find best hyperparams for each subject
-                                    and save them to a file
-     |
-     |--- predict.py: Predicts and creates submission files
-     |--- predict_perpatient.py: Predict with perpatient tuning 
-|
-|-- submission: Folder containing the CSV files with predictions to submit
-|-- submit.sh: ? 
-|-- utils: soft link to kaldi/egs/wsj/s5/utils/
-```
-Prepare the environment and create a symbolic link:
-
-1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
-2. `cd tsfresh/submit/`
-3. `conda create -n BeatPD_xgboost`
-4. `source activate BeatPD_xgboost`
-4. `conda install --file requirements_tsfresh_xgboost.txt`
-
-As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
-
-The following sections explains how to reproduce our final submission. 
-
-### Tremor - Submission 3 for CIS-PD
-1. In `run.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
-2. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
-    - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
-    - Then it will perform a GridSearch, saving the best config 
-    - Finally, it will create predictions files to be submitted in the `submission/` folder.  
-
-The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
-
-For CIS-PD, the best performance was obtained with tremor. 
-For REAL-PD, it was watch_gyr tremor. 
-
-For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
-
-### Dyskinesia & On/Off - Submission 4 - CIS-PD
-
-The following performs per Patient Tuning.
-
-1. In `run_perpatient.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
-2. `./run_perpatient.sh`
-    - It will perform `gridsearch_perpatient.py` on every task. It will create files in `mdl/cis-pd.on_off.1004.conf`
-    - Then, it will create predictions files to be submitted, in the `submission` folder like so : `submission/cis-pd.on_off.perpatient.csv`. 
 
 
-### Tremor, Dyskinesia & On/Off - Submission 4 - REAL-PD **
 
-The 4th submission of REAL-PD used gridsearch and global normalization.
 
-1. In `run_realpd.sh`, edit the absolute path hardcoded to the REAL-PD labels and write your own path to the labels you downloaded from the website of the challenge. 
-2. Run `./run_realpd.sh`
-    - This will create features in `exp/`, then merge will merge them, like this: `features/watchgyr_total.scp.csv`
-    - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
-    - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
 
-**Stop criteria on training data:**
 
-For the 4th submission, we performed early stop with the training data, as that led to some small improvements. To do so, you need to change two lines in the file `src/predict.py`. 
-
-`eval_set=[(tr, tr_y), (te, te_y)]` becomes `eval_set=[(tr, tr_y)]`
-
-`sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
-
-🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be 
 
 <a name="4-fusion"></a>
 ## Approach III : Fusion
