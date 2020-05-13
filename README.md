@@ -46,7 +46,9 @@ The problem with using Deep Neural Network-based techniques directly on signals 
 
 - <b>  Approach III : Fusion </b> 
 
-A fusion of the predictions from Approach I and Approach II  was done using gradient boosting regression. The regressor was trained with the predicted labels from the testing folds from cross-validations.
+A fusion of the predictions from Approach I and Approach II was done using either: 
+-  Gradient boosting regression. The regressor was trained with the predicted labels from the testing folds from cross-validations.
+- Average of predictions
 
 
 <br>
