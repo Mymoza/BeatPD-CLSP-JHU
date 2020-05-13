@@ -219,7 +219,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 
 <hr>
 
-##  Approach II
+##  Approach II : AE + i-vectors + SVR
 
 <a name="2-embeddings"></a>
 ### AutoEncoder (AE) features 
