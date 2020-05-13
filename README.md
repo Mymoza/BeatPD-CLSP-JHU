@@ -466,10 +466,6 @@ Final score :  0.48601343286255055
 Overall MSE Fusion - average :  None
 ```
 
-<hr>
-
-```
-
 
 <br>
 <hr>
