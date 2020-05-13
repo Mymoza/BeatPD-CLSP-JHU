@@ -40,7 +40,7 @@ Please note that due to a lack of development dataset, for all approaches, we pe
 
 tsfresh extracts statistical data features from the signal and xgboost handles tabular data extraction and uses decision trees to select important features and combine them to make strong predictions.
 
-- <b> Approach II :  AutoEncoder (AE) + i-vector + Support Vector Regression (SVR) </b> 
+- <b> Approach II :  AE + i-vector + Support Vector Regression (SVR) </b> 
 
 The problem with using Deep Neural Network-based techniques directly on signals from wearble devices is that there is only one label for a 20 minute file. So, the first step is to reduce the raw signal to features. We used an DNN based auto-encoder (AE) to extract features. Later we use respresentatial learning method called `i-vector` to convert the features into a vector of fixed size, regardless of the length of the signal. In this way, we used a combination of trained AE and i-vector extractor to obtain a single (fixed sized) vector per signal. Using i-vectors as features, we used Support Vector Regression (SVR) with linear kernel to predict the labels.
 
