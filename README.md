@@ -46,7 +46,7 @@ The problem with using Deep Neural Network-based techniques directly on signals 
 
 - <b>  Approach III : Fusion </b> 
 
-A fusion of the predictions from Approach 1 and Approach 2  was done using gradient boosting regression. The regressor was trained with the predicted labels from the testing folds from cross-validations.
+A fusion of the predictions from Approach I and Approach II  was done using gradient boosting regression. The regressor was trained with the predicted labels from the testing folds from cross-validations.
 
 
 <br>
@@ -91,6 +91,10 @@ $ ipython kernel install --user --name=BeatPD
 ```
 You will then be able to select `BeatPD` as your kernel. 
 
+## Install kaldi :
+
+You need to install [Kaldi](https://kaldi-asr.org). For installation, you can use either the [official install instructions](https://kaldi-asr.org/doc/install.html) or  the [easy install instructions](http://jrmeyer.github.io/asr/2016/01/26/Installing-Kaldi.html) if you find the official one difficult to follow.
+
 <br>
 <hr>
 <br>
@@ -109,7 +113,10 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 ```
 3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
-<hr>
+
+<br>
+
+For the final submission, we submitted:
 - `ON/OFF`:
     - CIS-PD: same as 4th submission
     - REAL-PD: same as 4th submission
@@ -119,6 +126,8 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 - `Dyskinesia`:
     - CIS-PD: same as 4th submission
     - REAL-PD: same as 4th submission
+    
+<br>
 
 
 <br>
@@ -182,13 +191,13 @@ Prepare the environment and create a symbolic link:
 ###  - Approach II (AE + i-vector + SVR)
 
 <a name="2-embeddings"></a>
-### AutoEncoder (AE) features 
-
+### PART A :  AutoEncoder (AE) features 
+First we obtain AE features, by following steps outlined as below:
 <a name="2.2.1-train-ae"></a>
 
-#### Train the AutoEncoder 
+#### Step 1) Train the AutoEncoder 
 
-1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
+1. The code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
 2. `conda env create --file environment_ae.yml` : This will create the `keras_tf2` environment you need to run AE experiments.
 3. Train an AE model & save their features:
     - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the AE models. 
@@ -201,7 +210,7 @@ Prepare the environment and create a symbolic link:
 
 <a name="2.2.2-get-ae-features"></a>
 
-#### Get AutoEncoder (AE) Features 
+#### Step 2) Get AutoEncoder (AE) Features 
 
 1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
 2. `cd ml_dl`
@@ -211,13 +220,9 @@ Prepare the environment and create a symbolic link:
 
 
 <a name="2.3-create-i-vectors"></a>
-### Create i-vectors 
+### PART B :  Create i-vectors 
  
-After creating Autoencoder features or the MFCC, we can create i-vectors. 
-
-You need to install [Kaldi](https://kaldi-asr.org) using either [official install instructions](https://kaldi-asr.org/doc/install.html) or [easy install instructions](http://jrmeyer.github.io/asr/2016/01/26/Installing-Kaldi.html) if you find the official one difficult to follow.
-
-The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_orig_auto60_400fl` for the 4th submission.
+After creating Autoencoder features or the MFCC, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_orig_auto60_400fl` for the 4th submission.
 
 🛑TODO: Good vocabulary? 
 
@@ -233,14 +238,15 @@ The following steps will vary a lot depending on what i-vector you want to creat
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
     - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats={path-to-AE-features}/AE_30ft_orig_inactivity_removed` 
-11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
+11. We used `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh` as we run our system on the grid. If you are running locally, please use  `bash runFor.sh > outputs/outputs_dysk_noinact_auto30 2> errors/errors_dysk_noinact_auto30`
 
-🔴TODO : remove qsub instructions? 
+🔴TODO : Check if alternative qsub instructions are correct? 
 
 <a name="2.4-get-results"></a>
-### Get results on test folds for SVR
+### PART C :  Get results on test folds for SVR
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. 
+
 #### Manually - for one size of i-vector 
 The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
@@ -263,8 +269,8 @@ So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
 
 <a name="2.5-get-predictions"></a>
-### Get Predictions CSV 
 
+### PART C : Get Predictions CSV 
 
 ### Per Patient SVR 
 
