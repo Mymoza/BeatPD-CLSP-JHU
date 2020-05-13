@@ -46,6 +46,8 @@ A fusion of the predictions from Approach 1 and Approach 2  was done using gradi
 
 
 <br>
+<hr>
+<br>
 
 # Step-By-Step guide for setting up environment and data
 
@@ -58,7 +60,6 @@ This step-by-step guide will cover the following steps:
     - Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
     - Approach III : [Fusion](#4-fusion)
 
-<hr>
 
 <a name="git-clone"></a>
 ## Clone our repository from git :
@@ -121,7 +122,6 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 The steps here decribe the basic code and set-up to run the three approaches.
 
 
-
 <a name="3-tsfresh"></a>
 ###  Approach I : tsfresh + xgboost  
 
@@ -171,12 +171,13 @@ Prepare the environment and create a symbolic link:
 
 
 
-##  Approach II
+###  Approach II (AE + i-vector + SVR)
 
 <a name="2-embeddings"></a>
 ### AutoEncoder (AE) features 
 
 <a name="2.2.1-train-ae"></a>
+
 #### Train the AutoEncoder 
 
 1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
@@ -191,6 +192,7 @@ Prepare the environment and create a symbolic link:
 5. This should create the following file `mlp_encoder_uad_False_ld_60.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
 
 <a name="2.2.2-get-ae-features"></a>
+
 #### Get AutoEncoder (AE) Features 
 
 1. `git checkout marie_ml_dl_real`: The code to get features from the AutoEncoder is in another branch. 
@@ -353,6 +355,7 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 
 
 <a name="4-fusion"></a>
+
 ## Approach III : Fusion
 
 For the second and fourth submission, we performed some fusion of the predictions between an SVR and the xgboost. 
@@ -360,14 +363,15 @@ For the second and fourth submission, we performed some fusion of the prediction
 The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
 
 
+##  Reproducing results for final submission
 
-##  Reproduce Approach I (tsfresh + xgboost) for final submission
+### Reproducing results for Approach I (tsfresh + xgboost)
 
 As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4<sup>th </sup> submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
 
 The following sections explains how to reproduce our final submission. 
 
-### CIS-PD - Tremor  (same as 3rd Submission)
+#### CIS-PD - Tremor  (same as 3rd Submission)
 1. In `run.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
 2. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
     - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
@@ -381,7 +385,7 @@ For REAL-PD, it was watch_gyr tremor.
 
 For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
 
-### CIS-PD - Dyskinesia & On/Off (same as 4th Submission)
+#### CIS-PD - Dyskinesia & On/Off (same as 4th Submission)
 
 The following performs per Patient Tuning.
 
@@ -391,7 +395,7 @@ The following performs per Patient Tuning.
     - Then, it will create predictions files to be submitted, in the `submission` folder like so : `submission/cis-pd.on_off.perpatient.csv`. 
 
 
-### REAL-PD - Tremor, Dyskinesia & On/Off (same as Submission 4) **
+#### REAL-PD - Tremor, Dyskinesia & On/Off (same as Submission 4) **
 
 The 4th submission of REAL-PD used gridsearch and global normalization.
 
@@ -415,7 +419,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 <hr>
 
 
-##  Reproduce Approach I (tsfresh + xgboost) for final submission (which is same as 4th Submission with rectified mistakes)
+###  Reproduce Approach I (tsfresh + xgboost) for final submission (which is same as 4th Submission with rectified mistakes)
 To reproduce it, you will need to create the following:
 - `AE_30ft_orig_inactivity_removed`
 - `cis_testing_AE_30ft_orig_inactivity_removed`
