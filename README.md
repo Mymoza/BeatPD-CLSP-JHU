@@ -13,8 +13,8 @@ The challenge had 4 submission rounds before the final submission. Hereafter, th
 
 For the final submission, we submitted:
 - `ON/OFF`:
-    - CIS-PD: same as 4th submission
-    - REAL-PD: same as 4th submission
+    - CIS-PD: same as 3rd submission + foldaverage
+    - REAL-PD: same as 4th submission + foldaverage 
 - `Tremor`:
     - CIS-PD: same as 3rd submission
     - REAL-PD: same as 4th submission
@@ -102,7 +102,23 @@ You need to install [Kaldi](https://kaldi-asr.org). For installation, you can us
 <a name="1-data-pre-processing"></a>
 ## Data Pre-Processing 
 
-All the steps to prepare the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
+First step is to prepare the data given by the challenge. 
+
+ 1. Download the training_data, the ancillary_data and the testing_data from the challenge website
+ 2. `mkdir BeatPD_data` Create a folder to contain all the files `.tar.bz2` you just downloaded for the challenge 
+ 3. `tar -xvf cis-pd.data_labels.tar.bz2; mv data_labels cis-pd.data_labels` it will extract a folder that we will rename to make it clear that it contains the label for the CIS-PD database 
+4. `tar -xvf real-pd.data_labels.tar.bz2; mv data_labels real-pd.data_labels`: same thing but for the REAL-PD database
+5. `rm -rf *.tar.bz2` : remove the compressed folders now that we have extracted the data we need. 
+6. `tar -xvf real-pd.training_data_updated.tar.bz2; mv training_data/ real-pd.training_data; rm  real-pd.training_data_updated.tar.bz2; 
+7. `tar -xvf cis-pd.training_data.tar.bz2; mv training_data/ cis-pd.training_data; rm cis-pd.training_data.tar.bz2;
+8. `tar -xvf cis-pd.ancillary_data.tar.bz2; mv ancillary_data/ cis-pd.ancillary_data; rm cis-pd.ancillary_data.tar.bz2;` 
+9. `tar -xvf real-pd.ancillary_data_updated.tar.bz2; mv ancillary_data real-pd.ancillary_data; rm real-pd.ancillary_data_updated.tar.bz2;` 
+10. `tar -xvf cis-pd.testing_data.tar.bz2; mv testing_data/ cis-pd.testing_data/; rm  cis-pd.testing_data.tar.bz2` 
+11. `tar -xvf real-pd.testing_data_updated.tar.bz2; mv testing_data/ real-pd.testing_data/; rm real-pd.testing_data_updated.tar.bz2;` 
+12. `mv cis-pd.CIS-PD_Test_Data_IDs.csv CIS-PD_Test_Data_IDs_Labels.csv; mv CIS-PD_Test_Data_IDs_Labels.csv cis-pd.data_labels/;` The labels for the test subset comes in just a `csv` file, so put that file in the `data_labels` folder. 
+13. `mv real-pd.REAL-PD_Test_Data_IDs.csv REAL-PD_Test_Data_IDs_Labels.csv; mv REAL-PD_Test_Data_IDs_Labels.csv real-pd.data_labels/` 
+
+All the steps to do pre-processing on the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
 
 1. Open the notebook
 2. Change the `data_dir` variable for the absolute path to the folder that contains the data given by the challenge. In this folder, you should already have the following directories downloaded from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/596118): 
@@ -171,6 +187,15 @@ Prepare the environment and create a symbolic link:
 As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
 
 The following sections explains how to reproduce our final submission. 
+
+### ON/OFF - Submission 5 (final submission) for CIS-PD and REAL-PD
+
+Instead of training one model on whole training set, we used our 5-fold to get five different models. We averaged predictions from those five models. The benefit of this approach is that for each model, we can use the test fold to do the early stop to avoid overfitting. Also combination of five systems may improve the overall performance.
+
+1. In `run_foldaverage.sh, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` and `REAL-PD_Test_Data_IDs_Labels.csv` that are currently hardcoded. 
+2. Run `run_foldaverage.sh`, which will run the necessary code for both databases. It will create the following files:
+    1. `submission/cis-pd.on_off_new.csv` files containing predictions on the test subset for CIS-PD.
+    2. `submission/<watchgyr - watchacc - phoneacc>_on_off.csv` : For REAL-PD on test subset 
 
 ### Tremor - Submission 3 for CIS-PD
 1. In `run.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
