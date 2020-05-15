@@ -27,19 +27,19 @@ test_fea = pd.merge(test_fea, test_sub, on=['measurement_id'], how='inner')
 subject_id = pd.get_dummies(test_fea.subject_id, columns='subject_id', prefix='spk_')
 test_fea = pd.concat([test_fea, subject_id], axis=1)
 
-#params = {
-#    "learning_rate": 0.05,
-#    "max_depth": 3,
-#    "n_estimators": 1000,
-#    "min_child_weight": 1,
-#    "colsample_bytree": 0.9,
-#    "subsample": 0.8,
-#    "nthread": 12,
-#    "random_state": 42,
-#    #"objective": "multi:softprob",
-#    #"num_class": 5
-#    "objective": "reg:squarederror",
-#}
+params = {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 1000,
+    "min_child_weight": 1,
+    "colsample_bytree": 0.9,
+    "subsample": 0.8,
+    "nthread": 12,
+    "random_state": 42,
+    #"objective": "multi:softprob",
+    #"num_class": 5
+    "objective": "reg:squarederror",
+}
 
 avg = al.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
 tr = pd.merge(al, avg, on='subject_id')
@@ -65,9 +65,9 @@ te_id = te.measurement_id
 te_sid = te.subject_id
 te = te.drop(['measurement_id', 'subject_id', 'prediction'], axis=1).astype(pd.np.float32)
 
-import pickle
-with open('mdl/real-pd.conf', 'rb') as f:
-    params=pickle.load(f)
+#import pickle
+#with open('mdl/real-pd.conf', 'rb') as f:
+#    params=pickle.load(f)
 
 clf = xgb.XGBRegressor(**params)
 #clf = xgb.XGBClassifier(**params)
