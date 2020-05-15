@@ -15,30 +15,30 @@ recog_set="cis-pd.training cis-pd.testing"
 nj=32
 logdir=exp
 
-#mkdir $logdir
-#export decode_cmd="utils/queue.pl --mem 4G"
-#set -e
+mkdir $logdir
+export decode_cmd="utils/queue.pl --mem 4G"
+set -e
 
-#for rtask in ${recog_set}; do
-#(
-#  split_segments=""
-#  for n in $(seq $nj); do
-#    split_segments="$split_segments $logdir/${rtask}.$n"
-#  done
+for rtask in ${recog_set}; do
+(
+  split_segments=""
+  for n in $(seq $nj); do
+    split_segments="$split_segments $logdir/${rtask}.$n"
+  done
 
-#  utils/split_scp.pl data/${rtask}.scp $split_segments
-#  ${decode_cmd} JOB=1:${nj} $logdir/${rtask}.JOB.log \
-#    ./submit.sh $logdir/${rtask}.JOB $logdir/${rtask}.JOB.csv
-#) &
-#pids+=($!) # store background pids
-#done
-#i=0; for pid in "${pids[@]}"; do wait ${pid} || ((++i)); done
-#[ ${i} -gt 0 ] && echo "$0: ${i} background jobs are failed." && false
+  utils/split_scp.pl data/${rtask}.scp $split_segments
+  ${decode_cmd} JOB=1:${nj} $logdir/${rtask}.JOB.log \
+    ./submit.sh $logdir/${rtask}.JOB $logdir/${rtask}.JOB.csv
+) &
+pids+=($!) # store background pids
+done
+i=0; for pid in "${pids[@]}"; do wait ${pid} || ((++i)); done
+[ ${i} -gt 0 ] && echo "$0: ${i} background jobs are failed." && false
 
-#for rtask in ${recog_set}; do
-#  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
-#done
-#echo "Finished"
+for rtask in ${recog_set}; do
+  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
+done
+echo "Finished"
 
 path_labels_cis=/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/
 
@@ -56,26 +56,26 @@ path_labels_real=/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_label
 export decode_cmd="utils/queue.pl --mem 4G"
 set -e
 
-#for rtask in ${recog_set}; do
-#(
-#  split_segments=""
-#  for n in $(seq $nj); do
-#    split_segments="$split_segments $logdir/${rtask}.$n"
-#  done
+for rtask in ${recog_set}; do
+(
+  split_segments=""
+  for n in $(seq $nj); do
+    split_segments="$split_segments $logdir/${rtask}.$n"
+  done
 
-#  utils/split_scp.pl data/${rtask} $split_segments
-#  ${decode_cmd} JOB=1:${nj} $logdir/${rtask}.JOB.log \
-#    ./submit_realpd.sh $logdir/${rtask}.JOB $logdir/${rtask}.JOB.csv
-#) &
-#pids+=($!) # store background pids
-#done
-#i=0; for pid in "${pids[@]}"; do wait ${pid} || ((++i)); done
-#[ ${i} -gt 0 ] && echo "$0: ${i} background jobs are failed." && false
+  utils/split_scp.pl data/${rtask} $split_segments
+  ${decode_cmd} JOB=1:${nj} $logdir/${rtask}.JOB.log \
+    ./submit_realpd.sh $logdir/${rtask}.JOB $logdir/${rtask}.JOB.csv
+) &
+pids+=($!) # store background pids
+done
+i=0; for pid in "${pids[@]}"; do wait ${pid} || ((++i)); done
+[ ${i} -gt 0 ] && echo "$0: ${i} background jobs are failed." && false
 
 # Merge the 32 subsets into one file features/watchgyr_total.csv
-#for rtask in ${recog_set}; do
-#  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
-#done
+for rtask in ${recog_set}; do
+  awk '{if(NR==1||FNR>1)print;}' $logdir/${rtask}.*.csv > features/${rtask}.csv
+done
 
 echo "Finished creating features"
 
