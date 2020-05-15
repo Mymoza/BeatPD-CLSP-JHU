@@ -86,21 +86,6 @@ python src/predict_realpd.py dyskinesia features/watchacc_total.scp.csv ${path_l
 #python src/predict_realpd.py on_off features/watchacc_total.scp.csv ${path_labels}/REAL-PD_Training_Data_IDs_Labels.csv features/watchacc_test.scp.csv ${path_labels}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv watchacc
 echo "End of predictions"
 
-echo "Section checking if there are differences between your submission files and the 4th submission of JHU-CLSP"
-echo "For REAL-PD 4th Submission"
-diff -q submission/phoneacc.tremor.csv submission4_preds/phoneacc.tremor.csv
-diff -q submission/watchgyr.tremor.csv submission4_preds/watchgyr.tremor.csv
-diff -q submission/watchacc.tremor.csv submission4_preds/watchacc.tremor.csv
-
-diff -q submission/phoneacc.dyskinesia.csv submission4_preds/phoneacc.dyskinesia.csv
-diff -q submission/watchgyr.dyskinesia.csv submission4_preds/watchgyr.dyskinesia.csv
-diff -q submission/watchacc.dyskinesia.csv submission4_preds/watchacc.dyskinesia.csv
-
-diff -q submission/phoneacc.on_off.csv submission4_preds/phoneacc.on_off.csv
-diff -q submission/watchgyr.on_off.csv submission4_preds/watchgyr.on_off.csv
-diff -q submission/watchacc.on_off.csv submission4_preds/watchacc.on_off.csv
-echo "End of the section checking if there is any difference between your submission files and the 3rd submission of JHU-CLSP"
-
 conda deactivate
 echo "End of run_realpd.sh"
 

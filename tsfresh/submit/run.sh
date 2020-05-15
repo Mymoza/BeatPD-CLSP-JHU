@@ -98,11 +98,11 @@ echo "Start to predict"
 echo "Tremor"
 # predict_realpd.py [tremor, on_off, dyskinesia] [features in csv file for subtype] [Real-PD Training Labels] [features in csv file for test subtype] [Real-PD Test Labels (measurement_id, subjects_id)] [watchgyr, phoneacc, watchacc]
 
-python src/predict_realpd_sub3.py tremor features/watchgyr_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/watchgyr_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv watchgyr
+python src/predict_realpd.py tremor features/watchgyr_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/watchgyr_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv watchgyr
 
-python src/predict_realpd_sub3.py tremor features/phoneacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/phoneacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv phoneacc
+python src/predict_realpd.py tremor features/phoneacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/phoneacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv phoneacc
 
-python src/predict_realpd_sub3.py tremor features/watchacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/watchacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv watchacc
+python src/predict_realpd.py tremor features/watchacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv features/watchacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv watchacc
 
 echo "End Tremor"
 
