@@ -46,9 +46,10 @@ conda activate BeatPD_xgboost
 ###########################
 
 echo "Starting PerPatient Gridsearch" 
-python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
-python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
-python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+# Commented this out because the best params we found & used are hardocded in the predict_perpatient.py file
+#python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+#python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+#python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
 echo "End of the PerPatient Gridsearch"
 
 ##########################

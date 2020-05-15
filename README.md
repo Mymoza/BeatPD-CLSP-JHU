@@ -20,7 +20,7 @@ For the final submission, we submitted:
     - REAL-PD: same as 3rd submission
 - `Dyskinesia`:
     - CIS-PD: same as 4th submission
-    - REAL-PD: same as 4th submission
+    - REAL-PD: same as 3rd submission
     
 <br>
 
@@ -142,7 +142,7 @@ cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.tra
 <a name="3-tsfresh"></a>
 ##  Approach I : tsfresh + xgboost  
 
-For this scheme, all the files are in `<your-path-to-AE-features>/tsfresh/submit/`. 
+For this scheme, all the files are in `<path-github-repo>/tsfresh/submit/`. 
 
 ```
 |-- run.sh : CIS-PD - Submission 3 - run the tsfresh + xgboost scheme without per patient tuning 
@@ -184,9 +184,10 @@ Prepare the environment and create a symbolic link:
 2. `cd tsfresh/submit/`
 3. `conda create -n BeatPD_xgboost`
 4. `source activate BeatPD_xgboost`
-4. `conda install --file requirements_tsfresh_xgboost.txt`
+5. `conda install --file requirements_tsfresh_xgboost.txt`
+6. In the data/ folder, add `BEAT-PD_SC1_OnOff_Submission_Template.csv`, `BEAT-PD_SC2_Dyskinesia_Submission_Template.csv` and `BEAT-PD_SC3_Tremor_Submission_Template.csv` downloaded from the challenge 
 
-As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, we used the 4th submission for the three tasks and the two databases, except for CIS-PD and tremor, we decided to go back to our 3rd submission results because that provided us better rankings in the intermediate rounds. 
+As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, 
 
 The following sections explains how to reproduce our final submission. 
 
@@ -199,7 +200,8 @@ Instead of training one model on whole training set, we used our 5-fold to get f
     1. `submission/cis-pd.on_off_new.csv` files containing predictions on the test subset for CIS-PD.
     2. `submission/<watchgyr - watchacc - phoneacc>_on_off.csv` : For REAL-PD on test subset 
 
-### Tremor - Submission 3 for CIS-PD
+### Tremor - Submission 3 for CIS-PD & REAL-PD
+
 1. In `run.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
 2. Run `./run.sh`. You might need to make some changes to this file. It is written to be ran on a grid engine. 
     - It will  split the CIS-PD training and testing csv files into 32 subsets and submit 32 jobs to do feature extraction. Then, it will merge all of them to store the features in the `features/` directory. This step only need to be ran once. 
@@ -213,9 +215,11 @@ For REAL-PD, it was watch_gyr tremor.
 
 For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
 
-### Dyskinesia & On/Off - Submission 4 - CIS-PD
+### Dyskinesia - CIS-PD & REAL-PD
+ 
+#### Submission 4 - CIS-PD
 
-The following performs per Patient Tuning.
+The following performs per Patient Tuning which we submitted in the 4th intermediate round. The following is for the CIS-PD database.
 
 1. In `run_perpatient.sh`, in the section to generate submission files, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` that is currently hardcoded. 
 2. `./run_perpatient.sh`
@@ -223,9 +227,7 @@ The following performs per Patient Tuning.
     - Then, it will create predictions files to be submitted, in the `submission` folder like so : `submission/cis-pd.on_off.perpatient.csv`. 
 
 
-### Tremor, Dyskinesia & On/Off - Submission 4 - REAL-PD **
-
-The 4th submission of REAL-PD used gridsearch and global normalization.
+#### Submission 3 - REAL-PD
 
 1. In `run_realpd.sh`, edit the absolute path hardcoded to the REAL-PD labels and write your own path to the labels you downloaded from the website of the challenge. 
 2. Run `./run_realpd.sh`
@@ -258,14 +260,23 @@ For the 4th submission, we performed early stop with the training data, as that 
 1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
 2. `conda env create --file environment_ae.yml` : This will create the `keras_tf2` environment you need to run AE experiments.
 3. Train an AE model & save their features:
-    - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the AE models. 
+    - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the AE models, which will be referred to as `<your-path-to-AE-Features>`. 
     - For REAL-PD: At line 53 of the `train_AE_real.py` file, change the `save_dir` path to the directory where you want to store the AE models.
-4. Launch the training for the configurations you want. Some examples are available in this wiki page about [Creating AutoEncoder Features](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/2-Creating-AutoEncoder-Features). To reproduce the results of submission 4, you will need the following command which uses features of length 60 and 400 as frame length: 
+4. Launch the training for the configurations you want. Some examples are available in this wiki page about [Creating AutoEncoder Features](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/2-Creating-AutoEncoder-Features). To reproduce the results of submission 4, you will need the following command which uses features of length 30 and a framelength of 400, with the inactivty removed: 
 
-`python train_AE.py --latent_dim 60 -dlP '{"remove_inactivity":"False"}' --saveAEFeats --saveFeatDir "/export/b19/mpgill/BeatPD/AE_60ft_400fl_orig/"`
+```
+python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "<path-to-BeatPD-data>/cis-pd.training_data/", "my_mask_path": "<your-path-to-AE-features>/cis-pd.training_data.high_pass_mask/"}' --saveFeatDir "<your-path-to-AE-features>/AE_30ft_orig_inactivity_removed/"
+```
 
-5. This should create the following file `mlp_encoder_uad_False_ld_60.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
+5. This should create the following file `<your-path-to-AE-features>/<Weights>/mlp_encoder_uad_False_ld_30.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
 
+6. Also generate features on the testing subset of the challenge with the following command: 
+
+```
+python test_AE.py -dlP '{"my_data_path": "<path-to-BeatPD-data>/cis-pd.testing_data/", "my_mask_path": "<your-path-to-AE-features>/cis-pd.testing_data.high_pass_mask/", "remove_inactivity": "True"}' --saveAEFeats --saveFeatDir "<your-path-to-AE-features>/cis_testing_AE_30ft_orig_inactivity_removed"
+``` 
+
+<!---
 <a name="2.2.2-get-ae-features"></a>
 #### Get AutoEncoder (AE) Features 
 
@@ -281,25 +292,26 @@ To reproduce it, you will need to create the following:
 - `cis_testing_AE_30ft_orig_inactivity_removed`
 
 We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `cis_testing_AE_60ft_orig`) as that provided us with better crossvalidation results, we ended up using the wrong features! 
+-->
 
 <a name="2.3-create-i-vectors"></a>
 ### Create i-vectors 
  
-After creating Autoencoder features or the MFCC, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_orig_auto60_400fl` for the 4th submission.
+After creating Autoencoder features or the MFCC, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` for the 4th submission.
 
 1. `cd <your-path-to-kaldi>/kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the i-vectors. 
 3.  `cp <your-path-github-repo>/sid_novad/* ../sre08/v1/sid/.` : Copy the `novad.sh` files from the repository to your Kaldi's directory 
-4. `mkdir *****` : Create a folder with a meaningful name about the i-vectors we want to create. The nomenclature we used to name the i-vectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-i-vectors-nomenclature). To reproduce the final submission, create `dysk_orig_auto60_400fl`.
-5. `cd ****` : Change your directory to the i-vector folder you just created 
+4. `mkdir <i-vector-name>` : Create a folder with a meaningful name about the i-vectors we want to create. The nomenclature we used to name the i-vectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-i-vectors-nomenclature). To reproduce the final submission, create `dysk_noinact_auto30`.
+5. `cd <i-vector-name>` : Change your directory to the i-vector folder you just created 
 6. `mkdir data`
 7. `cp -rf {path-github-repo}/beatPDivec/default_data/v2_auto/. .`
-8. `cp -rf {path-github-repo}/beatPDivec/default_data/autoencData/data/{onoff - tremor - dyskinesia}/. data/.` : Copy the data for the task. In this case, we used dyskinesia. 
+8. `cp -rf {path-github-repo}/beatPDivec/default_data/autoencData/data/{onoff - tremor - dyskinesia}/. data/.` : Copy the data for the task. For the final submission, use `dyskinesia`. 
 9. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats={path-to-AE-features}/AE_30ft_orig_inactivity_removed` 
-11. `qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e errors/errors_dysk_noinact_auto30 -o outputs/outputs_dysk_noinact_auto30 runFor.sh`
+    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=<path-to-AE-features>/AE_30ft_orig_inactivity_removed` 
+11. `./runFor.sh`
 
 <a name="2.4-get-results"></a>
 ### Get results on test folds for SVR
@@ -308,8 +320,8 @@ The file `runFor.sh` will create the log files with the results of the experimen
 #### Manually - for one size of i-vector 
 The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
-1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/trem_noinact_auto30/exp/`
-2. `cd ivec_350` : Then, choose an i-vector size 
+1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/`
+2. `cd ivec_650` : Then, choose an i-vector size 
 3. `ls` : 
 ```
 globalAccuPLDA.log : Result for PLDA 
@@ -333,7 +345,7 @@ For the other back-ends, you still need to get the results by hand like it was e
 
 #### Option 1 - For the test subset of the challenge 
 
-1. `cd` to the i-vector location, for example `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
+1. `cd` to the i-vector location, for example `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/` was the i-vector used for the [4th submission](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up).
 2. In the file `<your-path-to-github-repo>/beatPDivec/default_data/v2_auto/local/pca_svr_bpd2.sh`, make sure that the flag `--bPatientPredictionsPkl` is added to create pkl files for each subject_id, like this:
 
 ```
@@ -359,6 +371,8 @@ conda deactivate
 
 7. Provide the variables `best_config`, `dest_dir`, and `src_dir`. The example below are the results of per patient tuning on `dysk_orig_auto60_400fl, ivec: 650`. 
 
+*Note:* We made the mistake of using the best hyperparameters on `dysk_orig_auto60_400fl` applied to `dysk_noinact_auto30`.
+
 ```
 best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
  1007: ['/objs_100_kernel_linear_c_0.002_eps_0.1.pkl', 0.09115239389591206],
@@ -372,18 +386,18 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
-src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/resiVecSVR_Fold/'
+dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/'
+src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/'
 
 generateCSVtest_per_patient(src_dir, dest_dir, best_config)
 ```
 
 The dictionary for best_config is obtained in this file: 
-`cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
+`cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
-**Submission 4**
+**Note: Submission 4**
 
 For this submission, we made the mistake of using the best hyperparameters for Per Patient tuned on `dysk_auto60_400fl_orig` but applied to the wrong features on the test subset : `dysk_auto30_400fl_orig_inactivity_removed`. But similar cross-validation results were obtained on both these i-vectors.
 
