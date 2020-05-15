@@ -187,7 +187,7 @@ Prepare the environment and create a symbolic link:
 5. `conda install --file requirements_tsfresh_xgboost.txt`
 6. In the data/ folder, add `BEAT-PD_SC1_OnOff_Submission_Template.csv`, `BEAT-PD_SC2_Dyskinesia_Submission_Template.csv` and `BEAT-PD_SC3_Tremor_Submission_Template.csv` downloaded from the challenge 
 
-As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, 
+As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, the following sections need to be generated to create predictions files for tsfresh.  
 
 The following sections explains how to reproduce our final submission. 
 
@@ -250,6 +250,8 @@ For the 4th submission, we performed early stop with the training data, as that 
 <hr>
 
 ##  Approach II : AE + i-vectors + SVR
+
+For dyskinesia, in the final submission, we performed a fusion with the average of the predictions between Approach 1 and Approach 2. The following section will help you create the files needed to perform the fusion. 
 
 <a name="2-embeddings"></a>
 ### AutoEncoder (AE) features 
@@ -468,8 +470,8 @@ The code to perform the fusion for the fourth submission is in the notebook call
 It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
 
 ```
-sFilePred1='<your-path-to-github-repo>/BeatPD-CLSP-JHU/tsfresh/submit/submission4_preds/kfold_prediction_dyskinesia.csv'
-sFilePred2='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl_scratch/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
+sFilePred1='<your-path-to-github-repo>/BeatPD-CLSP-JHU/tsfresh/submit/submission4/kfold_prediction_dyskinesia.csv'
+sFilePred2='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
 ```
 
 You will get results: 
