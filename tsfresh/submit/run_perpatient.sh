@@ -8,6 +8,7 @@
 recog_set="cis-pd.training cis-pd.testing"
 nj=32
 logdir=exp
+path_labels=/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels
 
 conda activate BeatPD_xgboost 
 
@@ -45,9 +46,9 @@ echo "Finished"
 ###########################
 
 echo "Starting PerPatient Gridsearch" 
-python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv data/label.csv
-python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv data/label.csv
-python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv data/label.csv
+python src/gridsearch_perpatient.py dyskinesia features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+python src/gridsearch_perpatient.py on_off features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+python src/gridsearch_perpatient.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
 echo "End of the PerPatient Gridsearch"
 
 ##########################
@@ -57,13 +58,13 @@ echo "End of the PerPatient Gridsearch"
 echo "Generate Submission Files is starting" 
 
 echo "1. Tremor"
-python src/predict_perpatient.py tremor features/cis-pd.training.csv data/label.csv features/cis-pd.testing.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv
+python src/predict_perpatient.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv
 
 echo "2. Dyskinesia"
-python src/predict_perpatient.py dyskinesia features/cis-pd.training.csv data/label.csv features/cis-pd.testing.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC2_Dyskinesia_Submission_Template.csv
+python src/predict_perpatient.py dyskinesia features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC2_Dyskinesia_Submission_Template.csv
 
 echo "3. On Off"
-python src/predict_perpatient.py on_off features/cis-pd.training.csv data/label.csv features/cis-pd.testing.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
+python src/predict_perpatient.py on_off features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
 
 echo "End of generating submission files"
 

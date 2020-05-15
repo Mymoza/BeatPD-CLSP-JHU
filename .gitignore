@@ -6,6 +6,9 @@ tsfresh/submit/mdl/*
 tsfresh/submit/exp/*
 tsfresh/submit/features/*
 tsfresh/submit/submission/*.csv
+tsfresh/submit/data/BEAT-PD_SC1_OnOff_Submission_Template.csv
+tsfresh/submit/data/BEAT-PD_SC2_Dyskinesia_Submission_Template.csv
+tsfresh/submit/data/BEAT-PD_SC3_Tremor_Submission_Template.csv
 
 resx*
 *.pkl
