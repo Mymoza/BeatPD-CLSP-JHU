@@ -106,9 +106,9 @@ You need to install [Kaldi](https://kaldi-asr.org). For installation, you can us
 
 First step is to prepare the data given by the challenge. 
 
- 1. Download the training_data, the ancillary_data and the testing_data from the challenge website
- 2. `mkdir BeatPD_data` Create a folder to contain all the files `.tar.bz2` you just downloaded for the challenge 
- 3. `tar -xvf cis-pd.data_labels.tar.bz2; mv data_labels cis-pd.data_labels` it will extract a folder that we will rename to make it clear that it contains the label for the CIS-PD database 
+1. Download the training_data, the ancillary_data and the testing_data from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/600903)
+2. `mkdir BeatPD_data` Create a folder to contain all the files `.tar.bz2` you just downloaded for the challenge 
+3. `tar -xvf cis-pd.data_labels.tar.bz2; mv data_labels cis-pd.data_labels` it will extract a folder that we will rename to make it clear that it contains the label for the CIS-PD database 
 4. `tar -xvf real-pd.data_labels.tar.bz2; mv data_labels real-pd.data_labels`: same thing but for the REAL-PD database
 5. `rm -rf *.tar.bz2` : remove the compressed folders now that we have extracted the data we need. 
 6. `tar -xvf real-pd.training_data_updated.tar.bz2; mv training_data/ real-pd.training_data; rm  real-pd.training_data_updated.tar.bz2; 
@@ -318,7 +318,27 @@ After creating Autoencoder features, we can create i-vectors. The following step
 <a name="2.4-get-results"></a>
 ### Get results on test folds for SVR
 
-This section is only used to get cross-validation results. You can skip this section and just <a href="#2.5-get-predictions">get a CSV file with predictions</a> right away. 
+This section is only used to get cross-validation results. You can skip this section and just <a href="#2.5-get-predictions">get a CSV file with predictions</a> right away.
+
+<details>
+  <summary>Expand: get cross-validation results on test folds</summary>
+  <div>The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results.
+
+#### Manually - for one size of i-vector
+The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
+
+1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/`
+2. `cd ivec_650` : Then, choose an i-vector size
+3. `ls` :
+```
+globalAccuPLDA.log : Result for PLDA
+globalAccuKNN.log : Result for KNN
+globalAccuSVR_Test.log : Result for SVR
+globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR
+globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
+```
+  </div>
+</details>
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results.
  
