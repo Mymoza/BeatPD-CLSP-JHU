@@ -315,35 +315,18 @@ After creating Autoencoder features, we can create i-vectors. The following step
     - `sDirFeats`: use the absolute path to the AE features you want to use. For the final submission, use `sDirFeats=<path-to-AE-features>/AE_30ft_orig_inactivity_removed`
 11. `./runFor.sh`
 
+<!---
 <a name="2.4-get-results"></a>
+-->
+<!---
 ### Get results on test folds for SVR
 
-This section is only used to get cross-validation results. You can skip this section and just <a href="#2.5-get-predictions">get a CSV file with predictions</a> right away.
-
-<details>
-  <summary>Expand: get cross-validation results on test folds</summary>
-  <div>The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results.
-
-#### Manually - for one size of i-vector
-The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
-
-1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/`
-2. `cd ivec_650` : Then, choose an i-vector size
-3. `ls` :
-```
-globalAccuPLDA.log : Result for PLDA
-globalAccuKNN.log : Result for KNN
-globalAccuSVR_Test.log : Result for SVR
-globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR
-globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
-```
-  </div>
-</details>
+This section is only used to get cross-validation results. You can skip this section and just <a href="#2.5-get-predictions">get a CSV file with predictions</a> right away. It is not useful to create the final CSV predictions file. 
 
 The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results.
  
 #### Manually - for one size of i-vector 
-The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
+The following example will retrieve results for the `dysk_noinact_auto30` i-vector.
 
 1. `cd <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/`
 2. `cd ivec_650` : Then, choose an i-vector size 
@@ -355,13 +338,15 @@ globalAccuSVR_Test.log : Result for SVR
 globalAccuPerPatientSVR_Test.log : Result for Per Patient SVR 
 globalAccuEveryoneSVR_Test.log : Result for Everyone SVR
 ```
-
+-->
+<!---
 #### Extract results for different i-vector sizes 
 
 As of now, the automation is present in the `get_excel_results.ipynb`, and just creates a table in Jupyter from which we can copy and paste to Excel or Google spreadsheet:
 
 So far, it was only developed for Per Patient SVR and Everyone SVR results.
 For the other back-ends, you still need to get the results by hand like it was explained in the previous section. 
+-->
 
 <a name="2.5-get-predictions"></a>
 ### Get Predictions CSV 
@@ -398,7 +383,9 @@ No need to tell this step, it is already provided by default
 
 7. Provide the variables `best_config`, `dest_dir`, and `src_dir`. To reproduce the final submission, simply keep the `best_config` as it is, and replace the paths with yours. The following code show you exactly what you should use:
 
+<!---
 *Note:* We made the mistake of using the best hyperparameters on `dysk_orig_auto60_400fl` applied to `dysk_noinact_auto30`.
+-->
 ```
 best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
  1007: ['/objs_100_kernel_linear_c_0.002_eps_0.1.pkl', 0.09115239389591206],
@@ -423,6 +410,7 @@ If you want to experiment with other `best_config` values, the dictionary for be
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
 
+<!---
 **Note: Submission 4**
 
 For this submission, we made the mistake of using the best hyperparameters for Per Patient tuned on `dysk_auto60_400fl_orig` but applied to the wrong features on the test subset : `dysk_auto30_400fl_orig_inactivity_removed`. But similar cross-validation results were obtained on both these i-vectors.
@@ -437,9 +425,14 @@ instead of :
 sDirFeatsTest=<your-path-to-AE-features>/cis_testing_AE_60ft_orig
 sDirFeatsTrai=<your-path-to-AE-features>/AE_60ft_400fl_orig
 ```
+-->
 
+<!---
+COMMENTED THIS SECTION as it is not useful to reproduce the requirements of the challenge
 <a name="get-preds-trainingtestfolds-perpatient-svr"></a>
-#### Option 2 -- For training/test folds 
+-->
+<!---
+#### Option 2 - For training/test folds 
 
 Run `runFor.sh`, which will call the script `<your-path-to-github-repo>/beatPDivec/default_data/v2_auto/local/evaluate_global_per_patient_SVR.sh` that will create pkl files needed in `resiVecSVR_Fold*` with the predictions per patient instead of being per configuration. The following excerpt is an example if i-vectors files are already created for these dimensions:
 
@@ -478,7 +471,7 @@ generateCSVresults_per_patient(dest_dir, src_dir, best_config)
 ```
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. The complete path to the file will be printed last : `<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv` you will use this file during the fusion with average, in the `sFilePred2` variable. 
-
+-->
 
 
 
