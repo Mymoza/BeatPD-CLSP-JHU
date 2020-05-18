@@ -195,7 +195,7 @@ The following sections explains how to reproduce our final submission.
 
 Instead of training one model on whole training set, we used our 5-fold to get five different models. We averaged predictions from those five models. The benefit of this approach is that for each model, we can use the test fold to do the early stop to avoid overfitting. Also combination of five systems may improve the overall performance.
 
-1. In `run_foldaverage.sh, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` and `REAL-PD_Test_Data_IDs_Labels.csv` that are currently hardcoded. 
+1. In `run_foldaverage.sh`, edit the absolute path to the `CIS-PD_Test_Data_IDs_Labels.csv` and `REAL-PD_Test_Data_IDs_Labels.csv` that are currently hardcoded. 
 2. Run `run_foldaverage.sh`, which will run the necessary code for both databases. It will create the following files:
     1. `submission/cis-pd.on_off_new.csv` files containing predictions on the test subset for CIS-PD.
     2. `submission/<watchgyr - watchacc - phoneacc>_on_off.csv` : For REAL-PD on test subset 
@@ -299,7 +299,7 @@ We made a mistake and although we meant to be using `AE_60ft_400fl_orig` (and `c
 <a name="2.3-create-i-vectors"></a>
 ### Create i-vectors 
  
-After creating Autoencoder features or the MFCC, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` for the 4th submission.
+After creating Autoencoder features, we can create i-vectors. The following steps will vary a lot depending on what i-vector you want to create. You will need to create `dysk_noinact_auto30` to reproduce our final submission.
 
 1. `cd <your-path-to-kaldi>/kaldi/egs/` : Change your directory to where you installed Kaldi. 
 2. `mkdir beatPDivec; cd beatPDivec` : Create a directory to hold the i-vectors. 
@@ -307,18 +307,21 @@ After creating Autoencoder features or the MFCC, we can create i-vectors. The fo
 4. `mkdir <i-vector-name>` : Create a folder with a meaningful name about the i-vectors we want to create. The nomenclature we used to name the i-vectors we created was also [documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/4-i-vectors-nomenclature). To reproduce the final submission, create `dysk_noinact_auto30`.
 5. `cd <i-vector-name>` : Change your directory to the i-vector folder you just created 
 6. `mkdir data`
-7. `cp -rf {path-github-repo}/beatPDivec/default_data/v2_auto/. .`
-8. `cp -rf {path-github-repo}/beatPDivec/default_data/autoencData/data/{onoff - tremor - dyskinesia}/. data/.` : Copy the data for the task. For the final submission, use `dyskinesia`. 
+7. `cp -rf <your-path-github-repo>/beatPDivec/default_data/v2_auto/. .`
+8. `cp -rf <your-path-github-repo>/beatPDivec/default_data/autoencData/data/<onoff - tremor - dyskinesia>/. data/.` : Copy the data for the task. For the final submission, use `dyskinesia`. 
 9. `ln -s sid ../../sre08/v1/sid; ln -s steps ../../sre08/v1/steps; ln -s utils ../../sre08/v1/utils` : Create symbolic links
 10. `vim runFor.sh`: Edit the following variables:
     - `subChallenge`: use either `onoff`, `tremor`, or `dysk`. 
-    - `sDirFeats`: use the absolute path to the AE features you want to use, for example `sDirFeats=<path-to-AE-features>/AE_30ft_orig_inactivity_removed` 
+    - `sDirFeats`: use the absolute path to the AE features you want to use. For the final submission, use `sDirFeats=<path-to-AE-features>/AE_30ft_orig_inactivity_removed`
 11. `./runFor.sh`
 
 <a name="2.4-get-results"></a>
 ### Get results on test folds for SVR
 
-The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results. 
+This section is only used to get cross-validation results. You can skip this section and just <a href="#2.5-get-predictions">get a CSV file with predictions</a> right away. 
+
+The file `runFor.sh` will create the log files with the results of the experiments you ran. The following section explains how to retrieve those results.
+ 
 #### Manually - for one size of i-vector 
 The following example will retrieve results for the following i-vector: `trem_noinact_auto30`.
 
@@ -364,17 +367,18 @@ conda deactivate
 ```
 
 3. Run `runFinalsubm3_2.sh`. This will call `run_Final_auto.sh` and create the folder `resiVecPerPatientSVR_Fold_all` for the test subset. But first, you need to edit some things:
-    - `sDirFeatsTest` to point to the folder where you have extracted testing features with the AE 
-    - `sDirFeatsTrai` to point to the folder where  there is the training data
-    - `ivecDim` : The i-vector size you are interested in. 
-    - For the number of components, it gets more complicated. You need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
-
+    - `sDirFeatsTest` to point to the folder where you have extracted testing features with the AE, `<your-path-to-AE-features>/cis_testing_AE_30ft_orig_inactivity_removed` 
+    - `sDirFeatsTrai` to point to the folder where  there is the training data `<your-path-to-AE-features>/AE_30ft_orig_inactivity_removed`
+    - `ivecDim` : The i-vector size you are interested in, for the final submission, use `ivecDim=650`. 
+<!---
+No need to tell this step, it is already provided by default     
+- For the number of components, you need to write the components that have been selected as the best for at least one per patient tuning. You will get this info there `cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_orig_auto60_400fl/exp/ivec_650/globalAccuPerPatientSVR_Test.log` (it is the dictionary you can see at step 7).
+-->
 4. Go to `CreateCSV_test.ipynb`. We will use the function `generateCSVtest_per_patient` to create a CSV containing test predictions for all subject_ids. 
 
-7. Provide the variables `best_config`, `dest_dir`, and `src_dir`. The example below are the results of per patient tuning on `dysk_orig_auto60_400fl, ivec: 650`. 
+7. Provide the variables `best_config`, `dest_dir`, and `src_dir`. To reproduce the final submission, simply keep the `best_config` as it is, and replace the paths with yours. The following code show you exactly what you should use:
 
 *Note:* We made the mistake of using the best hyperparameters on `dysk_orig_auto60_400fl` applied to `dysk_noinact_auto30`.
-
 ```
 best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.1469489658686098],
  1007: ['/objs_100_kernel_linear_c_0.002_eps_0.1.pkl', 0.09115239389591206],
@@ -388,13 +392,13 @@ best_config = {1004: ['/objs_450_kernel_linear_c_0.002_eps_0.1.pkl', 1.146948965
  1048: ['/objs_650_kernel_linear_c_0.2_eps_0.1.pkl', 0.4505302952804157],
  1049: ['/objs_250_kernel_linear_c_0.2_eps_0.1.pkl', 0.4001809543831368]}
 
-dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/'
-src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/'
+dest_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
+src_dir='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/'
 
 generateCSVtest_per_patient(src_dir, dest_dir, best_config)
 ```
 
-The dictionary for best_config is obtained in this file: 
+If you want to experiment with other `best_config` values, the dictionary for best_config is obtained in this file: 
 `cat <your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/globalAccuPerPatientSVR_Test.log`
 
 8. Run that cell, and it will create a `csv` file in the provided location `dest_dir`. 
@@ -467,11 +471,21 @@ For the second and fourth submission, we performed some fusion of the prediction
 
 The code to perform the fusion for the fourth submission is in the notebook called `Fusion.ipynb`. 
 
-It is pretty straightforward. Just go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
+#### Fusion for test subset of the challenge 
+
+1. Go to the cell under the heading "Example to get predictions file on test subset" 
+2. Change the paths
+3. Run the cell. There will be an output telling you where your predictions file for dyskinesia was created, like so: 
 
 ```
+Submission file was created: /BeatPD_predictions/submissionCisPDdyskinesia.csv
+```
+
+#### Fusion for Test Folds 
+Go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
+```
 sFilePred1='<your-path-to-github-repo>/BeatPD-CLSP-JHU/tsfresh/submit/submission4/kfold_prediction_dyskinesia.csv'
-sFilePred2='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecSVR_Fold/preds_per_patient.csv'
+sFilePred2='<your-path-to-kaldi>/kaldi/egs/beatPDivec/dysk_noinact_auto30/exp/ivec_650/resiVecPerPatientSVR_Fold_all/preds_per_patient.csv'
 ```
 
 You will get results: 
