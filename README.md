@@ -519,7 +519,7 @@ For the REAL-PD database, multiple sensors are provided : `phoneacc`, `watchacc`
 Submission file was created: <your-path>/submissionCisPDdyskinesia.csv
 ```
 
-##### Fusion of CIS-PD and REAL-PD predictions
+#### Fusion of CIS-PD and REAL-PD predictions
 
 1. Still in `Fusion.ipynb`, execute the cells under the heading `Merge CIS-PD and REAL-PD predictions in one CSV file`. It will create the final submimssion files for the three subtasks to be sent to the challenge. 
 
