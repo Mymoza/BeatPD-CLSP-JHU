@@ -235,6 +235,7 @@ The following performs per Patient Tuning which we submitted in the 4th intermed
     - Then it will perform GridSearch. The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. For REAL-PD, it was `watchgyr` and `tremor`. That's why in the code all the other GridSearch combinations are commented out. Only the one used for the 4th submission will be ran. The best hyperparameters found will be stored in `mdl/real-pd.conf`
     - Then we predict the results using `src/predict_realpd.py`. The predictions will be stored in `submission/watchgyr_tremor.csv`. 
 
+<!---
 **Stop criteria on training data:**
 
 For the 4th submission, we performed early stop with the training data, as that led to some small improvements. To do so, you need to change two lines in the file `src/predict.py`. 
@@ -242,6 +243,7 @@ For the 4th submission, we performed early stop with the training data, as that 
 `eval_set=[(tr, tr_y), (te, te_y)]` becomes `eval_set=[(tr, tr_y)]`
 
 `sample_weight_eval_set=[tr_w, te_w]` becomes `sample_weight_eval_set=[tr_w]`.
+-->
 
 <!---
  🛑TODO: in run_realpd, change the absolute path to our home folder to where labels will be
