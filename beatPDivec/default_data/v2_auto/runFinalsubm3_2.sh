@@ -15,7 +15,7 @@ fEpsilon=0.1
 ./run_Final_auto.sh $sDirFeatsTrai $sDirFeatsTest $ivecDim $stage $iNumComponents $sKernel $fC $fEpsilon
 
 stage=2
-for iNumComponents in 50; do
+for iNumComponents in 50 100 250 300 400 450 650; do
     for sKernel in 'linear'; do # 'poly' 'sigmoid'; do
 	x=-13
 	while [ $x -le 2 ]
