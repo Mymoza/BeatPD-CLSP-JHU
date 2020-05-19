@@ -104,32 +104,30 @@ You need to install [Kaldi](https://kaldi-asr.org). For installation, you can us
 <a name="1-data-pre-processing"></a>
 ## Data Pre-Processing 
 
-First step is to prepare the data given by the challenge. 
+First step is to prepare the data given by the challenge. All the steps to do pre-processing on the data is done in the Jupyter Notebook `prepare_data.ipynb`.
 
 1. Download the training_data, the ancillary_data and the testing_data from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/600903)
-2. `mkdir BeatPD_data` Create a folder to contain all the data for the challenge. Put all the files `.tar.bz2` you just downloaded for the challenge in this newly created folder.
-3. `tar -xvf cis-pd.data_labels.tar.bz2; mv data_labels cis-pd.data_labels` it will extract a folder that we will rename to make it clear that it contains the label for the CIS-PD database 
-4. `tar -xvf real-pd.data_labels.tar.bz2; mv data_labels real-pd.data_labels`: same thing but for the REAL-PD database
-5. `rm -rf *.tar.bz2` : remove the compressed folders now that we have extracted the data we need. 
-6. `tar -xvf real-pd.training_data_updated.tar.bz2; mv training_data/ real-pd.training_data; rm  real-pd.training_data_updated.tar.bz2; 
-7. `tar -xvf cis-pd.training_data.tar.bz2; mv training_data/ cis-pd.training_data; rm cis-pd.training_data.tar.bz2;
-8. `tar -xvf cis-pd.ancillary_data.tar.bz2; mv ancillary_data/ cis-pd.ancillary_data; rm cis-pd.ancillary_data.tar.bz2;` 
-9. `tar -xvf real-pd.ancillary_data_updated.tar.bz2; mv ancillary_data real-pd.ancillary_data; rm real-pd.ancillary_data_updated.tar.bz2;` 
-10. `tar -xvf cis-pd.testing_data.tar.bz2; mv testing_data/ cis-pd.testing_data/; rm  cis-pd.testing_data.tar.bz2` 
-11. `tar -xvf real-pd.testing_data_updated.tar.bz2; mv testing_data/ real-pd.testing_data/; rm real-pd.testing_data_updated.tar.bz2;` 
-12. `mv cis-pd.CIS-PD_Test_Data_IDs.csv CIS-PD_Test_Data_IDs_Labels.csv; mv CIS-PD_Test_Data_IDs_Labels.csv cis-pd.data_labels/;` The labels for the test subset comes in just a `csv` file, so put that file in the `data_labels` folder. 
-13. `mv real-pd.REAL-PD_Test_Data_IDs.csv REAL-PD_Test_Data_IDs_Labels.csv; mv REAL-PD_Test_Data_IDs_Labels.csv real-pd.data_labels/` 
+2. `mkdir BeatPD_data` Create a folder to contain all the data for the challenge. Put all the files `.tar.bz2` you just downloaded for the challenge in this newly created folder, as well as `cis-pd.CIS-PD_Test_Data_IDs.csv` and `real-pd.REAL-PD_Test_Data_IDs.csv`.
 
-All the steps to do pre-processing on the data is done in the Jupyter Notebook `prepare_data.ipynb`. 
+```
+BeatPD_data $ ls
+cis-pd.ancillary_data.tar.bz2    real-pd.ancillary_data_updated.tar.bz2
+cis-pd.CIS-PD_Test_Data_IDs.csv  real-pd.data_labels.tar.bz2
+cis-pd.data_labels.tar.bz2       real-pd.REAL-PD_Test_Data_IDs.csv
+cis-pd.testing_data.tar.bz2      real-pd.testing_data_updated.tar.bz2
+cis-pd.training_data.tar.bz2     real-pd.training_data_updated.tar.bz2
+```
 
-1. Open the notebook
-2. Change the `data_dir` variable for the absolute path to the folder that contains the data given by the challenge. In this folder, you should already have the following directories downloaded from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/596118): 
+3. Open the notebook `prepare_data.ipynb`
+2. Change the `data_dir` variable for the absolute path to the folder `BeatPD_data` that contains the data given by the challenge.
+3. Execute the cells under `Extract initial data` and you should have the following directories when it's done:
+
 ```
 <path-to-BeatPD_data>  $ ls
 cis-pd.ancillary_data  cis-pd.testing_data   real-pd.ancillary_data  real-pd.testing_data
 cis-pd.data_labels     cis-pd.training_data  real-pd.data_labels     real-pd.training_data
 ```
-3. Execute the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
+3. Execute the rest of the cells in the Notebook. It will create several folders needed to reproduce the experiments. The [data directory structure is documented in the wiki](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/1-Data-Directory-Structure).
 
 
 <br>
@@ -208,12 +206,13 @@ Instead of training one model on whole training set, we used our 5-fold to get f
     - Then it will perform a GridSearch, saving the best config 
     - Finally, it will create predictions files to be submitted in the `submission/` folder.  
 
-The same hyperparameters were used for all three tasks so I expect the hyperparameter to generalize. So I did three hyperparameter search on on/off, tremor, dysk and then I compared their performance to see which one is the best. 
+The same hyperparameters were used for all three tasks so we expect the hyperparameter to generalize. So we did three hyperparameters search on on/off, tremor, dysk and then we compared their performance to see which one is the best. 
 
-For CIS-PD, the best performance was obtained with tremor. 
-For REAL-PD, it was watch_gyr tremor. 
+For CIS-PD, the best performance was obtained with tremor. For REAL-PD, it was watch_gyr tremor. 
 
+<!---
 For this one, we were not able to reproduce the exact same predictions, we suspect it is because of a random seed. However, the difference in predictions are in the units of 0.001 so it is considered fine. 
+-->
 
 ### Dyskinesia - CIS-PD & REAL-PD
  
@@ -496,7 +495,7 @@ The code to perform the fusion for the fourth submission is in the notebook call
 
 The following sections will explain how to do the fusion of REAL-PD subtypes, how to do the fusion for the CIS-PD database between the two approaches, and finally, how to merge the CIS-PD and REAL-PD predictions. 
 
-##### Fusion of REAL-PD subtypes predictions
+#### Fusion of REAL-PD subtypes predictions
 
 For the REAL-PD database, multiple sensors are provided : `phoneacc`, `watchacc`, and `watchgyr`. We can only submit one value for each measurement, so we used the following method:
 
@@ -511,7 +510,7 @@ For the REAL-PD database, multiple sensors are provided : `phoneacc`, `watchacc`
     - `submissionRealPDtremor.csv`
     - `submissionRealPDdyskinesia.csv` 
 
-##### Fusion of CIS-PD Dyskinesia predictions for the two approaches 
+#### Fusion of CIS-PD Dyskinesia predictions for the two approaches 
 
 1. Execute the cells under the heading  "Submission 4 - Average of predictions for Approach 1 and 2 - CIS-PD" 
 2. There will be an output telling you where your predictions file for dyskinesia was created, like so: 
