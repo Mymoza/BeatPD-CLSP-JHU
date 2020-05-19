@@ -107,7 +107,7 @@ You need to install [Kaldi](https://kaldi-asr.org). For installation, you can us
 First step is to prepare the data given by the challenge. 
 
 1. Download the training_data, the ancillary_data and the testing_data from the [challenge website](https://www.synapse.org/#!Synapse:syn20825169/wiki/600903)
-2. `mkdir BeatPD_data` Create a folder to contain all the files `.tar.bz2` you just downloaded for the challenge 
+2. `mkdir BeatPD_data` Create a folder to contain all the data for the challenge. Put all the files `.tar.bz2` you just downloaded for the challenge in this newly created folder.
 3. `tar -xvf cis-pd.data_labels.tar.bz2; mv data_labels cis-pd.data_labels` it will extract a folder that we will rename to make it clear that it contains the label for the CIS-PD database 
 4. `tar -xvf real-pd.data_labels.tar.bz2; mv data_labels real-pd.data_labels`: same thing but for the REAL-PD database
 5. `rm -rf *.tar.bz2` : remove the compressed folders now that we have extracted the data we need. 
@@ -486,14 +486,43 @@ The code to perform the fusion for the fourth submission is in the notebook call
 
 #### Fusion for test subset of the challenge 
 
-1. Go to the cell under the heading "Example to get predictions file on test subset" 
-2. Change the paths
-3. Run the cell. There will be an output telling you where your predictions file for dyskinesia was created, like so: 
+1. Open the `Fusion.ipynb` notebook
+2. Edit the variables:
+    - `sPathKaldi` : Path to your folder containing the kaldi installation `<your-path-to-kaldi>`. Do not include `/kaldi/`. 
+    - `sDirOut` : Path to where you want to create the final CSV files with predictions 
+    - `sPathData` : Path to the folder containing the data we downloaded and extracted from the website of the challenge
+
+The following sections will explain how to do the fusion of REAL-PD subtypes, how to do the fusion for the CIS-PD database between the two approaches, and finally, how to merge the CIS-PD and REAL-PD predictions. 
+
+##### Fusion of REAL-PD subtypes predictions
+
+For the REAL-PD database, multiple sensors are provided : `phoneacc`, `watchacc`, and `watchgyr`. We can only submit one value for each measurement, so we used the following method:
+
+- If a measurement have 3 predictions (no missing files), then we do the average of the two closest values and discard the third value.
+- If there are only two predictions for a measurement, we simply do the average
+- If there is only one prediction out of the three subtype, then we use that value     
+
+1. The fusion of REAL-PD subtypes predictions is made with the `real_average_fusion` function. 
+2. Execute the cells under the header `Fusion for REAL-PD sensors`. There will be a cell with the function declared, then 3 others for `ON/OFF`, `Tremor`, and `dyskinesia`.
+3. It will create three files that can be sent to the challenge as our final submission:
+    - `submissionRealPDon_off.csv`
+    - `submissionRealPDtremor.csv`
+    - `submissionRealPDdyskinesia.csv` 
+
+##### Fusion of CIS-PD Dyskinesia predictions for the two approaches 
+
+1. Execute the cells under the heading  "Submission 4 - Average of predictions for Approach 1 and 2 - CIS-PD" 
+2. There will be an output telling you where your predictions file for dyskinesia was created, like so: 
 
 ```
-Submission file was created: /BeatPD_predictions/submissionCisPDdyskinesia.csv
+Submission file was created: <your-path>/submissionCisPDdyskinesia.csv
 ```
 
+##### Fusion of CIS-PD and REAL-PD predictions
+
+1. Still in `Fusion.ipynb`, execute the cells under the heading `Merge CIS-PD and REAL-PD predictions in one CSV file`. It will create the final submimssion files for the three subtasks to be sent to the challenge. 
+
+<!---
 #### Fusion for Test Folds 
 Go to `Dyskinesia - Submission 4 - Average` for an example of how to do fusion evaluation on the test folds. Just give the path to the csv files containing the predictions in `sFilePred1` and `sFilePred2` (obtained [here](#get-preds-trainingtestfolds-perpatient-svr)), like so:
 ```
@@ -514,7 +543,7 @@ Overall MSE Classif. 2 - ivec:  None
 Final score :  0.48601343286255055
 Overall MSE Fusion - average :  None
 ```
-
+-->
 
 <br>
 <hr>
