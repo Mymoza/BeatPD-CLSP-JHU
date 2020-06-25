@@ -45,7 +45,21 @@ cv = PredefinedSplit(foldid)
 
 X = al.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32).to_numpy()
 
-best_params = {'max_depth': 3, 'colsample_bylevel': 0.8, 'colsample_bytree': 0.4, 'silent': False, 'n_estimators': 100, 'learning_rate': 0.3, 'objective': 'reg:squarederror', 'reg_lambda': 50.0, 'min_child_weight': 5.0, 'subsample': 0.7, 'gamma': 1.0}
+#best_params = {'max_depth': 3, 'colsample_bylevel': 0.8, 'colsample_bytree': 0.4, 'silent': False, 'n_estimators': 100, 'learning_rate': 0.3, 'objective': 'reg:squarederror', 'reg_lambda': 50.0, 'min_child_weight': 5.0, 'subsample': 0.7, 'gamma': 1.0}
+
+best_params = {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 1000,
+    "min_child_weight": 1,
+    "colsample_bytree": 0.9,
+    "subsample": 0.8,
+    "nthread": 12,
+    "random_state": 42,
+    #"objective": "multi:softprob",
+    #"num_class": 5
+    "objective": "reg:squarederror",
+}
 
 test_fea = pd.read_csv(sys.argv[5])
 test_lab = pd.read_csv(sys.argv[6]) #spk label

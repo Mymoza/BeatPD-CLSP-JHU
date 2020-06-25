@@ -104,17 +104,16 @@ for spk in all_spks:
     te_sid = te_spk.subject_id.reset_index(drop=True)
     te_spk = te_spk.drop(['measurement_id', 'subject_id', 'prediction'], axis=1).astype(pd.np.float32)
 
-    import pickle
-    with open('mdl/cis-pd.'+obj+'.'+str(spk)+'.conf','rb') as f:
-        params=pickle.load(f)
-    print('cfgs['+str(spk)+'] = ', params)    
+    #import pickle
+    #with open('mdl/cis-pd.'+obj+'.'+str(spk)+'.conf','rb') as f:
+    #    params=pickle.load(f)
+    #print('cfgs['+str(spk)+'] = ', params)    
     
     # Using the params saved to file in the gridsearch_perpatient
-    clf = xgb.XGBRegressor(**params) 
+    #clf = xgb.XGBRegressor(**params) 
 
     # Using the saved configuration provided at the top of this document
-    # This line is commented because it's best to use the saved params, but just in case you want to test it out
-    #clf = xgb.XGBRegressor(**cfgs[spk_id])
+    clf = xgb.XGBRegressor(**cfgs[spk_id])
     
     # Currently Using Stop Criteria on Training Data for the speaker
     clf.fit(

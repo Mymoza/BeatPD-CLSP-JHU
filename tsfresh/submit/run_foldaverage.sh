@@ -40,7 +40,9 @@ conda activate BeatPD_xgboost
 #done
 #echo "Finished"
 
-python src/foldaverage.py on_off features/cis-pd.training.csv data/label.csv features/cis-pd.testing.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
+path_labels_cis=/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/
+
+python src/foldaverage.py on_off features/cis-pd.training.csv ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels_cis}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
 
 ###########
 # REAL-PD
@@ -50,6 +52,7 @@ python src/foldaverage.py on_off features/cis-pd.training.csv data/label.csv fea
 #recog_set="phoneacc_test.scp  phoneacc_total.scp watchacc_test.scp  watchacc_total.scp  watchgyr_test.scp  watchgyr_total.scp"
 #nj=32
 #logdir=exp
+path_labels_real=/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/
 #export decode_cmd="utils/queue.pl --mem 4G"
 #set -e
 
@@ -76,10 +79,10 @@ python src/foldaverage.py on_off features/cis-pd.training.csv data/label.csv fea
 
 echo "Finished creating features"
 
-#python src/foldaverage_realpd.py on_off features/watchgyr_total.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Training_Data_IDs_Labels.csv data/watchgyr_order.csv features/watchgyr_test.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv watchgyr
+#python src/foldaverage_realpd.py on_off features/watchgyr_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv data/watchgyr_order.csv features/watchgyr_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv watchgyr
 
-#python src/foldaverage_realpd.py on_off features/watchacc_total.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Training_Data_IDs_Labels.csv data/watchacc_order.csv features/watchacc_test.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv watchacc
+#python src/foldaverage_realpd.py on_off features/watchacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv data/watchacc_order.csv features/watchacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv watchacc
 
-#python src/foldaverage_realpd.py on_off features/phoneacc_total.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Training_Data_IDs_Labels.csv data/phoneacc_order.csv features/phoneacc_test.scp.csv /home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv phoneacc
+#python src/foldaverage_realpd.py on_off features/phoneacc_total.scp.csv ${path_labels_real}/REAL-PD_Training_Data_IDs_Labels.csv data/phoneacc_order.csv features/phoneacc_test.scp.csv ${path_labels_real}/REAL-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv phoneacc
 
 conda deactivate
