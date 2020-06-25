@@ -8,13 +8,18 @@ from xgboost import plot_importance
 import numpy as np
 import pickle
 
+# subchallenge
 obj = sys.argv[1]
 all_obj = ["on_off", "tremor", "dyskinesia"]
 
+# Training features extracted 
 all_fea = pd.read_csv(sys.argv[2])
+
+# Labels from all folds
 all_lab = pd.read_csv(sys.argv[3])
 all_lab = all_lab.drop(list(set(all_obj) - set([obj])), axis=1)
 
+# Merge features and labels based on their measurement id 
 al = pd.merge(all_fea, all_lab, on=["measurement_id"])
 al = al.dropna(subset=[obj])
 avg = al.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
@@ -47,7 +52,10 @@ X = al.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'fold_id'], axis=1)
 
 best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
 
+# test features
 test_fea = pd.read_csv(sys.argv[4])
+
+# Test Data Labels (measurement_id, subject_id)
 test_lab = pd.read_csv(sys.argv[5]) #spk label
 test_fea = pd.merge(test_fea, test_lab, on=["measurement_id"])
 test_sub = pd.read_csv(sys.argv[6]) #submission file
@@ -58,6 +66,10 @@ test_fea = pd.concat([test_fea, subject_id], axis=1)
 
 tr_w = al['spcount'] ** -0.5
 tr_y = al[obj].astype(pd.np.float32)
+tr_id = al.measurement_id
+print('tr_id : ', tr_id)
+tr_sid = al.subject_id
+print('tr_sid : ', tr_sid)
 tr = al.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32)
 
 te = pd.merge(test_fea, avg, on='subject_id')
@@ -69,6 +81,7 @@ te_id = te.measurement_id
 te_sid = te.subject_id
 te_bak = te.drop(['measurement_id', 'subject_id', 'prediction'], axis=1)#.astype(pd.np.float32)
 
+preds_train_folds = []
 preds = []
 for i in range(5):
     #test = pd.read_csv(sys.argv[i]).squeeze()
@@ -112,14 +125,38 @@ for i in range(5):
     #cnt = cnt ** 0.5
     pred = clf.predict(te_bak).clip(0, 4)
     preds.append(pred)
+    print('len(tr) : ', len(tr))
+    pred_train_fold = clf.predict(tr).clip(0,4)
+    preds_train_folds.append(pred_train_fold)
 preds = np.array(preds)
+preds_train_folds = np.array(preds_train_folds)
+print(preds_train_folds[0])
+
+print('-------------')
+print(preds_train_folds[1])
+ivg = al.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
+# Predictions on test set
 #print(preds.std(axis=0).max())
+print('len(te_id) : ', len(te_id))
+print('len(te_sid) : ', len(te_sid))
+print('len(preds) : ', len(preds)) 
+print('len(preds[0] : ', len(preds[0])) 
+print('len(preds[1] : ', len(preds[1])) 
 res = pd.DataFrame(data={'measurement_id': te_id, 'subject_id': te_sid, obj: preds.mean(axis=0)})
 res = pd.merge(res, avg, on='subject_id')
 res[obj] += res['sp_' + obj]
 res = res[["measurement_id", obj]]
 #print(res)
 res.to_csv('submission/cis-pd.{0}_new.csv'.format(obj), index=False)
-# FIXME: Bug to create kfold_prediction files
-#preds.to_csv('submission/kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
+
+# FIXME: Predictions on training folds
+print('len(tr_id) : ', len(tr_id))
+print('len(tr_sid) : ', len(tr_sid))
+print('len(preds_train_folds) : ', len(preds_train_folds))
+results_folds = pd.DataFrame(data={'measurement_id': tr_id, 'subject_id': tr_sid, obj: preds_train_folds.mean(axis=0)})
+print(results_folds)
+print('results_folds len : ', len(results_folds))
+#results_folds = pd.merge(results_folds, avg, on='subject_id')
+preds.to_csv('submission/kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
+print('preds.to_csv kfold_prediction_cis-pd was done')
 #print(clf.get_booster().get_score(importance_type='gain'))

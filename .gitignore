@@ -6,6 +6,7 @@ tsfresh/submit/mdl/*
 tsfresh/submit/exp/*
 tsfresh/submit/features/*
 tsfresh/submit/submission/*.csv
+tsfresh/submit/submission/*/*.csv
 
 resx*
 *.pkl

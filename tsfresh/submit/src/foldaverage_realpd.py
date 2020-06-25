@@ -58,6 +58,7 @@ test_fea = pd.concat([test_fea, subject_id], axis=1)
 
 tr_w = al['spcount'] ** -0.5
 tr_y = al[obj].astype(pd.np.float32)
+tr_id = al.measurement_id
 tr = al.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32)
 
 te = pd.merge(test_fea, avg, on='subject_id')
@@ -111,15 +112,29 @@ for i in range(5):
     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
     #cnt = cnt ** 0.5
     pred = clf.predict(te_bak).clip(0, 4 if obj!='on_off' else 1)
+    res = pd.DataFrame(data={'measurement_id': te_id, 'subject_id': te_sid, obj: pred})
+    res = pd.merge(res, avg, on='subject_id')
+    res[obj] += res['sp_' + obj]
+    res = res[["measurement_id", obj]]
     preds.append(pred)
-preds = np.array(preds)
+preds = np.concatenate(np.array(preds))
 #print(preds.std(axis=0).max())
-res = pd.DataFrame(data={'measurement_id': te_id, 'subject_id': te_sid, obj: preds.mean(axis=0)})
-res = pd.merge(res, avg, on='subject_id')
-res[obj] += res['sp_' + obj]
-res = res[["measurement_id", obj]]
+#res = pd.DataFrame(data={'measurement_id': te_id, 'subject_id': te_sid, obj: preds.mean(axis=0)})
+#res = pd.merge(res, avg, on='subject_id')
+#res[obj] += res['sp_' + obj]
+#res = res[["measurement_id", obj]]
 #print(res)
-res.to_csv('submission/{0}_{1}_new.csv'.format(sys.argv[-1], obj), index=False)
+res.to_csv('submission/{0}_{1}_new_2.csv'.format(sys.argv[-1], obj), index=False)
 # FIXME: Bug to create kfold_prediction files
-#preds.to_csv('kfold_prediction_real-pd_{0}_new.csv'.format(obj), index=False)
+preds.to_csv('submission/kfold_prediction_real-pd_{0}_2.csv'.format(obj), index=False)
+print('tr_id type : ', type(tr_id))
+print('shape tr_id : ', tr_id.shape)
+print(tr_id)
+print('print len(preds) : ', len(preds))
+print('type preds : ', type(preds))
+print('preds shape : ', preds.shape)
+#preds_dev_set = pd.DataFrame(data={'measurement_id': tr_id, obj: preds})
+#preds_dev_set.to_csv('submission/kfold_prediction_real-pd_{0}_new.csv'.format(obj), index=False)
+
+#pd.DataFrame(preds).to_csv('submission/kfold_prediction_real-pd_{0}_new.csv'.format(obj), index=False)
 #print(clf.get_booster().get_score(importance_type='gain'))
