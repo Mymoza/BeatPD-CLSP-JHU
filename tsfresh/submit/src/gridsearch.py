@@ -7,6 +7,7 @@ import xgboost as xgb
 from xgboost import plot_importance
 import numpy as np
 import pickle
+from sklearn.ensemble import RandomForestRegressor
 
 # contains the subchallenge we are working on 
 obj = sys.argv[1]
@@ -31,6 +32,7 @@ all_features_labels = all_features_labels.dropna(subset=[obj])
 avg = all_features_labels.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
 all_features_labels = pd.merge(all_features_labels, avg, on='subject_id')
 
+# Performing global normalization, removing the mean for the features and the labels
 remove = []
 for i in all_features_labels.columns:
     # if it doesn't start with sp and its sp_ is in  all_features_labels
@@ -74,6 +76,7 @@ X = all_features_labels.drop([obj, 'subject_id', 'measurement_id', 'spcount', 'f
 print(X.shape)
 print(foldid.shape)
 
+# Params Grid for xgboost
 param_grid = {
         'objective': ['reg:squarederror'],
         'silent': [False],
@@ -87,24 +90,42 @@ param_grid = {
         'reg_lambda': [0.1, 1.0, 5.0, 10.0, 50.0, 100.0],
         'n_estimators': [50, 100, 500, 1000]}
 
-# from sklearn.model_selection import RandomizedSearchCV
+# Params grid for a Random Forest Regressor
+param_grid = {
+    'n_estimators': [50, 55, 63, 64, 65, 67, 71, 74, 75, 78, 83, 86, 93, 95, 96, 97, 100],# 500, 1000],
+    'max_depth': [5, 8, 15, 25, 30],
+    'min_samples_split': [2, 5, 10, 15, 100],
+    'min_samples_leaf': [1, 2, 5, 10],
+    #'max_features': ['auto','0.25']
+}
+
+# FIXME: Uncomment this section to perform the gridsearch 
+from sklearn.model_selection import RandomizedSearchCV
+# xgboost
 # clf = xgb.XGBRegressor()
-# rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
-#                             n_jobs=8, verbose=2, cv=cv,
-#                             refit=False, random_state=42, scoring='neg_mean_squared_error')
-# rs_clf.fit(X, Y, sample_weight=W) 
-# best_params = rs_clf.best_params_
-# print('Best Params : ')
-# print(best_params)
+
+# Random Forest Regressor 
+clf = RandomForestRegressor()
+rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
+                            n_jobs=8, verbose=2, cv=cv,
+                            refit=False, random_state=42, scoring='neg_mean_squared_error')
+rs_clf.fit(X, Y, sample_weight=W) 
+best_params = rs_clf.best_params_
+print('Best Params : ')
+print(best_params)
 
 # Best parameters used for submission 3
-#best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
+# best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
 
-with open('mdl/cis-pd.conf','wb') as f:
-    pickle.dump(best_params, f)
+# For the random Forest regressor
+# best_params = {'max_depth': 2, 'n_estimators': 100}
+
+
+# with open('mdl/cis-pd.conf','wb') as f:
+#     pickle.dump(best_params, f)
 
 # Comment this exit if you want to get predictions files on test kfolds
-exit() 
+#exit() 
 
 ########################################################################
 # The following section is only used if you want to generate a predictions files
@@ -115,6 +136,10 @@ results = []
 baselines = []
 
 preds = []
+
+lambda_value = None
+#lambda_value = -3
+
 for i in range(5):
     ##test = pd.read_csv(sys.argv[i]).squeeze()
     ##idx = all_features_labels['measurement_id'].isin(test)
@@ -127,9 +152,30 @@ for i in range(5):
     
     # Drop the measurements that are not from the current fold 
     tr = all_features_labels[~idx].drop(['fold_id'], axis=1)
-    train_weight = tr['spcount'] ** -0.5 # training weight 
+    train_weight = tr['spcount'] ** -0.5 # training weight
+
+    # Data augmentation with a lambda 
+    if lambda_value is not None:
+        # Take all the columns except the ones that are int and we don't want to multiply
+        # FIXME: Do we want to multiple spcount?
+        print('len tr keys : ', len(tr.columns))
+        df_feat_mul = tr[tr.columns.difference(['subject_id','spcount'])]
+        print('len df_feat_mul keys : ', len(df_feat_mul.columns))
+        numerics = ['int16', 'int32', 'int64']
+
+        newdf = df_feat_mul.select_dtypes(include=numerics)
+        print(newdf.columns)
+        # Multiply the features by the lambda_value 
+        df_feat_mul = df_feat_mul.mul(lambda_value)
+        # We add the subject_id, spcount columns back to the df with mutliplied values
+        df_feat_mul = pd.concat([tr[['subject_id','spcount']], df_feat_mul], axis=1, sort=False)
+        # Concatenate the original training features and the lambda multiplied ones 
+        tr = pd.concat([tr, df_feat_mul])
+        train_weight = tr['spcount'] ** -0.5 # training weight
+
     train_y = tr[obj].astype(pd.np.float32) # training labels 
     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
 
     ##te_w = all_features_labels[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
     ##te = pd.merge(all_features_labels[idx], te_w, on='subject_id')
@@ -143,17 +189,22 @@ for i in range(5):
     test_measurement_id = te.measurement_id
     te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
-    clf = xgb.XGBRegressor(**best_params)
+    #clf = xgb.XGBRegressor(**best_params)
     #clf = xgb.XGBClassifier(**params)
-    clf.fit(
-        tr, train_y,
-        sample_weight=train_weight,
-        eval_set=[(tr, train_y), (te, test_y)],
-        #eval_metric=',
-        sample_weight_eval_set=[train_weight, test_weight],
-        verbose=0,
-        early_stopping_rounds=100
-    )
+
+    clf = RandomForestRegressor(**best_params)
+    clf.fit(tr, train_y, sample_weight=train_weight)
+
+    # Fit for the xgboost 
+    # clf.fit(
+    #     tr, train_y,
+    #     sample_weight=train_weight,
+    #     eval_set=[(tr, train_y), (te, test_y)],
+    #     #eval_metric=',
+    #     sample_weight_eval_set=[train_weight, test_weight],
+    #     verbose=0,
+    #     early_stopping_rounds=100
+    # )
     pred = clf.predict(te).clip(0, 4)
     mse = (pred - test_y) ** 2
     #mse = test_y.to_numpy() ** 2
@@ -171,7 +222,8 @@ for i in range(5):
     results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
     baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
 preds = pd.concat(preds)
-preds.to_csv('kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
+preds.to_csv('kfold_prediction_rf_cis-pd_{0}.csv'.format(obj), index=False)
+#preds.to_csv('kfold_prediction_lambda_0.3_cis-pd_{0}.csv'.format(obj), index=False)
 #print(clf.get_booster().get_score(importance_type='gain'))
 print("baseline {0} result {1}".format(np.mean(baselines),np.mean(results)))
 xgb.plot_importance(clf,max_num_features=10)
