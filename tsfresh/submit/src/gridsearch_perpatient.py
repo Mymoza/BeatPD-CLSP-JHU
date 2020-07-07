@@ -9,35 +9,43 @@ import numpy as np
 import pickle
 import datetime
 
+# contains the subchallenge we are working on 
 obj = sys.argv[1]
+
+# All the subchallenges
 all_obj = ["on_off", "tremor", "dyskinesia"]
 
-all_fea = pd.read_csv(sys.argv[2])
-all_lab = pd.read_csv(sys.argv[3])
-all_lab = all_lab.drop(list(set(all_obj) - set([obj])), axis=1)
+# Read the training features 
+all_features = pd.read_csv(sys.argv[2])
 
-al = pd.merge(all_fea, all_lab, on=["measurement_id"])
-al = al.dropna(subset=[obj])
-avg = al.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
-al = pd.merge(al, avg, on='subject_id')
+# Read the training labels
+all_labels = pd.read_csv(sys.argv[3])
+# Drop the labels of the subchallenges we're not working on 
+all_labels = all_labels.drop(list(set(all_obj) - set([obj])), axis=1)
+
+# Merge the features and the labels on measurement_id
+all_features_labels = pd.merge(all_features, all_labels, on=["measurement_id"])
+all_features_labels = all_features_labels.dropna(subset=[obj])
+avg = all_features_labels.groupby('subject_id').mean().reset_index().add_prefix('sp_').rename(columns={'sp_subject_id':'subject_id'})
+all_features_labels = pd.merge(all_features_labels, avg, on='subject_id')
 remove = []
-for i in al.columns:
-    if not i.startswith('sp_') and 'sp_' + i in al.columns:
+for i in all_features_labels.columns:
+    if not i.startswith('sp_') and 'sp_' + i in all_features_labels.columns:
         remove.append('sp_' + i)
-        al[i] = al[i] - al['sp_' + i]
-al = al.drop(remove, axis=1)
-#al_y = al[obj].astype(int)
-#al = al.drop([obj, 'measurement_id'], axis=1)
-#mean_value = al.groupby('subject_id').mean().reset_index().add_suffix('_mean')
+        all_features_labels[i] = all_features_labels[i] - all_features_labels['sp_' + i]
+all_features_labels = all_features_labels.drop(remove, axis=1)
+#al_y = all_features_labels[obj].astype(int)
+#all_features_labels = all_features_labels.drop([obj, 'measurement_id'], axis=1)
+#mean_value = all_features_labels.groupby('subject_id').mean().reset_index().add_suffix('_mean')
 #mean_value.columns = ['subject_id' if x=='subject_id_mean' else x for x in mean_value.columns]
-al = pd.merge(al, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
-weight = al.groupby(['subject_id', 'fold_id']).count().reset_index()[["subject_id", "fold_id", obj]].rename(columns={obj: 'spcount'})
-al = pd.merge(al, weight, on=['subject_id', 'fold_id'])
-#subject_id = pd.get_dummies(al.subject_id, columns='subject_id', prefix='spk_')
-#al = pd.merge(al, mean_value, on='subject_id')
-#al = pd.concat([al, subject_id], axis=1)
-#al = al.astype(pd.np.float32)
-spks = al['subject_id'].unique()
+all_features_labels = pd.merge(all_features_labels, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
+weight = all_features_labels.groupby(['subject_id', 'fold_id']).count().reset_index()[["subject_id", "fold_id", obj]].rename(columns={obj: 'spcount'})
+all_features_labels = pd.merge(all_features_labels, weight, on=['subject_id', 'fold_id'])
+#subject_id = pd.get_dummies(all_features_labels.subject_id, columns='subject_id', prefix='spk_')
+#all_features_labels = pd.merge(all_features_labels, mean_value, on='subject_id')
+#all_features_labels = pd.concat([all_features_labels, subject_id], axis=1)
+#all_features_labels = all_features_labels.astype(pd.np.float32)
+spks = all_features_labels['subject_id'].unique()
 
 param_grid = {
         'objective': ['reg:squarederror'],
@@ -52,31 +60,31 @@ param_grid = {
         'reg_lambda': [0.1, 1.0, 5.0, 10.0, 50.0, 100.0],
         'n_estimators': [50, 100, 500, 1000]}
 
-ret = {}
-for i in spks:
-    print("{0}:{1}".format(datetime.datetime.now(), i))
-    al_spk = al.loc[al['subject_id'] == int(i)]
-    Y = al_spk[obj].to_numpy()
-    W = al_spk['spcount'].to_numpy() ** -0.5
-    foldid = al_spk['fold_id'].to_numpy().astype(int)
-    from sklearn.model_selection import PredefinedSplit
-    cv = PredefinedSplit(foldid)
+# ret = {}
+# for i in spks:
+#     print("{0}:{1}".format(datetime.datetime.now(), i))
+#     al_spk = all_features_labels.loc[all_features_labels['subject_id'] == int(i)]
+#     Y = al_spk[obj].to_numpy()
+#     W = al_spk['spcount'].to_numpy() ** -0.5
+#     foldid = al_spk['fold_id'].to_numpy().astype(int)
+#     from sklearn.model_selection import PredefinedSplit
+#     cv = PredefinedSplit(foldid)
     
-    X = al_spk.drop([obj, 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32).to_numpy()
+#     X = al_spk.drop([obj, 'measurement_id', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32).to_numpy()
     
     
-    from sklearn.model_selection import RandomizedSearchCV
-    clf = xgb.XGBRegressor()
-    rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
-                                n_jobs=8, verbose=1, cv=cv,
-                                refit=False, random_state=42, scoring='neg_mean_squared_error')
-    rs_clf.fit(X, Y, sample_weight=W) 
-    best_params = rs_clf.best_params_
-    print(i)
-    print(best_params)
-    #print(rs_clf.beat_score_)
-    with open('mdl/cis-pd.'+obj+'.'+str(i)+'.conf', 'wb') as f:
-        pickle.dump(best_params, f)
+#     from sklearn.model_selection import RandomizedSearchCV
+#     clf = xgb.XGBRegressor()
+#     rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
+#                                 n_jobs=8, verbose=1, cv=cv,
+#                                 refit=False, random_state=42, scoring='neg_mean_squared_error')
+#     rs_clf.fit(X, Y, sample_weight=W) 
+#     best_params = rs_clf.best_params_
+#     print(i)
+#     print(best_params)
+#     #print(rs_clf.beat_score_)
+#     with open('mdl/cis-pd.'+obj+'.'+str(i)+'.conf', 'wb') as f:
+#         pickle.dump(best_params, f)
 
 #best_params = {'min_child_weight': 3.0, 'learning_rate': 0.1, 'n_estimators': 50, 'colsample_bylevel': 0.5, 'objective': 'reg:squarederror', 'subsample': 0.6, 'max_depth': 3, 'gamma': 0.5, 'silent': False, 'colsample_bytree': 0.4, 'reg_lambda': 100.0}
 
@@ -89,8 +97,7 @@ for i in spks:
 #with open('hypsearch_spk.model', 'wb') as f:
 #    pickle.dump(ret, f)
 
-exit()
-
+#exit()
 ####################################################
 # The following section is only used to create a predictions files for 
 # cis-pd with per patient tuning 
@@ -98,63 +105,77 @@ exit()
 
 #FIXME: The following code is not complete though. It should loop over the subject_ids and read all of their best_params, make predictions and append those to a variable which we put to a csv at the end 
 
-results = []
-#baselines = []
 
-#preds = []
-for i in range(5, len(sys.argv)):
-    test = pd.read_csv(sys.argv[i]).squeeze()
-    idx = al['measurement_id'].isin(test)
 
-    #tr_w = al[~idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
-    #tr = pd.merge(al[~idx], tr_w, on='subject_id')
-    tr = al[~idx].drop(['fold_id'], axis=1)
-    tr_w = tr['spcount'] ** -0.5
-    tr_y = tr[obj].astype(pd.np.float32)
-    tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
-    #te_w = al[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
-    #te = pd.merge(al[idx], te_w, on='subject_id')
-    te = al[idx].drop(['fold_id'], axis=1)
-    te_w = te['spcount'] ** -0.5
-    te_y = te[obj].astype(pd.np.float32)
-    sub = te['subject_id']
-    sid = te.subject_id
-    tid = te.measurement_id
-    te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
-    clf = xgb.XGBRegressor(**best_params)
-    #clf = xgb.XGBClassifier(**params)
-    clf.fit(
-        tr, tr_y,
-        sample_weight=tr_w,
-        eval_set=[(tr, tr_y)],#, (te, te_y)],
-        #eval_metric=',
-        sample_weight_eval_set=[tr_w],#, te_w],
-        verbose=0,
-        early_stopping_rounds=100
-    )
-    pred = clf.predict(te).clip(0, 4)
-    mse = (pred - te_y) ** 2
-    #mse = te_y.to_numpy() ** 2
-    #mse2 = te_y ** 2
-    #ret = pd.concat([sub, mse], axis=1)
-    #ret.to_csv('tmp.csv')
-    #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
-    #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
-    #cnt = cnt ** 0.5
-    #res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
-    #res = pd.merge(res, avg, on='subject_id')
-    #res[obj] += res['sp_' + obj]
-    #res = res[["measurement_id", obj]]
-    #preds.append(res)
-    results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
-    #baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
-preds = pd.concat(preds)
-preds.to_csv('kfold_prediction_cis-pd_perpatient_{0}.csv'.format(obj), index=False)
-#print(clf.get_booster().get_score(importance_type='gain'))
-#print(np.mean(results))
-#print(np.mean(baselines))
-plot_importance(clf,max_num_features=10)
-plt.savefig('importance.png')
+
+
+################# 
+# The following code was Nanxin's code.
+# It is commented so I can try if I can replicate those results because I don't 
+# think the following code is supposed to work.. 
+###################
+
+# results = []
+# #baselines = []
+
+# preds = []
+
+# for i in range(5):
+#     ##test = pd.read_csv(sys.argv[i]).squeeze()
+#     idx = al['measurement_id'].isin(test)
+
+#     #tr_w = al[~idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+#     #tr = pd.merge(al[~idx], tr_w, on='subject_id')
+#     tr = al[~idx].drop(['fold_id'], axis=1)
+#     tr_w = tr['spcount'] ** -0.5
+#     tr_y = tr[obj].astype(pd.np.float32)
+#     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+#     #te_w = al[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
+#     #te = pd.merge(al[idx], te_w, on='subject_id')
+#     te = al[idx].drop(['fold_id'], axis=1)
+#     te_w = te['spcount'] ** -0.5
+#     te_y = te[obj].astype(pd.np.float32)
+#     sub = te['subject_id']
+#     sid = te.subject_id
+#     tid = te.measurement_id
+#     te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+#     print('hiiiiiiiiiiiiiii')
+#     clf = xgb.XGBRegressor(**best_params)
+#     #clf = xgb.XGBClassifier(**params)
+#     clf.fit(
+#         tr, tr_y,
+#         sample_weight=tr_w,
+#         eval_set=[(tr, tr_y)],#, (te, te_y)],
+#         #eval_metric=',
+#         sample_weight_eval_set=[tr_w],#, te_w],
+#         verbose=0,
+#         early_stopping_rounds=100
+#     )
+#     pred = clf.predict(te).clip(0, 4)
+#     print(pred)
+#     mse = (pred - te_y) ** 2
+#     #mse = te_y.to_numpy() ** 2
+#     #mse2 = te_y ** 2
+#     #ret = pd.concat([sub, mse], axis=1)
+#     #ret.to_csv('tmp.csv')
+#     #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
+#     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
+#     #cnt = cnt ** 0.5
+#     res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
+#     res = pd.merge(res, avg, on='subject_id')
+#     res[obj] += res['sp_' + obj]
+#     res = res[["measurement_id", obj]]
+#     preds.append(res)
+#     results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
+#     #baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
+# preds = pd.concat(preds)
+# preds.to_csv('kfold_prediction_cis-pd_perpatient_{0}.csv'.format(obj), index=False)
+# #print(clf.get_booster().get_score(importance_type='gain'))
+# #print(np.mean(results))
+# #print(np.mean(baselines))
+# plot_importance(clf,max_num_features=10)
+# plt.savefig('importance.png')
 
