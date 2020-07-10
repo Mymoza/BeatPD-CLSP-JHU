@@ -8,18 +8,26 @@ from xgboost import plot_importance
 import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestRegressor
+import argparse
+
+# on_off features/cis-pd.training.csv ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv 1.0
+parser = argparse.ArgumentParser(description='Perform gridsearch or predicts on test folds.')
+parser.add_argument('symptom', metavar='obj', type=str, help='Should be either on_off, tremor, or dyskinesia')
+parser.add_argument("--features", action="append", type=str, help='Path to the features, like features/cis-pd.training.csv')
+parser.add_argument("--labels", type=str, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
+parser.add_argument("--linear_combination", type=float, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
 
 # contains the subchallenge we are working on 
-obj = sys.argv[1]
+obj = args.symptom
 
 # All the subchallenges
 all_obj = ["on_off", "tremor", "dyskinesia"]
 
-# Read the training features 
-all_features = pd.read_csv(sys.argv[2])
+# Read the training features, we can provide more than one file (for data augmentation purposes)
+all_features = pd.concat((pd.read_csv(f, header=0) for f in args.features))
 
 # Read the training labels
-all_labels = pd.read_csv(sys.argv[3])
+all_labels = pd.read_csv(args.labels)
 # Drop the labels of the subchallenges we're not working on 
 all_labels = all_labels.drop(list(set(all_obj) - set([obj])), axis=1)
 
@@ -138,11 +146,8 @@ baselines = []
 preds = []
 
 # If a lambda value is given
-#FIXME: Change sysarg with argparse
-print('Arguments are : ', sys.argv)
-print('Arguments len : ', len(sys.argv))
 if len(sys.argv) >= 4:
-    lambda_value = float(sys.argv[4])
+    lambda_value = float(args.linear_combination)
 else:
     lambda_value = None
 
