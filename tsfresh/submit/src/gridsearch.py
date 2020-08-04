@@ -16,6 +16,13 @@ parser.add_argument('symptom', metavar='obj', type=str, help='Should be either o
 parser.add_argument("--features", action="append", type=str, help='Path to the features, like features/cis-pd.training.csv')
 parser.add_argument("--labels", type=str, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
 parser.add_argument("--linear_combination", type=float, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
+parser.add_argument("--filename", type=str, help='filename')
+parser.add_argument("--load_model", type=str, help='filename') #FIXME: It's a flag but as well as its not none will work
+parser.add_argument("--random_forest", type=str, help='filename') #FIXME: Flag too. If it's there, then we want to use RFR instead of xgboost
+parser.add_argument("--find_best_params", type=str, help='filename') #FIXME: flag
+parser.add_argument("--pred_path", type=str, help='path to pred files')
+parser.add_argument("--msek_path", type=str, help='path to save msek file (mse per subject per fold)')
+args = parser.parse_args()
 
 # contains the subchallenge we are working on 
 obj = args.symptom
@@ -24,8 +31,10 @@ obj = args.symptom
 all_obj = ["on_off", "tremor", "dyskinesia"]
 
 # Read the training features, we can provide more than one file (for data augmentation purposes)
-all_features = pd.concat((pd.read_csv(f, header=0) for f in args.features))
-
+# all_features = pd.read_csv(args.features[0])
+# all_features = pd.concat([all_features, pd.read_csv(args.features[1], header=0)])
+all_features = pd.concat((pd.read_csv(f) for f in args.features))
+print('all_features.shape : ', all_features.shape)
 # Read the training labels
 all_labels = pd.read_csv(args.labels)
 # Drop the labels of the subchallenges we're not working on 
@@ -100,8 +109,9 @@ param_grid = {
 
 # Params grid for a Random Forest Regressor
 param_grid = {
-    'n_estimators': [50, 55, 63, 64, 65, 67, 71, 74, 75, 78, 83, 86, 93, 95, 96, 97, 100],# 500, 1000],
-    'max_depth': [5, 8, 15, 25, 30],
+    'n_estimators': [50, 65, 95, 100, 500, 1000],
+    #'n_estimators': [50, 55, 63, 64, 65, 67, 71, 74, 75, 78, 83, 86, 93, 95, 96, 97, 100],# 500, 1000],
+    'max_depth': [2, 3, 4, 5, 6, 8, 15, 25, 30],
     'min_samples_split': [2, 5, 10, 15, 100],
     'min_samples_leaf': [1, 2, 5, 10],
     #'max_features': ['auto','0.25']
@@ -109,24 +119,29 @@ param_grid = {
 
 # FIXME: Uncomment this section to perform the gridsearch 
 from sklearn.model_selection import RandomizedSearchCV
-# xgboost
-clf = xgb.XGBRegressor()
 
-# Random Forest Regressor 
-# clf = RandomForestRegressor()
-# rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
-#                             n_jobs=8, verbose=2, cv=cv,
-#                             refit=False, random_state=42, scoring='neg_mean_squared_error')
-# rs_clf.fit(X, Y, sample_weight=W) 
-# best_params = rs_clf.best_params_
-# print('Best Params : ')
-# print(best_params)
+if args.random_forest:
+    # Random Forest Regressor 
+    clf = RandomForestRegressor()
+    
+else:
+    # xgboost
+    clf = xgb.XGBRegressor()
 
-# Best parameters used for submission 3 with the xgboost
-best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
-
-# For the random Forest regressor
-# best_params = {'max_depth': 2, 'n_estimators': 100}
+if args.random_forest and args.find_best_params:
+    rs_clf = RandomizedSearchCV(clf, param_grid, n_iter=100,
+                                n_jobs=8, verbose=2, cv=cv,
+                                refit=False, random_state=42, scoring='neg_mean_squared_error')
+    rs_clf.fit(X, Y, sample_weight=W) 
+    best_params = rs_clf.best_params_
+    print('Best Params : ')
+    print(best_params)
+elif args.random_forest:
+    # For the random Forest regressor
+    best_params = {'max_depth': 2, 'n_estimators': 100}
+else:   
+    # Best parameters used for submission 3 with the xgboost
+    best_params = {'subsample': 1.0, 'silent': False, 'gamma': 1.0, 'reg_lambda': 100.0, 'min_child_weight': 0.5, 'objective': 'reg:squarederror', 'learning_rate': 0.3, 'max_depth': 2, 'colsample_bytree': 0.8, 'n_estimators': 100, 'colsample_bylevel': 0.5}
 
 
 # with open('mdl/cis-pd.conf','wb') as f:
@@ -145,11 +160,8 @@ baselines = []
 
 preds = []
 
-# If a lambda value is given
-if len(sys.argv) >= 4:
-    lambda_value = float(args.linear_combination)
-else:
-    lambda_value = None
+# Will be a float value of the lambda if provided, otherwise None 
+lambda_value = args.linear_combination
 
 all_spks = all_features_labels['subject_id'].unique()
 
@@ -170,11 +182,7 @@ for i in range(5):
     tr = all_features_labels[~idx].drop(['fold_id'], axis=1)
 
     # Data augmentation with a lambda
-    if len(sys.argv) == 6:
-        print('Loading model : ', "mdl/tr_cis-pd_{0}_fold_{1}_lamb_{2}.csv".format(obj, i, lambda_value))
-        if sys.argv[5] == "load_mdl":
-            tr = pd.read_csv("mdl/tr_cis-pd_{0}_fold_{1}_lamb_{2}.csv".format(obj, i, lambda_value), index_col=[0])
-    elif lambda_value is not None:
+    if lambda_value is not None:
         for spk in all_spks: 
             # Filter training data for that speaker 
             tr_subject = tr.loc[tr['subject_id'] == spk]
@@ -216,10 +224,11 @@ for i in range(5):
             tr = pd.concat([tr, df_data_aug], ignore_index=True)
             print('After spk ', str(spk), ' tr shape is : ', tr.shape)
         tr.to_csv("mdl/tr_cis-pd_{0}_fold_{1}_lamb_{2}.csv".format(obj, i, lambda_value), index=False)
-    else:
+    # else:
+        # print(tr.keys())
         # If we are using lambda data augmentation, these columns were already removed 
-        tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
-
+        # tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+    print('obj is : ', obj)
     train_y = tr[obj].astype(pd.np.float32) # training labels 
     train_weight = tr['spcount'] ** -0.5 # training weight
     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
@@ -230,7 +239,7 @@ for i in range(5):
     
     # Drop the measurements that are used in the training of this fold, so we keep [idx] instead of [~idx]
     te = all_features_labels[idx].drop(['fold_id'], axis=1)
-    print('te !!! : ', te)
+    # print('te !!! : ', te)
     test_weight = te['spcount'] ** -0.5 # test weight 
     test_y = te[obj].astype(pd.np.float32) # testing labels
     #sub = te['subject_id']
@@ -238,31 +247,40 @@ for i in range(5):
     test_measurement_id = te.measurement_id
     te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
-    # XGBoost 
-    clf = xgb.XGBRegressor(**best_params)
-    #clf = xgb.XGBClassifier(**params)
+    if args.random_forest:
+        # Random Forest Regressor 
+        print('Using Random Forest Regressor')
+        clf = RandomForestRegressor(**best_params)
+        clf.fit(tr, train_y, sample_weight=train_weight)
+    else:
+        # XGBoost 
+        print('Using XGBOOST')
+        clf = xgb.XGBRegressor(**best_params)
+        #clf = xgb.XGBClassifier(**params)
 
-    # Random Forest Regressor 
-    #clf = RandomForestRegressor(**best_params)
-    #clf.fit(tr, train_y, sample_weight=train_weight)
-
-    # Fit for the xgboost 
-    clf.fit(
-        tr, train_y,
-        sample_weight=train_weight,
-        eval_set=[(tr, train_y), (te, test_y)],
-        #eval_metric=',
-        sample_weight_eval_set=[train_weight, test_weight],
-        verbose=0,
-        early_stopping_rounds=100
-    )
+        # Fit for the xgboost 
+        clf.fit(
+            tr, train_y,
+            sample_weight=train_weight,
+            eval_set=[(tr, train_y), (te, test_y)],
+            #eval_metric=',
+            sample_weight_eval_set=[train_weight, test_weight],
+            verbose=0,
+            early_stopping_rounds=100
+        )
     pred = clf.predict(te).clip(0, 4)
-    print('pred : ', pred)
+    # print('pred : ', pred)
     mse = (pred - test_y) ** 2
     #mse = test_y.to_numpy() ** 2
-    mse2 = test_y ** 2
-    #ret = pd.concat([sub, mse], axis=1)
+    mse2 = test_y ** 2 #null model I think?
+
+    # Code to get the MSEK as per the challenge requirement 
+    # ret = pd.concat([sub, mse], axis=1)
+    # mse_marie = (ret.groupby('subject_id').sum())[obj].to_numpy()
+
+
     #ret.to_csv('tmp.csv')
+    
     #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
     #cnt = cnt ** 0.5
@@ -271,15 +289,45 @@ for i in range(5):
     res[obj] += res['sp_' + obj]
     res = res[["measurement_id", obj]]
     preds.append(res)
+
     results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
     baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
 preds = pd.concat(preds)
+pred_path = args.pred_path if args.pred_path is not None else ''
+print('Saving preds to path : ', pred_path)
+
+# Save the MSE per subject per fold to a file so we can do statistical analysis 
+msek_path = args.msek_path if args.msek_path is not None else None
+print('msek_path is : ', msek_path)
+results = pd.DataFrame(results)
+
 if lambda_value is not None:
-    preds.to_csv('kfold_prediction_cis-pd_{0}_lamb_{1}_2.csv'.format(obj, lambda_value), index=False)
+    preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}_lamb_{1}.csv'.format(obj, lambda_value), index=False)
+elif args.filename:
+     preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}_{1}.csv'.format(obj, args.filename), index=False)
 else:
-    preds.to_csv('kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
+    preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
 #preds.to_csv('kfold_prediction_lambda_0.3_cis-pd_{0}.csv'.format(obj), index=False)
 #print(clf.get_booster().get_score(importance_type='gain'))
+if msek_path is not None:
+    # df_preds = pd.concat(preds)
+    true_labels = all_labels[["measurement_id", obj, 'subject_id']]
+    true_labels = true_labels.dropna(subset=[obj])
+    true_labels = true_labels.rename(columns={obj: 'true_'+obj})
+    # DataFrame with measurement_id, obj prediction, true label, subject_id 
+    preds_true_labels = pd.merge(preds, true_labels, on='measurement_id')
+
+    msek_subject = []
+    for spk in all_spks: 
+        spk_preds_true_label = preds_true_labels[preds_true_labels['subject_id'] == spk]
+        msek = ((spk_preds_true_label['true_'+obj] - spk_preds_true_label[obj]) ** 2).sum() * (1/len(spk_preds_true_label))
+        print(spk , ' : ', msek)
+        msek_subject.append(msek)
+
+    df_msek_subject = pd.DataFrame(msek_subject)
+    df_msek_subject.to_csv(msek_path+'msek_cis-pd_{0}_{1}.csv'.format(obj, args.filename), index=False, header=False)
+
 print("baseline {0} result {1}".format(np.mean(baselines),np.mean(results)))
-xgb.plot_importance(clf,max_num_features=10)
-plt.savefig('importance_{0}.png'.format(obj))
+if not args.random_forest:
+    xgb.plot_importance(clf,max_num_features=10)
+    plt.savefig('importance_{0}.png'.format(obj))
