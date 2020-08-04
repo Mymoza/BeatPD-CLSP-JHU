@@ -550,6 +550,54 @@ Overall MSE Fusion - average :  None
 <hr>
 <br>
 
+# Data Augmentation 
+
+1. First generate the files we need. You can do so in the DataAugmentation notebook. (It is only generating training files, not for the test set given by the challenge yet, as we can't evaluate those results anyway at the moment as the labels are not public.)
+
+2. `cd tsfresh/submit/data/`: we will need to create a new `.scp` file pointing to the folder of the features we just created. 
+
+3. Copy an example of a file. Inside, it contains the path to all files of the training corpus. We want to change the path to point to the folder of our new features, so we are going to use `sed` to do so.
+    - `cp cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.scp cis-pd.training.combhpfnoinact.resample_0.9.scp`
+    - `cp cis-pd.testing.combhpfnoinact.noise_mu_0_sig_0.1.scp cis-pd.testing.combhpfnoinact.resample_0.9.scp`
+
+4. Change the paths
+    - `sed -i 's/cis-pd.training_data.combhpfnoinact.noise_mu_0_sig_0.1/cis-pd.training_data.combhpfnoinact.resample_0.9/g' cis-pd.training.combhpfnoinact.resample_0.9.scp`
+    - `sed -i 's/cis-pd.testing_data.combhpfnoinact.noise_mu_0_sig_0.1/cis-pd.testing_data.combhpfnoinact.resample_0.9/g' cis-pd.testing.combhpfnoinact.resample_0.9.scp`
+    <!--
+    - `sed -i 's/cis-pd.testing_data.combhpfnoinact.resample_0.9/cis-pd.testing_data.combhpfnoinact.resample_1.1/g' cis-pd.testing.combhpfnoinact.resample_1.1.scp`
+    - `sed -i 's/cis-pd.training_data.combhpfnoinact.resample_0.9/cis-pd.training_data.resample_1.1/g' cis-pd.training.resample_0.9.scp`
+    - `sed -i 's/cis-pd.training_data.resample_0.9/cis-pd.testing_data.resample_0.9/g' cis-pd.testing.resample_0.9.scp`
+    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact/g' cis-pd.training.combhpfnoinact.scp`
+    - `sed -i 's/cis-pd.training_data.combhpfnoinact/cis-pd.testing_data.combhpfnoinact/g' cis-pd.testing.combhpfnoinact.scp`
+    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.rotate_1/g' cis-pd.training.rotate_1.scp`
+    - `sed -i 's/cis-pd.testing_data/cis-pd.testing_data.rotate_1/g' cis-pd.testing.rotate_1.scp`
+    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.rotate_2/g' cis-pd.training.rotate_2.scp`
+    - `sed -i 's/cis-pd.testing_data/cis-pd.testing_data.rotate_2/g' cis-pd.testing.rotate_2.scp`
+
+    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact.rotate_1/g' cis-pd.training.combhpfnoinact.rotate_1.scp`
+    - `sed -i 's/cis-pd.testing_data/cis-pd.testing.combhpfnoinact.rotate_1/g' cis-pd.testing.combhpfnoinact.rotate_1.scp`
+    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact.rotate_2/g' cis-pd.training.combhpfnoinact.rotate_2.scp`
+    - `sed -i 's/cis-pd.testing_data/cis-pd.testing.combhpfnoinact.rotate_1/g' cis-pd.testing.combhpfnoinact.rotate_2.scp`
+    -->
+
+5. Duplicate any `run_extract_features*.sh` file edit two variables:
+    - Change the `recog_set` variable for the name of the `scp` files we just created, like so: 
+
+    ```
+    recog_set="cis-pd.training.combhpfnoinact.resample_0.9 cis-pd.testing.combhpfnoinact.resample_0.9"
+    ```
+
+    - Edit the `logdir` directory for a folder where the jobs can be executed.
+
+    ```
+    logdir=exp/combhpfnoinact.resample_0.9
+    ```
+
+5. Launch the extraction of the features:
+
+```
+qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_run_extract_features_resample_combhpfnoinact_0.9 -o /export/b19/mpgill/outputs/outputs_run_extract_features_resample_combhpfnoinact_0.9 run_extract_features_resample_combhpfnoinact_0.9.sh
+```
 
 # References 
 
