@@ -14,6 +14,10 @@ tsfresh/submit/submission*
 tsfresh/submit/kfold_prediction*.csv
 tsfresh/submit/importance*.png
 tsfresh/submit/data/*.scp
+tsfresh/submit/*.zip
+tsfresh/submit/rfr_preds/
+tsfresh/submit/rfr_preds_2/
+tsfresh/submit/xgb_msek/
 
 resx*
 *.pkl
