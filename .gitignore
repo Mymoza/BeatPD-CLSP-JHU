@@ -13,6 +13,7 @@ tsfresh/submit/data/BEAT-PD_SC3_Tremor_Submission_Template.csv
 tsfresh/submit/submission* 
 tsfresh/submit/kfold_prediction*.csv
 tsfresh/submit/importance*.png
+tsfresh/submit/data/*.scp
 
 resx*
 *.pkl
