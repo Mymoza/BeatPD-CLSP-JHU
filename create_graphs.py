@@ -221,25 +221,26 @@ def plot_axis_on_top(df_train_label, path_train_data, highpass=False):
     pyplot.tight_layout()
     pyplot.show()
     
-def plot_accelerometer(df_train_label, data_type, path_train_data, path_accelerometer_plots, path_inactivity=None):
+def plot_accelerometer(df_train_label, data_type, path_train_data, 
+                       path_accelerometer_plots, path_inactivity=None, filename="", mask_path=None):
     """
     Plots the accelerometer data. There will be 3 subplots for each axis (X, Y, Z)
     
     Keyword arguments: 
     - data_type={cis , real} : It depends on which database is used 
     - path_accelerometer_plots: Path where the accelerometer plots are going to be saved 
-    - path_inactivity: Path where the dataframe with inactivity  removed are 
+    - path_inactivity: Path where the dataframe with inactivity removed are 
+    - mask_path: If provided, the mask will be applied (for example, inactivity will be removed)
     """
     # Iterating through all the indexes contained in df_train_label
     for idx in df_train_label.index:
-        if path_inactivity is None:
-            df_train_data = pd.read_csv(
-                path_train_data + df_train_label["measurement_id"][idx] + ".csv"
-            )
+        if mask_path is not None:
+            df_train_data = apply_mask(path_train_data=path_train_data,
+                               measurement_id=df_train_label["measurement_id"][idx],
+                               mask_path=mask_path)
         else:
-            df_train_data = pd.read_csv(
-                path_inactivity + df_train_label["measurement_id"][idx] + ".csv"
-            )
+            df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + ".csv")
+
 
         # FIXME: BUG ?  why the following goes to 1000xxx sometimes? It should be max 59xxx
         print("measurement_id : ", df_train_label["measurement_id"][idx])
@@ -255,14 +256,12 @@ def plot_accelerometer(df_train_label, data_type, path_train_data, path_accelero
             lambda x: (x - x.min()) / (x.max() - x.min())
         )
 
-        df_train_data.plot(
-            x=x_axis_data_type, legend=True, subplots=True, title=great_title
-        )
+        df_train_data.plot(x=x_axis_data_type, legend=True, subplots=True, title=great_title)
 
         # Save plotted graph with the measurement_id as name of the file
-        plt.savefig(
-            path_accelerometer_plots + df_train_label["measurement_id"][idx] + ".png"
-        )
+        plt.savefig(path_accelerometer_plots + df_train_label["measurement_id"][idx] + '_' + filename + ".png")
+        plt.savefig(path_accelerometer_plots + df_train_label["measurement_id"][idx] + '_' + filename + ".pdf")
+        
         plt.show()
         plt.clf()
         plt.cla()
