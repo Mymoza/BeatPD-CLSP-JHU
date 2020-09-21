@@ -9,6 +9,10 @@ import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestRegressor
 import argparse
+import pandas as pd
+from sklearn.model_selection import KFold
+from lofo import LOFOImportance, Dataset, plot_importance, FLOFOImportance
+import numpy as np
 
 # on_off features/cis-pd.training.csv ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv 1.0
 parser = argparse.ArgumentParser(description='Perform gridsearch or predicts on test folds.')
@@ -22,6 +26,8 @@ parser.add_argument("--random_forest", type=str, help='filename') #FIXME: Flag t
 parser.add_argument("--find_best_params", type=str, help='filename') #FIXME: flag
 parser.add_argument("--pred_path", type=str, help='path to pred files')
 parser.add_argument("--msek_path", type=str, help='path to save msek file (mse per subject per fold)')
+parser.add_argument("--lofo_importance", type=str, help='flag if you want lofo feature importance') #FIXME flag
+
 args = parser.parse_args()
 
 # contains the subchallenge we are working on 
@@ -329,5 +335,49 @@ if msek_path is not None:
 
 print("baseline {0} result {1}".format(np.mean(baselines),np.mean(results)))
 if not args.random_forest:
-    xgb.plot_importance(clf,max_num_features=10)
-    plt.savefig('importance_{0}.png'.format(obj))
+    fig, ax = plt.subplots(figsize=(20, 10))
+    xgb.plot_importance(clf, ax=ax, importance_type='gain', max_num_features=20, xlabel='Feature importance score')
+    plt.savefig(msek_path+'importance_{0}_{1}_gain.png'.format(obj, args.filename))
+
+    # Flag to know if we want to compute lofo importance 
+    lofo_importance = args.lofo_importance if args.lofo_importance is not None else None 
+    print('lofo importance : ', lofo_importance)
+    if lofo_importance is not None:
+        target = obj #target will be either tremor, dyskinesia, or on_off 
+        dataset = Dataset(df=all_features_labels, target=target, features=[col for col in all_features_labels.columns if col != target])
+
+        # define the validation scheme and scorer. The default model is LightGBM
+        print('te val : ', te)
+        print('te.to_list : ', te.columns)
+        
+        # Tried Fast LOFO Importance, but the validation set is not big enough
+        #lofo_imp = FLOFOImportance(trained_model=clf, validation_df=te, features=list(te.columns), target=target, scoring="neg_mean_squared_error") 
+        lofo_imp = LOFOImportance(dataset, cv=cv, scoring="neg_mean_squared_error")
+        # get the mean and standard deviation of the importances in pandas format
+        importance_df = lofo_imp.get_importance()
+        # plot the means and standard deviations of the importances
+
+        figsize=(12, 25)
+        # figsize=(20,10)
+        kind="default"
+
+        # I put the plot_importance function here just to save the actual figure 
+        importance_df = importance_df.copy()
+        importance_df["color"] = (importance_df["importance_mean"] > 0).map({True: 'g', False: 'r'})
+        importance_df.sort_values("importance_mean", inplace=True)
+
+        available_kinds = {"default", "box"}
+        if kind not in available_kinds:
+            warnings.warn("{kind} not in {ak}. Setting to default".format(kind=kind, ak=available_kinds))
+
+        if kind == "default":
+            importance_df.plot(x="feature", y="importance_mean", xerr="importance_std",
+                            kind='barh', color=importance_df["color"], figsize=figsize)
+            plt.savefig(msek_path+'lofo_importance_{0}_{1}.png'.format(obj, args.filename))
+            
+        # elif kind == "box":
+        #     lofo_score_cols = [col for col in importance_df.columns if col.startswith("val_imp")]
+        #     features = importance_df["feature"].values.tolist()
+        #     importance_df.set_index("feature")[lofo_score_cols].T.boxplot(column=features, vert=False, figsize=figsize)
+
+
