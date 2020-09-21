@@ -58,6 +58,7 @@ class FeatureGenerator(object):
         feature_dict[prefix+'_'+'moment_3'] = sp.stats.moment(x, 3)
         feature_dict[prefix+'_'+'moment_4'] = sp.stats.moment(x, 4)
         
+        # tsfresh
         feature_dict[prefix+'_'+'abs_energy'] = feature_calculators.abs_energy(x)
         feature_dict[prefix+'_'+'abs_sum_of_changes'] = feature_calculators.absolute_sum_of_changes(x)
         feature_dict[prefix+'_'+'count_above_mean'] = feature_calculators.count_above_mean(x)
