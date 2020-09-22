@@ -44,7 +44,8 @@ tsfresh/submit/run_extract_features_rotate2.sh
 tsfresh/submit/run_test_folds_preds_RFR.sh
 tsfresh/submit/run_test_folds_preds_RFR_bp.sh
 tsfresh/submit/run_test_folds_preds_repeating_exp.sh
-
+tsfresh/submit/xgb_hpf_orignoinact/
+tsfresh/submit/run_extract_features_high_pass.sh
 
 resx*
 *.pkl
