@@ -63,7 +63,7 @@ This step-by-step guide will cover the following steps:
 - [Data Pre-Processing](#1-data-pre-processing)
 - [Code for all approaches](#2-code)
     - Approach I : [TSFRESH + XGBOOST](#3-tsfresh)
-    - Approach II :  [AutoEncoder (AE)](#2.2.2-get-ae-features) + [i-vectors](#2.3-create-i-vectors) + [SVRs](#2.4-get-results)
+    - Approach II :  [AutoEncoder (AE)](#2-embeddings) + [i-vectors](#2.3-create-i-vectors) + [Get predictions CSV](#2.4-get-results)
     - Approach III : [Fusion](#4-fusion)
 
 
@@ -80,9 +80,8 @@ $ git clone https://github.com/Mymoza/BeatPD-CLSP-JHU.git
 We use python for majority of our scripts. We use jupyter notebook to facilitate an interactive envirnment. To run our scripts, please create an environment using `requirements.txt` file by following these steps:
 
 ```
-$ conda create -n BeatPD python=3.5
-$ source activate BeatPD 
-$ conda install --file requirements.txt
+$ conda create --name BeatPD python=3.5 --file requirements.txt
+$ conda activate BeatPD 
 ```
 
 * <b>Note:</b> Make sure that the Jupyter notebook is running on `BeatPD` kernel. 
@@ -147,7 +146,6 @@ For this scheme, all the files are in `<path-github-repo>/tsfresh/submit/`.
 |-- run_perpatient.sh : CIS-PD - Submission 4 - run the tsfresh + xgboost scheme with per patient tuning
 |-- run_realpd.sh : REAL-PD - Submission 4 - run the tsfresh + xgboost scheme without per patient tuning  
 |
-|-- conf: 
 |-- data: Challenge data
      |-- label.csv  
 |-- exp: Feature extraction jobs that were divided in 32 subsets
@@ -173,17 +171,15 @@ For this scheme, all the files are in `<path-github-repo>/tsfresh/submit/`.
      |--- predict_perpatient.py: Predict with perpatient tuning 
 |
 |-- submission: Folder containing the CSV files with predictions to submit
-|-- submit.sh: ? 
 |-- utils: soft link to kaldi/egs/wsj/s5/utils/
 ```
 Prepare the environment and create a symbolic link:
 
 1. Create a softlink from `tsfresh/submit/utils/` to `kaldi/egs/wsj/s5/utils/`. 
 2. `cd tsfresh/submit/`
-3. `conda create -n BeatPD_xgboost`
-4. `source activate BeatPD_xgboost`
-5. `conda install --file requirements_tsfresh_xgboost.txt`
-6. In the data/ folder, add `BEAT-PD_SC1_OnOff_Submission_Template.csv`, `BEAT-PD_SC2_Dyskinesia_Submission_Template.csv` and `BEAT-PD_SC3_Tremor_Submission_Template.csv` downloaded from the challenge 
+3. `conda create --name BeatPD_xgboost --file tsfresh_xgboost_environment.yml`
+4. `conda activate BeatPD_xgboost`
+5. In the data/ folder, add `BEAT-PD_SC1_OnOff_Submission_Template.csv`, `BEAT-PD_SC2_Dyskinesia_Submission_Template.csv` and `BEAT-PD_SC3_Tremor_Submission_Template.csv` downloaded from the challenge 
 
 As you can see in our [write-up](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/0-Write-Up#final-submission), for the final submission, the following sections need to be generated to create predictions files for tsfresh.  
 
@@ -554,33 +550,13 @@ Overall MSE Fusion - average :  None
 
 1. First generate the files we need. You can do so in the DataAugmentation notebook. (It is only generating training files, not for the test set given by the challenge yet, as we can't evaluate those results anyway at the moment as the labels are not public.)
 
-2. `cd tsfresh/submit/data/`: we will need to create a new `.scp` file pointing to the folder of the features we just created. 
+2. Tsfresh needs `scp` files containing the path to each training file. These are stored in `tsfresh/submit/data/`.  
 
-3. Copy an example of a file. Inside, it contains the path to all files of the training corpus. We want to change the path to point to the folder of our new features, so we are going to use `sed` to do so.
-    - `cp cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.scp cis-pd.training.combhpfnoinact.resample_0.9.scp`
-    - `cp cis-pd.testing.combhpfnoinact.noise_mu_0_sig_0.1.scp cis-pd.testing.combhpfnoinact.resample_0.9.scp`
+3. `cd tsfresh/submit/`
 
-4. Change the paths
-    - `sed -i 's/cis-pd.training_data.combhpfnoinact.noise_mu_0_sig_0.1/cis-pd.training_data.combhpfnoinact.resample_0.9/g' cis-pd.training.combhpfnoinact.resample_0.9.scp`
-    - `sed -i 's/cis-pd.testing_data.combhpfnoinact.noise_mu_0_sig_0.1/cis-pd.testing_data.combhpfnoinact.resample_0.9/g' cis-pd.testing.combhpfnoinact.resample_0.9.scp`
-    <!--
-    - `sed -i 's/cis-pd.testing_data.combhpfnoinact.resample_0.9/cis-pd.testing_data.combhpfnoinact.resample_1.1/g' cis-pd.testing.combhpfnoinact.resample_1.1.scp`
-    - `sed -i 's/cis-pd.training_data.combhpfnoinact.resample_0.9/cis-pd.training_data.resample_1.1/g' cis-pd.training.resample_0.9.scp`
-    - `sed -i 's/cis-pd.training_data.resample_0.9/cis-pd.testing_data.resample_0.9/g' cis-pd.testing.resample_0.9.scp`
-    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact/g' cis-pd.training.combhpfnoinact.scp`
-    - `sed -i 's/cis-pd.training_data.combhpfnoinact/cis-pd.testing_data.combhpfnoinact/g' cis-pd.testing.combhpfnoinact.scp`
-    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.rotate_1/g' cis-pd.training.rotate_1.scp`
-    - `sed -i 's/cis-pd.testing_data/cis-pd.testing_data.rotate_1/g' cis-pd.testing.rotate_1.scp`
-    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.rotate_2/g' cis-pd.training.rotate_2.scp`
-    - `sed -i 's/cis-pd.testing_data/cis-pd.testing_data.rotate_2/g' cis-pd.testing.rotate_2.scp`
+4. `./create_scp_files.sh combhpfnoinact.resample_0.9` : This will create new scp files needed for both training and testing data. The naming is convention is the following `cis-pd.training.{argument given}.scp` & `cis-pd.testing.{argument given}.scp`
 
-    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact.rotate_1/g' cis-pd.training.combhpfnoinact.rotate_1.scp`
-    - `sed -i 's/cis-pd.testing_data/cis-pd.testing.combhpfnoinact.rotate_1/g' cis-pd.testing.combhpfnoinact.rotate_1.scp`
-    - `sed -i 's/cis-pd.training_data/cis-pd.training_data.combhpfnoinact.rotate_2/g' cis-pd.training.combhpfnoinact.rotate_2.scp`
-    - `sed -i 's/cis-pd.testing_data/cis-pd.testing.combhpfnoinact.rotate_1/g' cis-pd.testing.combhpfnoinact.rotate_2.scp`
-    -->
-
-5. Duplicate any `run_extract_features*.sh` file edit two variables:
+5. Duplicate any `run_extract_features*.sh` file and edit two variables:
     - Change the `recog_set` variable for the name of the `scp` files we just created, like so: 
 
     ```
