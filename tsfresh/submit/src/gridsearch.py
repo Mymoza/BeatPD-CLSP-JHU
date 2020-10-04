@@ -13,6 +13,7 @@ import pandas as pd
 from sklearn.model_selection import KFold
 from lofo import LOFOImportance, Dataset, plot_importance, FLOFOImportance
 import numpy as np
+from sklearn.model_selection import PredefinedSplit
 
 # on_off features/cis-pd.training.csv ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv 1.0
 parser = argparse.ArgumentParser(description='Perform gridsearch or predicts on test folds.')
@@ -88,10 +89,10 @@ all_features_labels = pd.concat([all_features_labels, subject_id], axis=1)
 
 # Y contains the labels for the obj (subchallenge) 
 Y = np.array(all_features_labels[obj])
-# FIXME: Why do we do the number of recordings times *-0.5? 
+
+# squareroot(1/number of recordings) 
 W = np.array(all_features_labels['spcount']) ** -0.5
 foldid = np.array(all_features_labels['fold_id']).astype(int)
-from sklearn.model_selection import PredefinedSplit
 cv = PredefinedSplit(foldid)
 
 # X contains all the features 
@@ -204,7 +205,7 @@ for i in range(5):
             df_data_aug = []
             # First loop to go over the rows
             for index, measurement1 in modDfObj1.iterrows():
-                # Second rows to go over the loop except the same two rows
+                # Second rows to go over the loop except the same two rows and do not repeat same substraction
                 for index2, measurement2 in modDfObj2.iterrows():
                     if index >= index2:
                         continue
@@ -229,7 +230,6 @@ for i in range(5):
             # Append the augmented dataframe to the original dataframe
             tr = pd.concat([tr, df_data_aug], ignore_index=True)
             print('After spk ', str(spk), ' tr shape is : ', tr.shape)
-        tr.to_csv("mdl/tr_cis-pd_{0}_fold_{1}_lamb_{2}.csv".format(obj, i, lambda_value), index=False)
     # else:
         # print(tr.keys())
         # If we are using lambda data augmentation, these columns were already removed 
@@ -275,10 +275,12 @@ for i in range(5):
             early_stopping_rounds=100
         )
     pred = clf.predict(te).clip(0, 4)
-    # print('pred : ', pred)
+    # Computes the Msek 
     mse = (pred - test_y) ** 2
-    #mse = test_y.to_numpy() ** 2
-    mse2 = test_y ** 2 #null model I think?
+    # Computes the Msek for the null model 
+    mse2 = test_y ** 2
+    # mean_y = labels of that speaker.sum() / spcount of that subject 
+    # mse_null_model = (mean_y - test_y) ** 2
 
     # Code to get the MSEK as per the challenge requirement 
     # ret = pd.concat([sub, mse], axis=1)
@@ -289,6 +291,7 @@ for i in range(5):
     
     #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
+    
     #cnt = cnt ** 0.5
     res = pd.DataFrame(data={'measurement_id': test_measurement_id, 'subject_id': sid, obj: pred})
     res = pd.merge(res, avg, on='subject_id')
@@ -296,6 +299,7 @@ for i in range(5):
     res = res[["measurement_id", obj]]
     preds.append(res)
 
+    # Computes the Final Score (formula from the challenge)
     results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
     baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
 preds = pd.concat(preds)
@@ -307,13 +311,11 @@ msek_path = args.msek_path if args.msek_path is not None else None
 print('msek_path is : ', msek_path)
 results = pd.DataFrame(results)
 
-if lambda_value is not None:
-    preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}_lamb_{1}.csv'.format(obj, lambda_value), index=False)
-elif args.filename:
+if args.filename:
      preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}_{1}.csv'.format(obj, args.filename), index=False)
 else:
     preds.to_csv(pred_path+'kfold_prediction_cis-pd_{0}.csv'.format(obj), index=False)
-#preds.to_csv('kfold_prediction_lambda_0.3_cis-pd_{0}.csv'.format(obj), index=False)
+
 #print(clf.get_booster().get_score(importance_type='gain'))
 if msek_path is not None:
     # df_preds = pd.concat(preds)
@@ -334,10 +336,11 @@ if msek_path is not None:
     df_msek_subject.to_csv(msek_path+'msek_cis-pd_{0}_{1}.csv'.format(obj, args.filename), index=False, header=False)
 
 print("baseline {0} result {1}".format(np.mean(baselines),np.mean(results)))
-if not args.random_forest:
-    fig, ax = plt.subplots(figsize=(20, 10))
+if not args.random_forest and msek_path is not None:
+    fig, ax = plt.subplots(figsize=(19, 10))
     xgb.plot_importance(clf, ax=ax, importance_type='gain', max_num_features=20, xlabel='Feature importance score')
-    plt.savefig(msek_path+'importance_{0}_{1}_gain.png'.format(obj, args.filename))
+    plt.savefig(msek_path+'importance_{0}_{1}_gain.png'.format(obj, args.filename), format='png')
+    plt.savefig(msek_path+'importance_{0}_{1}_gain.pdf'.format(obj, args.filename), format='pdf')
 
     # Flag to know if we want to compute lofo importance 
     lofo_importance = args.lofo_importance if args.lofo_importance is not None else None 
