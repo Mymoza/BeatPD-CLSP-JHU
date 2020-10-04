@@ -25,6 +25,11 @@ tsfresh/submit/xgb_noise_diffrent_sigma/
 tsfresh/submit/xgb_rotate_bound/
 tsfresh/submit/repetition/
 
+tsfresh/submit/submission1_preds/
+tsfresh/submit/submission2_preds/
+tsfresh/submit/submission3_preds/
+tsfresh/submit/submission4_preds/
+
 tsfresh/submit/run_extract_features_combhpfnoinact.rotate_1.sh
 tsfresh/submit/run_extract_features_combhpfnoinact.rotate_balance.sh
 tsfresh/submit/run_extract_features_combhpfnoinact.rotate_bound.sh
