@@ -1,6 +1,11 @@
 
 ml_dl/BeatPD_job_submit_missing.sh
 
+.vscode/
+tsfresh/submit/getpreds_perpatient/
+tsfresh/submit/xgb_linear_comb_random/
+tsfresh/submit/xgb_weitd_thing/
+
 # tsfresh
 tsfresh/submit/tmp
 tsfresh/submit/utils/*
