@@ -470,13 +470,13 @@ def remove_inactivity_highpass(
                                 Flag to determine if we want to plot the accelerometer after the inactivity
                                 is removed
     """
-#     # Filter requirements.
-#     order = 10
-#     fs = 50.0  # sample rate, Hz
-#     cutoff = 0.5  # 3.667  # desired cutoff frequency of the filter, Hz
+    # Filter requirements.
+    order = 10
+    fs = 50.0  # sample rate, Hz
+    cutoff = 0.5  # 3.667  # desired cutoff frequency of the filter, Hz
 
-#     # Get the filter coefficients so we can check its frequency response.
-#     b, a = butter_highpass(cutoff, fs, order)
+    # Get the filter coefficients so we can check its frequency response.
+    b, a = butter_highpass(cutoff, fs, order)
 
     # Load every training file for each "row of labels" we have loaded in df_train_label
     for idx in df_train_label.index:
@@ -604,7 +604,7 @@ def remove_inactivity_highpass(
 
         # Plot the frequency response, and plot both the original and filtered signals for X, Y and Z.
         if plot_frequency_response:
-            # TODO: Make the graphs bigger
+            fig = plt.figure(figsize=(8,8))
             w, h = freqz(b, a, worN=8000)
             plt.subplot(4, 1, 1)
             plt.plot(0.5 * fs * w / np.pi, np.abs(h), "b")
