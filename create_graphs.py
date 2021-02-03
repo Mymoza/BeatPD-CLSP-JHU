@@ -239,8 +239,12 @@ def plot_accelerometer(df_train_label, data_type, path_train_data,
                                measurement_id=df_train_label["measurement_id"][idx],
                                mask_path=mask_path)
         else:
+            # Workaround to save graphs for rotation with meaningful title
+#             df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + "_ang_-15.csv")
+#             df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + "_ang_-32.csv")
+#             df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + "_ang_-3.csv")
+#             df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + "_ang_25_30_bound.csv")
             df_train_data = pd.read_csv(path_train_data + df_train_label["measurement_id"][idx] + ".csv")
-
 
         # FIXME: BUG ?  why the following goes to 1000xxx sometimes? It should be max 59xxx
         print("measurement_id : ", df_train_label["measurement_id"][idx])
