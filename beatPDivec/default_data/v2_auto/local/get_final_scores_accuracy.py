@@ -44,7 +44,7 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
         vSubjectId = (vParID == subject_id)
 
         vPredictions_subjectId = vPredictions[vSubjectId]
-
+#         print(vParID)
         vTrueLabels_subjectId = np.array(vTrueLabels)[vSubjectId]
         mse_per_subjectId.append(mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
         nb_files_per_subjectId.append(len(vPredictions_subjectId))
@@ -52,7 +52,7 @@ def get_final_score(vPredictions, vParID, vTrueLabels):
 #         print('MSE : ', mean_squared_error(vTrueLabels_subjectId, vPredictions_subjectId))
     
     print('--- MSEscore ---')
-    final_score(mse_per_subjectId, nb_files_per_subjectId)
+    return final_score(mse_per_subjectId, nb_files_per_subjectId)
     
 def find_components_neighbors(lObjsFiles, bKnn, bSVR, bEveryoneSVR): 
     lComponents = [] 
@@ -214,7 +214,7 @@ def get_all_folds(lResxFolders, sFileName):
            allfolds_test_nb_files_per_subjectid
         
     
-def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR, bPerSubject):
+def get_final_scores_accuracy(sFilePath, bKnn, bSVR, bEveryoneSVR, bPerSubject, sDatabase, sSubchallenge):
     """
     Read a pickle file and outputs the global mean accuracy & final score for BeatPD Challenge
     
@@ -450,7 +450,6 @@ def get_final_scores_SVR_lowest_mse_for_subjectid(sFilePath, bKnn, bSVR, bEveryo
             print('------ FOR C VALUE ', c_value, '------')
             for component in lComponents:
                 print('---- FOR COMPONENT ', component, '----')
-
                 if bEveryoneSVR:
                     sFileName = '/objs_everyone_'+component+'_kernel_'+kernel+'_c_'+c_value+'_eps_'+epsilon+'.pkl'
                 else:
@@ -460,8 +459,10 @@ def get_final_scores_SVR_lowest_mse_for_subjectid(sFilePath, bKnn, bSVR, bEveryo
                 all_folds_mse_test_per_subjectid = []
                 # List to contain the nb of test files for one subject id 
                 total_nb_files = []
-
+                
                 for fold_folder in lResxFolders:
+                    print('subject index : ', subjectid_index)
+                    print(fold_folder+sFileName)
                     [glob_trai_pred,glob_trai_true, \
                      glob_test_pred,glob_test_true, \
                      mse_training_per_subjectid, \
