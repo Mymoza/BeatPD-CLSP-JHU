@@ -9,10 +9,8 @@ import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestRegressor
 import argparse
-import pandas as pd
 from sklearn.model_selection import KFold
 from lofo import LOFOImportance, Dataset, plot_importance, FLOFOImportance
-import numpy as np
 from sklearn.model_selection import PredefinedSplit
 
 # on_off features/cis-pd.training.csv ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv 1.0
@@ -20,7 +18,7 @@ parser = argparse.ArgumentParser(description='Perform gridsearch or predicts on 
 parser.add_argument('symptom', metavar='obj', type=str, help='Should be either on_off, tremor, or dyskinesia')
 parser.add_argument("--features", action="append", type=str, help='Path to the features, like features/cis-pd.training.csv')
 parser.add_argument("--labels", type=str, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
-parser.add_argument("--linear_combination", type=float, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
+parser.add_argument("--linear_combination", type=float, help='Path to the labels, for example')
 parser.add_argument("--filename", type=str, help='filename')
 parser.add_argument("--load_model", type=str, help='filename') #FIXME: It's a flag but as well as its not none will work
 parser.add_argument("--random_forest", type=str, help='filename') #FIXME: Flag too. If it's there, then we want to use RFR instead of xgboost
@@ -193,25 +191,36 @@ for i in range(5):
         for spk in all_spks: 
             # Filter training data for that speaker 
             tr_subject = tr.loc[tr['subject_id'] == spk]
-
+            
             # FIXME: The mean number of recordings changes per fold so to make it easier 
             # I'm just gonna use the mean for the data augmented values
             mean_spcount = int(tr_subject['spcount'].mean())
 
             # Apply the lambda on the training features except the columns that are not float
-            modDfObj1 = tr_subject[tr_subject.columns.difference(columns_to_exclude)].apply(lambda x: x * lambda_value, axis=1, result_type='broadcast')
-            modDfObj2 = tr_subject[tr_subject.columns.difference(columns_to_exclude)].apply(lambda x: x * (1-lambda_value), axis=1, result_type='broadcast')
+            modDfObj1 = tr_subject[tr_subject.columns.difference(columns_to_exclude)].reset_index(drop=True).apply(lambda x: x * lambda_value, axis=1, result_type='broadcast')
+            modDfObj2 = tr_subject[tr_subject.columns.difference(columns_to_exclude)].sample(frac=1).reset_index(drop=True).apply(lambda x: x * (1-lambda_value), axis=1, result_type='broadcast')
             
             df_data_aug = []
-            # First loop to go over the rows
+
             for index, measurement1 in modDfObj1.iterrows():
-                # Second rows to go over the loop except the same two rows and do not repeat same substraction
-                for index2, measurement2 in modDfObj2.iterrows():
-                    if index >= index2:
-                        continue
-                    df_data_aug.append(measurement1.add(measurement2).to_list())
+                measurement2 = modDfObj2.loc[index]
+                index2 = 1
+                while measurement1[obj] * lambda_value == measurement2[obj] * (1-lambda_value):
+                    measurement2 = modDfObj2.loc[(index+index2 if (index+index2<len(modDfObj2)) else 0+index2)]
+                    index2 = index2 + 1 
+                    if index2 == len(modDfObj2): #some folds only contain the same label for a speaker
+                        break
+                df_data_aug.append(measurement1.add(measurement2).to_list())
+            # First loop to go over the rows
+            # for index, measurement1 in modDfObj1.iterrows():
+            #     # Second rows to go over the loop except the same two rows and do not repeat same substraction
+            #     for index2, measurement2 in modDfObj2.iterrows():
+            #         if measurement1[obj] * lambda_value == measurement2[obj] * (1-lambda_value):
+            #             print('Labels were : ', str((measurement1[obj] * lambda_value)), ' and ', str((measurement2[obj] * (1-lambda_value))))
+            #             continue
+            #         df_data_aug.append(measurement1.add(measurement2).to_list())
             df_data_aug = pd.DataFrame(df_data_aug, columns=modDfObj1.columns)
-            
+
             # Add again the columns we just removed 
             #modDfObj1 = pd.concat([modDfObj1, tr_subject[columns_to_exclude]], axis=1)
             subjects_columns_title = [x for x in columns_to_exclude if x.startswith("spk_")]
@@ -228,27 +237,23 @@ for i in range(5):
             #df_data_aug = pd.concat([df_data_aug, full_subjects], axis=1)
 
             # Append the augmented dataframe to the original dataframe
+            print('Before spk ', str(spk), ' tr shape is : ', tr.shape)
             tr = pd.concat([tr, df_data_aug], ignore_index=True)
             print('After spk ', str(spk), ' tr shape is : ', tr.shape)
-    # else:
-        # print(tr.keys())
-        # If we are using lambda data augmentation, these columns were already removed 
-        # tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
-    print('obj is : ', obj)
+            
+    # print('obj is : ', obj)
     train_y = tr[obj].astype(pd.np.float32) # training labels 
+    # print('tr spcount : ', tr['spcount'])
     train_weight = tr['spcount'] ** -0.5 # training weight
     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
-
 
     ##te_w = all_features_labels[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
     ##te = pd.merge(all_features_labels[idx], te_w, on='subject_id')
     
     # Drop the measurements that are used in the training of this fold, so we keep [idx] instead of [~idx]
     te = all_features_labels[idx].drop(['fold_id'], axis=1)
-    # print('te !!! : ', te)
     test_weight = te['spcount'] ** -0.5 # test weight 
     test_y = te[obj].astype(pd.np.float32) # testing labels
-    #sub = te['subject_id']
     sid = te.subject_id
     test_measurement_id = te.measurement_id
     te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
@@ -285,7 +290,6 @@ for i in range(5):
     # Code to get the MSEK as per the challenge requirement 
     # ret = pd.concat([sub, mse], axis=1)
     # mse_marie = (ret.groupby('subject_id').sum())[obj].to_numpy()
-
 
     #ret.to_csv('tmp.csv')
     
