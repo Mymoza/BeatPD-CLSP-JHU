@@ -35,6 +35,7 @@ parser.add_argument("--saveAEFeats",action="store_true")
 parser.add_argument("--saveFeatDir",default="")
 parser.add_argument("-dlP","--dataLoadParams",type=json.loads)
 parser.add_argument("--dataAugScale",default=2,type=int)
+parser.add_argument("--data_prepro",default="",type=str)
 
 args = parser.parse_args()
 
@@ -47,6 +48,7 @@ saveAEFeats = args.saveAEFeats
 saveFeatDir = args.saveFeatDir
 params = args.dataLoadParams
 dataAugScale = args.dataAugScale
+dataPrepro = args.data_prepro
 
 savedir = "/export/b19/mpgill/BeatPD/Weights/"
 #savedir = "/export/b03/sbhati/PD/BeatPD/Weights/"
@@ -141,7 +143,7 @@ print("Augumented Size: %f" % (train_X_all.shape[0]))
 #train_Y_all = train_Y_all[ind,:]
 model,encoder = make_DNN_model(feat_size=params['frame_length']*3,latent_dim=latent_dim)
 
-checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5', verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath=savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'_type_'+str(dataPrepro)+'.h5', verbose=1, save_best_only=True)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 #model.compile(optimizer='adam',loss='mse',metrics=['mse'])
 
@@ -153,11 +155,11 @@ batch_size = 500
 epochs = 200
 model.fit(train_X_all,train_Y_all,validation_split=0.1,batch_size=batch_size,epochs=epochs,shuffle=True, verbose=1,callbacks=[checkpointer, early_stopping])
 
-model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5') 
-encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'_type_'+str(dataPrepro)+'.h5')
+encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'_type_'+str(dataPrepro)+'.h5')
 # End of section to be commented if the model is already created and you just want to load it
 
-encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'_type_'+str(dataPrepro)+'.h5')
 
 if saveAEFeats:
     #save_feats_path = '/export/b19/mpgill/BeatPD/AE_30ft_high_pass_inactivity_removed_test/'
