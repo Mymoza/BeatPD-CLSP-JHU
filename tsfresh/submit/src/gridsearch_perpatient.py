@@ -45,7 +45,7 @@ all_features_labels = pd.merge(all_features_labels, weight, on=['subject_id', 'f
 #all_features_labels = pd.merge(all_features_labels, mean_value, on='subject_id')
 #all_features_labels = pd.concat([all_features_labels, subject_id], axis=1)
 #all_features_labels = all_features_labels.astype(pd.np.float32)
-spks = all_features_labels['subject_id'].unique()
+all_spks = all_features_labels['subject_id'].unique()
 
 param_grid = {
         'objective': ['reg:squarederror'],
@@ -108,74 +108,75 @@ param_grid = {
 
 
 
-
-
-
 ################# 
 # The following code was Nanxin's code.
 # It is commented so I can try if I can replicate those results because I don't 
 # think the following code is supposed to work.. 
 ###################
 
-# results = []
-# #baselines = []
+results = []
+#baselines = []
 
-# preds = []
+preds = []
 
-# for i in range(5):
-#     ##test = pd.read_csv(sys.argv[i]).squeeze()
-#     idx = al['measurement_id'].isin(test)
+for i in range(5):
+    # Filter all_features_labels to only the measurements of the current fold
+    idx = all_features_labels['measurement_id'].isin(test)
 
-#     #tr_w = al[~idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
-#     #tr = pd.merge(al[~idx], tr_w, on='subject_id')
-#     tr = al[~idx].drop(['fold_id'], axis=1)
-#     tr_w = tr['spcount'] ** -0.5
-#     tr_y = tr[obj].astype(pd.np.float32)
-#     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+    # Drop the measurements that are not from the current fold
+    tr = all_features_labels[~idx].drop(['fold_id'], axis=1)
+    train_weight = tr['spcount'] ** -0.5
+    train_y = tr[obj].astype(pd.np.float32) #training labels
+    tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
-#     #te_w = al[idx].groupby('subject_id').count().reset_index()[["subject_id", obj]].rename(columns={obj: 'spcount'})
-#     #te = pd.merge(al[idx], te_w, on='subject_id')
-#     te = al[idx].drop(['fold_id'], axis=1)
-#     te_w = te['spcount'] ** -0.5
-#     te_y = te[obj].astype(pd.np.float32)
-#     sub = te['subject_id']
-#     sid = te.subject_id
-#     tid = te.measurement_id
-#     te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
-#     print('hiiiiiiiiiiiiiii')
-#     clf = xgb.XGBRegressor(**best_params)
-#     #clf = xgb.XGBClassifier(**params)
-#     clf.fit(
-#         tr, tr_y,
-#         sample_weight=tr_w,
-#         eval_set=[(tr, tr_y)],#, (te, te_y)],
-#         #eval_metric=',
-#         sample_weight_eval_set=[tr_w],#, te_w],
-#         verbose=0,
-#         early_stopping_rounds=100
-#     )
-#     pred = clf.predict(te).clip(0, 4)
-#     print(pred)
-#     mse = (pred - te_y) ** 2
-#     #mse = te_y.to_numpy() ** 2
-#     #mse2 = te_y ** 2
-#     #ret = pd.concat([sub, mse], axis=1)
-#     #ret.to_csv('tmp.csv')
-#     #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
-#     #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
-#     #cnt = cnt ** 0.5
-#     res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
-#     res = pd.merge(res, avg, on='subject_id')
-#     res[obj] += res['sp_' + obj]
-#     res = res[["measurement_id", obj]]
-#     preds.append(res)
-#     results.append(((mse * te_w).sum() / te_w.sum()).squeeze())
-#     #baselines.append(((mse2 * te_w).sum() / te_w.sum()).squeeze())
-# preds = pd.concat(preds)
-# preds.to_csv('kfold_prediction_cis-pd_perpatient_{0}.csv'.format(obj), index=False)
-# #print(clf.get_booster().get_score(importance_type='gain'))
-# #print(np.mean(results))
-# #print(np.mean(baselines))
-# plot_importance(clf,max_num_features=10)
-# plt.savefig('importance.png')
+    # testfold_features_label
+    testfold_features_label = all_features_labels[idx].drop(['fold_id'], axis=1)
+    test_weight = testfold_features_label['spcount'] ** -0.5
+    te_y = testfold_features_label[obj].astype(pd.np.float32)
+    sub = testfold_features_label['subject_id']
+    sid = testfold_features_label.subject_id
+    tid = testfold_features_label.measurement_id
+    testfold_features = testfold_features_label.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+    # divide testfold_features_labels in two 
+
+    # use the first part as evaluation set 
+
+    # make predictions on second part of evaluation set, start over 
+
+    clf = xgb.XGBRegressor(**best_params)
+    #clf = xgb.XGBClassifier(**params)
+    clf.fit(
+        tr, train_y,
+        sample_weight=train_weight,
+        eval_set=[(tr, train_y)],#, (te, te_y)],
+        #eval_metric=',
+        sample_weight_eval_set=[train_weight],#, test_weight],
+        verbose=0,
+        early_stopping_rounds=100
+    )
+    pred = clf.predict(testfold_features).clip(0, 4)
+    print(pred)
+    mse = (pred - te_y) ** 2
+    #mse = te_y.to_numpy() ** 2
+    #mse2 = te_y ** 2
+    #ret = pd.concat([sub, mse], axis=1)
+    #ret.to_csv('tmp.csv')
+    #mse = (ret.groupby('subject_id').mean())[obj].to_numpy()
+    #cnt = (ret.groupby('subject_id').count())[obj].to_numpy()
+    #cnt = cnt ** 0.5
+    res = pd.DataFrame(data={'measurement_id': tid, 'subject_id': sid, obj: pred})
+    res = pd.merge(res, avg, on='subject_id')
+    res[obj] += res['sp_' + obj]
+    res = res[["measurement_id", obj]]
+    preds.append(res)
+    results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
+    #baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
+preds = pd.concat(preds)
+preds.to_csv('kfold_prediction_cis-pd_perpatient_{0}.csv'.format(obj), index=False)
+#print(clf.get_booster().get_score(importance_type='gain'))
+#print(np.mean(results))
+#print(np.mean(baselines))
+plot_importance(clf,max_num_features=10)
+plt.savefig('importance.png')
 

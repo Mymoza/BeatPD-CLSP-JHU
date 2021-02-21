@@ -1,4 +1,11 @@
 
+ml_dl/BeatPD_job_submit_missing.sh
+
+.vscode/
+tsfresh/submit/getpreds_perpatient/
+tsfresh/submit/xgb_linear_comb_random/
+tsfresh/submit/xgb_weitd_thing/
+
 # tsfresh
 tsfresh/submit/tmp
 tsfresh/submit/utils/*
@@ -24,6 +31,16 @@ tsfresh/submit/xgb_lofo/
 tsfresh/submit/xgb_noise_diffrent_sigma/
 tsfresh/submit/xgb_rotate_bound/
 tsfresh/submit/repetition/
+tsfresh/submit/run_extract_features_combhpfnoinact.linear_combination.sh
+tsfresh/submit/run_extract_features_preds_noise.sh
+tsfresh/submit/xgb_best_results/
+tsfresh/submit/xgb_linear_comb_feat/
+tsfresh/submit/submission1_preds/
+tsfresh/submit/submission2_preds/
+tsfresh/submit/submission3_preds/
+tsfresh/submit/submission4_preds/
+
+
 
 tsfresh/submit/run_extract_features_combhpfnoinact.rotate_1.sh
 tsfresh/submit/run_extract_features_combhpfnoinact.rotate_balance.sh

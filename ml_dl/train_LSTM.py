@@ -18,8 +18,8 @@ import json
 import copy
 
 from dataload import load_data
-from model import make_DNN_model, make_LSTM_model
-from feat_process import get_AE_feats
+from model import make_DNN_model, make_LSTM_model, make_CNN_model
+from feat_process import get_AE_feats, combine_feats
 from BeatPDutils import get_class_weights, sort_dict
 
 import tensorflow as tf
@@ -63,12 +63,6 @@ train_data_path = data_dir + data_type + "-pd.training_data/" + data_real_subtyp
 df_train_label = pd.read_csv(label_path_train)
 train_data_len = df_train_label.shape[0]
 
-if use_ancillarydata:
-    ancillary_data_path = data_dir + data_type + 'pd.ancillary_data'
-    label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
-    df_ancillary_label = pd.read_csv(label_path_ancillary)
-    #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
-
 if not params:
     params = {}
 
@@ -88,31 +82,32 @@ cleanParams = copy.copy(params)
 cleanParams['add_rotation'] = 'False'
 cleanParams['add_noise'] = 'False'
 
+if use_ancillarydata:
+    ancillary_data_path = data_dir + data_type + '-pd.ancillary_data/'
+    label_path_ancillary=data_dir+data_type+'-pd.data_labels/'+data_type.upper()+'-PD_Ancillary_Data_IDs_Labels.csv'
+    df_ancillary_label = pd.read_csv(label_path_ancillary)
+    anci_params = copy.copy(params)
+    anci_params['data_path'] = ancillary_data_path
+    anci_cleanParams = copy.copy(cleanParams)
+    anci_cleanParams['data_path'] = ancillary_data_path
+    #df_train_label = pd.concat([df_train_label,df_ancillary_label],axis=0,ignore_index=True)
+
 #model.load_weights(savedir+'mlp_AE_uad_'+str(use_ancillarydata)+'.h5') 
 #encoder.save(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'.h5')
 
 #encoder.load_weights(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'.h5')
 
 encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+params_append_str+'_ld_'+str(latent_dim)+'.h5')
+#encoder = load_model(savedir+'mlp_encoder_uad_'+str(use_ancillarydata)+'_ld_'+str(latent_dim)+'.h5')
 
 ### LSTM classifier 
 
 AE_feats, labels, ind_selected = get_AE_feats(encoder,df_train_label,subtask,cleanParams)
-
-LSTM_featsize = AE_feats.shape[-1]
-classifier = make_LSTM_model(feat_size=LSTM_featsize)
-
-#classifier.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
-
-lstm_savename = savedir+'LSTM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.h5'
-checkpointer = ModelCheckpoint(filepath=lstm_savename, verbose=1, save_best_only=True)
-early_stopping = EarlyStopping(monitor='val_loss', patience=5)
-
-lr=0.0001
-sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
-
-classifier.compile(optimizer='adam',loss='mse',metrics=['mae'])
-#classifier.fit(AE_feats,labels,validation_split=0.2,batch_size=50,epochs=100,verbose=1,callbacks=[checkpointer, early_stopping])
+if use_ancillarydata:
+    acni_AE_feats, anci_labels, anci_ind_selected = get_AE_feats(encoder,df_ancillary_label,subtask,anci_cleanParams)
+    AE_feats = combine_feats(AE_feats,acni_AE_feats)
+    labels = np.concatenate((labels,anci_labels),axis=0)
+    del acni_AE_feats,anci_labels
 
 temp_X = AE_feats
 temp_Y = labels
@@ -120,19 +115,42 @@ temp_Y = labels
 if params['add_noise'] =='True' or params['add_rotation'] == 'True':
     for i in range(dataAugScale):
         temp_AE_feats, temp_labels, temp_ind_selected = get_AE_feats(encoder,df_train_label,subtask,params)
-        temp_X = np.concatenate((temp_X,temp_AE_feats),axis=0)
-        temp_Y = np.concatenate((temp_Y,temp_labels),axis=0)
+        if use_ancillarydata:
+            acni_AE_feats, anci_labels, anci_ind_selected = get_AE_feats(encoder,df_ancillary_label,subtask,anci_cleanParams)
+            temp_AE_feats = combine_feats(temp_AE_feats,acni_AE_feats)
+            temp_labels = np.concatenate((temp_labels,anci_labels),axis=0)
+            del acni_AE_feats,anci_labels,anci_ind_selected
+        temp_X = np.concatenate((temp_AE_feats,temp_X),axis=0)
+        temp_Y = np.concatenate((temp_labels,temp_Y),axis=0)
         del temp_AE_feats, temp_labels, temp_ind_selected
 
 print("Original Size: %f" % (AE_feats.shape[0]))
 print("Augumented Size: %f" % (temp_X.shape[0]))
 
-#N = temp_X.shape[0]
-#ind = np.random.permutation(N)
-#temp_X = temp_X[ind,:,:]
-#temp_Y = temp_Y[ind,:]
-classifier.fit(temp_X,temp_Y,validation_split=0.15,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer, early_stopping])
+N = temp_X.shape[0]
+ind = np.random.permutation(N)
+temp_X = temp_X[ind,:,:]
+temp_Y = temp_Y[ind,:]
 
+LSTM_featsize = AE_feats.shape[-1]
+classifier = make_LSTM_model(feat_size=LSTM_featsize)
+
+#classifier.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+
+lstm_savename = savedir+'LSTM_uad_'+str(use_ancillarydata)+'_'+subtask+params_append_str+'_ld_'+str(latent_dim)+'.h5'
+checkpointer = ModelCheckpoint(filepath=lstm_savename, monitor='loss',verbose=1, save_best_only=True)
+
+early_stopping = EarlyStopping(monitor='loss', patience=5)
+
+lr=0.0001
+sgd = SGD(lr=lr, decay=0, momentum=0.9, nesterov=True)
+
+classifier.compile(optimizer='adam',loss='mse',metrics=['mae'])
+#classifier.fit(AE_feats,labels,validation_split=0.2,batch_size=50,epochs=100,verbose=1,callbacks=[checkpointer, early_stopping])
+
+classifier.fit(temp_X,temp_Y,batch_size=50,epochs=100,verbose=1,shuffle=True,callbacks=[checkpointer, early_stopping])
+
+AE_feats, labels, ind_selected = get_AE_feats(encoder,df_train_label,subtask,cleanParams)
 tr_pred = classifier.predict(AE_feats,batch_size=20)
 
 tr_class_weights = get_class_weights(df_train_label)

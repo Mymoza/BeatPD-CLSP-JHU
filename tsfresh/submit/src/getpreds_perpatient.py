@@ -12,18 +12,28 @@ from xgboost import plot_importance
 import numpy as np
 import pickle
 import datetime
+import argparse
+
+parser = argparse.ArgumentParser(description='Perform gridsearch or predicts on test folds.')
+parser.add_argument('symptom', metavar='obj', type=str, help='Should be either on_off, tremor, or dyskinesia')
+parser.add_argument("--features", action="append", type=str, help='Path to the features, like features/cis-pd.training.csv')
+parser.add_argument("--labels", type=str, help='Path to the labels, for example \{\path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv')
+parser.add_argument("--filename", type=str, help='filename')
+parser.add_argument("--pred_path", type=str, help='path to pred files')
+args = parser.parse_args()
 
 # contains the subchallenge we are working on 
-obj = sys.argv[1]
+obj = args.symptom
 
 # All the subchallenges
 all_obj = ["on_off", "tremor", "dyskinesia"]
 
 # Read the training features 
-all_features = pd.read_csv(sys.argv[2])
+print(args.features)
+all_features = pd.concat((pd.read_csv(f) for f in args.features))
 
 # Read the training labels
-all_labels = pd.read_csv(sys.argv[3])
+all_labels = pd.read_csv(args.labels)
 # Drop the labels of the subchallenges we're not working on 
 all_labels = all_labels.drop(list(set(all_obj) - set([obj])), axis=1)
 
@@ -42,7 +52,7 @@ all_features_labels = all_features_labels.drop(remove, axis=1)
 #all_features_labels = all_features_labels.drop([obj, 'measurement_id'], axis=1)
 #mean_value = all_features_labels.groupby('subject_id').mean().reset_index().add_suffix('_mean')
 #mean_value.columns = ['subject_id' if x=='subject_id_mean' else x for x in mean_value.columns]
-all_features_labels = pd.merge(all_features_labels, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
+all_features_labels = pd.merge(all_features_labels, pd.read_csv('/home/mpgill/BeatPD/BeatPD-CLSP-JHU/tsfresh/submit/data/order.csv'), how='inner', on=["measurement_id"])
 weight = all_features_labels.groupby(['subject_id', 'fold_id']).count().reset_index()[["subject_id", "fold_id", obj]].rename(columns={obj: 'spcount'})
 all_features_labels = pd.merge(all_features_labels, weight, on=['subject_id', 'fold_id'])
 #subject_id = pd.get_dummies(all_features_labels.subject_id, columns='subject_id', prefix='spk_')
@@ -103,11 +113,9 @@ if obj == 'on_off':
 # The following section is only used to create a predictions files for 
 # cis-pd with per patient tuning 
 ####################################################
-
-#FIXME: The following code is not complete though. 
-# It should loop over the subject_ids and read all of their best_params,
-# make predictions and append those to a variable which we put to a csv at the end 
-
+results_mse = []
+results = []
+preds = []
 A = []
 for i in range(5):
     for spk in all_spks:
@@ -129,31 +137,77 @@ for i in range(5):
         test_weight = test_spk['spcount'] ** -0.5 # test weight 
         test_measurement_id = test_spk.measurement_id.reset_index(drop=True)
         test_subject_id = test_spk.subject_id.reset_index(drop=True)
-        # FIXME: is there really a prediction column? Should i instead drop obj?
-        test_spk = test_spk.drop(['measurement_id', 'subject_id', 'prediction', 'spcount', 'fold_id'], axis=1).astype(pd.np.float32)
-
+        test_spk_y = test_spk[obj].astype(pd.np.float32)
+        test_spk = test_spk.drop(['measurement_id', 'subject_id', obj, 'spcount', 'fold_id'], axis=1).astype(pd.np.float32)
         # Using the saved configuration provided at the top of this document
         clf = xgb.XGBRegressor(**cfgs[spk_id])
         
-        # Currently Using Stop Criteria on Training Data for the speaker
-        # FIXME: Why are we not using (te, test_y) in eval_set ?
-        clf.fit(
-            train_spk, train_y,
-            sample_weight=train_weight,
-            eval_set=[(train_spk, train_y)],
-            #eval_metric=',
-            sample_weight_eval_set=[train_weight],
-            verbose=0,
-            early_stopping_rounds=100
-        )
+        # Split the test dataset in two to make a development dataset 
+        # print(len(test_spk))
+        # print('-----------')
+        # print(test_spk)
+        # print('------------------')
+        # print('initial : ', test_measurement_id)
+        # test_measurement_id_yay = np.split(test_measurement_id, [int(.5*len(test_measurement_id))])
+        # print('test_measurement_id_yay 0 : ', test_measurement_id_yay[0])
+        # print('test_measurement_id_yay 1 : ', test_measurement_id_yay[1])
+        # print('test_measurement_id_yay : ', test_measurement_id_yay)
+        # print('type(test_measurement_id_yay) : ', type(test_measurement_id_yay))
+
+        test_spk_dev = np.split(test_spk, [int(.5*len(test_spk))])
+        test_spk_y_dev = np.split(test_spk_y, [int(.5*len(test_spk_y))])
+        test_weight_dev = np.split(test_weight, [int(.5*len(test_weight))])
+        # print('test_spk_dev ', test_spk_dev)
+        # print('len test_spk_dev[0] ', len(test_spk_dev[0]))
+        # print('len test_spk_dev[1] ', len(test_spk_dev[1]))
+        # print('len test_spk_y_dev[0] : ', len(test_spk_y_dev[0]))
+        # print('len test_spk_y_dev[1] : ', len(test_spk_y_dev[1]))
+        # print("===================")
+        # print('test_spk_dev[0] ', test_spk_dev[0])
+        # print('test_spk_y_dev[0] : ', test_spk_y_dev[0])
+
+        print('dev : ', len(test_spk_dev[0]),', test : ',len(test_spk_dev[1]),' = ', str(len(test_spk_dev[0])+len(test_spk_dev[1])))
+        pred_test_fold = [] 
+        # for index in range(2):
+        for index in [0, 1]:
+            # Currently Using Stop Criteria on Training Data for the speaker
+            clf.fit(
+                train_spk, train_y,
+                sample_weight=train_weight,
+                eval_set=[(train_spk, train_y), (test_spk_dev[index], test_spk_y_dev[index])], #[(train_spk, train_y)],
+                #eval_metric=',
+                sample_weight_eval_set=[train_weight, test_weight_dev[index]],
+                verbose=0,
+                early_stopping_rounds=100
+            )
+            # Predict on the dataset that was not used for the early stop
+            pred = clf.predict(test_spk_dev[1 if index == 0 else 0]).clip(0,4)
+            pred_test_fold.append(pred)
+
+            # Trying to get Nanxin's MSE  to see if it's lower than my results
+            mse = (pred - test_spk_y_dev[1 if index == 0 else 0]) ** 2
+            results_mse.append(((mse * test_weight_dev[1 if index == 0 else 0]).sum() / test_weight_dev[1 if index == 0 else 0].sum()).squeeze())
+
+        # print('len(test_measurement_id) : ', len(test_measurement_id))
+        # print('len(pred_test_fold) ', len(pred_test_fold))
+        # print('type(pred_test_fold[0]) : ', type(pred_test_fold[0]))
+        # print('before : ', pred_test_fold)
+        pred_test_fold = np.concatenate(pred_test_fold, axis=None)
+        # print('after concatenate : ', pred_test_fold)
         # Append the predictions for every speaker for each fold
-        results = pd.DataFrame(data={obj: clf.predict(test_spk).clip(0,4)})
+        results = pd.DataFrame(data={obj: np.array(pred_test_fold)}) # used to be pred 
         # Join test_measurement_id, results and test_subject_id
         joined = pd.DataFrame(test_measurement_id).join(results).join(test_subject_id)
-        # FIXME: why we add avg to the preds?
         joined = pd.merge(joined, avg, on='subject_id')
-        joined[obj] += joined['sp_' + obj]
+        joined[obj] += joined['sp_' + obj] # we add the average back 
         joined = joined[['measurement_id', obj]]
         A.append(joined)
 joined = pd.concat(A)
-joined.to_csv('kfold_prediction_cis-pd.{0}.perpatient.csv'.format(obj), index=False)
+joined.to_csv(args.pred_path+'kfold_prediction_cis-pd.{0}_{1}.perpatient.csv'.format(obj, args.filename), index=False)
+
+print(type(results_mse))
+print(len(results_mse))
+results_mse = pd.DataFrame(results_mse)
+print(type(results_mse))
+print(len(results_mse))
+print("baseline result {0}".format(np.mean(results_mse)))

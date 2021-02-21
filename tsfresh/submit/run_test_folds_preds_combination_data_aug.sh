@@ -23,6 +23,36 @@ msek_path="$(pwd)/xgb_comb_rotate_noise/"
 
 # python test_before.py on_off --features features/cis-pd.training.csv --features features/cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.csv --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv 
 
+
+python src/gridsearch.py on_off --features features/cis-pd.training.combhpfnoinact.csv \
+                                --features features/cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_1.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.rotate_1.csv \
+                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+                                --pred_path ${msek_path} \
+                                --filename combhpfnoinact.comb_4
+
+
+python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+                                --features features/cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_1.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.rotate_1.csv \
+                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+                                --pred_path ${msek_path} \
+                                --filename combhpfnoinact.comb_4
+
+python src/gridsearch.py dyskinesia --features features/cis-pd.training.combhpfnoinact.csv \
+                                --features features/cis-pd.training.combhpfnoinact.noise_mu_0_sig_0.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+                                --features features/cis-pd.training.combhpfnoinact.resample_1.1.csv \
+                                --features features/cis-pd.training.combhpfnoinact.rotate_1.csv \
+                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+                                --pred_path ${msek_path} \
+                                --filename combhpfnoinact.comb_4 
+
+
 # echo ----- Start cis-pd.training ------
 
 # python src/gridsearch.py on_off --features features/cis-pd.training.csv \
@@ -568,44 +598,44 @@ msek_path="$(pwd)/xgb_comb_rotate_noise/"
 #                                 --lofo_importance yes
 
 
-echo 2. combhpfnoinact tremor
-python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
-                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
-                                --features features/cis-pd.training.combhpfnoinact.rotate_1.csv \
-                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
-                                --pred_path ${msek_path} \
-                                --msek_path ${msek_path} \
-                                --filename combhpfnoinact.rotate_1_resample09
+# echo 2. combhpfnoinact tremor
+# python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.rotate_1.csv \
+#                                 --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+#                                 --pred_path ${msek_path} \
+#                                 --msek_path ${msek_path} \
+#                                 --filename combhpfnoinact.rotate_1_resample09
 
-echo 2. combhpfnoinact tremor
-python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
-                                --features features/cis-pd.training.combhpfnoinact.rotate_2.csv \
-                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
-                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
-                                --pred_path ${msek_path} \
-                                --msek_path ${msek_path} \
-                                --filename combhpfnoinact.rotate_2_resample09
+# echo 2. combhpfnoinact tremor
+# python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.rotate_2.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+#                                 --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+#                                 --pred_path ${msek_path} \
+#                                 --msek_path ${msek_path} \
+#                                 --filename combhpfnoinact.rotate_2_resample09
 
-python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
-                                --features features/cis-pd.training.combhpfnoinact.rotate_3.csv \
-                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
-                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
-                                --pred_path ${msek_path} \
-                                --msek_path ${msek_path} \
-                                --filename combhpfnoinact.rotate_3_resample09
+# python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.rotate_3.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+#                                 --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+#                                 --pred_path ${msek_path} \
+#                                 --msek_path ${msek_path} \
+#                                 --filename combhpfnoinact.rotate_3_resample09
 
-python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
-                                --features features/cis-pd.training.combhpfnoinact.rotate_4.csv \
-                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
-                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
-                                --pred_path ${msek_path} \
-                                --msek_path ${msek_path} \
-                                --filename combhpfnoinact.rotate_4_resample09
+# python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.rotate_4.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+#                                 --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+#                                 --pred_path ${msek_path} \
+#                                 --msek_path ${msek_path} \
+#                                 --filename combhpfnoinact.rotate_4_resample09
 
-python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
-                                --features features/cis-pd.training.combhpfnoinact.rotate_5.csv \
-                                --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
-                                --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
-                                --pred_path ${msek_path} \
-                                --msek_path ${msek_path} \
-                                --filename combhpfnoinact.rotate_5_resample09
+# python src/gridsearch.py tremor --features features/cis-pd.training.combhpfnoinact.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.rotate_5.csv \
+#                                 --features features/cis-pd.training.combhpfnoinact.resample_0.9.csv \
+#                                 --labels ${path_labels_cis}/CIS-PD_Training_Data_IDs_Labels.csv \
+#                                 --pred_path ${msek_path} \
+#                                 --msek_path ${msek_path} \
+#                                 --filename combhpfnoinact.rotate_5_resample09

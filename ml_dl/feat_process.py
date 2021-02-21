@@ -37,3 +37,22 @@ def get_AE_feats(encoder,data_frame_in,subtask,params):
     labels = np.vstack(labels)
     ind_selected = np.array(ind_selected)
     return AE_feats, labels, ind_selected
+
+def combine_feats(train_feats,anci_feats):
+    s_t = train_feats.shape[1]
+    s_a = anci_feats.shape[1]
+    if s_t > s_a:
+        temp = np.zeros((anci_feats.shape[0],s_t-s_a,anci_feats.shape[2]))
+        anci_feats = np.concatenate((anci_feats,temp),axis=1)
+    else:
+        temp = np.zeros((train_feats.shape[0],s_a-s_t,train_feats.shape[2]))
+        train_feats = np.concatenate((train_feats,temp),axis=1)
+    combined_feats = np.concatenate((train_feats,anci_feats),axis=0)
+    return combined_feats    
+
+ 
+
+
+
+
+

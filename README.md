@@ -259,13 +259,15 @@ For dyskinesia, in the final submission, we performed a fusion with the average 
 1. At the moment, all the code needed for the AE lives [on a branch](https://github.com/Mymoza/BeatPD-CLSP-JHU/pull/14). So the first step is to checkout that branch with `git checkout marie_ml_dl_real`.
 2. `conda env create --file environment_ae.yml` : This will create the `keras_tf2` environment you need to run AE experiments.
 3. Train an AE model & save their features:
-    - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the AE models, which will be referred to as `<your-path-to-AE-Features>`. 
-    - For REAL-PD: At line 53 of the `train_AE_real.py` file, change the `save_dir` path to the directory where you want to store the AE models.
+    - For CIS-PD: At line 51 of the `train_AE.py` file, change the `save_dir` path to the directory where you want to store the weights of the AE models. 
+    - For REAL-PD: At line 53 of the `train_AE_real.py` file, change the `save_dir` path to the directory where you want to store the weights of the AE models.
 4. Launch the training for the configurations you want. Some examples are available in this wiki page about [Creating AutoEncoder Features](https://github.com/Mymoza/BeatPD-CLSP-JHU/wiki/2-Creating-AutoEncoder-Features). To reproduce the results of submission 4, you will need the following command which uses features of length 30 and a framelength of 400, with the inactivty removed: 
 
 ```
 python train_AE.py --saveAEFeats -dlP '{"remove_inactivity": "True", "my_data_path": "<path-to-BeatPD-data>/cis-pd.training_data/", "my_mask_path": "<your-path-to-AE-features>/cis-pd.training_data.high_pass_mask/"}' --saveFeatDir "<your-path-to-AE-features>/AE_30ft_orig_inactivity_removed/"
 ```
+
+For an example of how to launch these on a GridEngine system, refer to `ml_dl/BeatPD_job_submit_missing.sh`. 
 
 5. This should create the following file `<your-path-to-AE-features>/<Weights>/mlp_encoder_uad_False_ld_30.h5` and the features will be saved in the directory provided with the `--saveFeatDir` flag. 
 
@@ -548,7 +550,7 @@ Overall MSE Fusion - average :  None
 
 # Data Augmentation 
 
-1. First generate the files we need. You can do so in the DataAugmentation notebook. (It is only generating training files, not for the test set given by the challenge yet, as we can't evaluate those results anyway at the moment as the labels are not public.)
+1. First generate the files we need. You can do so in the DataAugmentation notebook for the rotation, gaussian noise and resampling methods, as these uses the signal directly. (It is only generating training files, not for the test set given by the challenge yet, as we can't evaluate those results anyway at the moment as the labels are not public.) For data augmentation using linear combination, this type is done at the features level, therefore, it is not required to generate any files at this time.  
 
 2. Tsfresh needs `scp` files containing the path to each training file. These are stored in `tsfresh/submit/data/`.  
 
@@ -574,6 +576,8 @@ Overall MSE Fusion - average :  None
 ```
 qsub -l mem_free=30G,ram_free=30G -pe smp 6 -cwd -e /export/b19/mpgill/errors/errors_run_extract_features_resample_combhpfnoinact_0.9 -o /export/b19/mpgill/outputs/outputs_run_extract_features_resample_combhpfnoinact_0.9 run_extract_features_resample_combhpfnoinact_0.9.sh
 ```
+
+For linear combination, you can use it at predictions time, by adding an argument when running `python gridsearch.py`. See an example in `tsfresh/submit/run_test_folds_preds_combination_data_aug.sh`.
 
 # References 
 

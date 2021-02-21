@@ -164,6 +164,7 @@ results = []
 baselines = []
 
 preds = []
+preds_output = []
 
 # Will be a float value of the lambda if provided, otherwise None 
 lambda_value = args.linear_combination
@@ -241,9 +242,9 @@ for i in range(5):
             tr = pd.concat([tr, df_data_aug], ignore_index=True)
             print('After spk ', str(spk), ' tr shape is : ', tr.shape)
             
-    # print('obj is : ', obj)
+    print('obj is : ', obj)
     train_y = tr[obj].astype(pd.np.float32) # training labels 
-    # print('tr spcount : ', tr['spcount'])
+    print('tr spcount : ', tr['spcount'])
     train_weight = tr['spcount'] ** -0.5 # training weight
     tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
 
@@ -298,15 +299,105 @@ for i in range(5):
     
     #cnt = cnt ** 0.5
     res = pd.DataFrame(data={'measurement_id': test_measurement_id, 'subject_id': sid, obj: pred})
+    # res_output = pd.DataFrame(data={'measurement_id': test_measurement_id, 'subject_id': sid, obj: pred})
     res = pd.merge(res, avg, on='subject_id')
     res[obj] += res['sp_' + obj]
+    preds_output.append(res)
     res = res[["measurement_id", obj]]
     preds.append(res)
+    # preds_output.append(res_output)
 
     # Computes the Final Score (formula from the challenge)
     results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
     baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
 preds = pd.concat(preds)
+preds_output = pd.concat(preds_output)
+
+preds = [] 
+
+weirdthing = True
+if weirdthing is not None:
+    # 1. Start from scratch because the mean was removed from the features 
+    # Merge the features and the labels on measurement_id
+    all_features_labels = pd.merge(all_features, all_labels, on=["measurement_id"])
+    # Drop the recordings where we don't have a label for the subchallenge
+    all_features_labels = all_features_labels.dropna(subset=[obj])
+
+    # This adds the fold_id as a column 
+    all_features_labels = pd.merge(all_features_labels, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
+    print('all_features_labels.columns : ', all_features_labels.columns)
+
+    # Count the number of recordings per subject_id per fold in a column called "spcount"
+    weight = all_features_labels.groupby(['subject_id', 'fold_id']).count().reset_index()[["subject_id", "fold_id", obj]].rename(columns={obj: 'spcount'})
+    # Add the number of recordings per subject to the all_features_label DataFrame
+    all_features_labels = pd.merge(all_features_labels, weight, on=['subject_id', 'fold_id'])
+    # Get a one hot encoding of which recording belongs to which subject_id
+    subject_id = pd.get_dummies(all_features_labels.subject_id, columns='subject_id', prefix='spk_')
+    ##all_features_labels = pd.merge(all_features_labels, mean_value, on='subject_id')
+    # Concat the binary subject_id column to say which recording belongs to who 
+    all_features_labels = pd.concat([all_features_labels, subject_id], axis=1)
+
+    # Merge res_output with the order csv to make sure the order of measurements are the same 
+    preds_output = pd.merge(preds_output, pd.read_csv('data/order.csv'), how='inner', on=["measurement_id"])
+
+    for i in range(5):
+        print('--------- FOLD ', str(i), ' ----------')
+        # Filter all_features_labels to only the measurements of the current fold
+        idx = all_features_labels['fold_id'] == i
+
+        # Drop the measurements that are not from the current fold 
+        tr = all_features_labels[~idx].drop(['fold_id'], axis=1)
+        train_weight = tr['spcount'] ** -0.5 # training weight
+        print('preds_output : ', preds_output)
+        print(' preds_output columns : ', preds_output.columns)
+        tr_preds_output = preds_output[~idx].drop(['fold_id'], axis=1)
+        train_y = tr[obj].astype(pd.np.float32) #- pred # training labels + output of last model
+        
+        train_y -= tr_preds_output[obj].astype(pd.np.float32)
+        # print('New train_y after substraction : ', train_y)
+        train_weight = tr['spcount'] ** -0.5 # training weight
+        tr = tr.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+        # Drop the measurements that are used in the training of this fold, so we keep [idx] instead of [~idx]
+        te = all_features_labels[idx].drop(['fold_id'], axis=1)
+        test_weight = te['spcount'] ** -0.5 # test weight 
+        te_preds_output = preds_output[idx].drop(['fold_id'], axis=1)
+        # test weight does not change
+        test_y = te[obj].astype(pd.np.float32) #- pred # testing labels
+        test_y -= te_preds_output[obj].astype(pd.np.float32)
+        sid = te.subject_id
+        test_measurement_id = te.measurement_id
+        te = te.drop([obj, 'subject_id', 'measurement_id', 'spcount'], axis=1).astype(pd.np.float32)
+
+        # train and predict 
+        clf = xgb.XGBRegressor(**best_params)
+
+        # Fit for the xgboost 
+        clf.fit(
+            tr, train_y,
+            sample_weight=train_weight,
+            eval_set=[(tr, train_y), (te, test_y)],
+            #eval_metric=',
+            sample_weight_eval_set=[train_weight, test_weight],
+            verbose=0,
+            early_stopping_rounds=100
+        )
+        # add back the output of previous model 
+        pred_weirdthing = clf.predict(te).clip(0, 4)
+        # pred = pred_weirdthing #+ pred
+        res = pd.DataFrame(data={'measurement_id': test_measurement_id, 'subject_id': sid, obj: pred_weirdthing})
+        # Add back the pred_output we removed before
+        res[obj] += te_preds_output[obj].astype(pd.np.float32)
+        res = res[["measurement_id", obj]]
+        print('res : ', res)
+        preds.append(res)
+
+        # Computes the Final Score (formula from the challenge)
+        results.append(((mse * test_weight).sum() / test_weight.sum()).squeeze())
+        baselines.append(((mse2 * test_weight).sum() / test_weight.sum()).squeeze())
+preds = pd.concat(preds)
+
+
 pred_path = args.pred_path if args.pred_path is not None else ''
 print('Saving preds to path : ', pred_path)
 

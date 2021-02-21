@@ -7,13 +7,13 @@
 conda activate BeatPD_xgboost
 
 # create features for training and testing
-recog_set="cis-pd.training cis-pd.testing"
-nj=32
-logdir=exp
+# recog_set="cis-pd.training cis-pd.testing"
+# nj=32
+# logdir=exp
 
-mkdir $logdir
-export decode_cmd="utils/queue.pl --mem 4G"
-set -e
+# mkdir $logdir
+# export decode_cmd="utils/queue.pl --mem 4G"
+# set -e
 
 #for rtask in ${recog_set}; do
 #(
@@ -39,20 +39,26 @@ echo "Finished"
 path_labels=/home/sjoshi/codes/python/BeatPD/data/BeatPD/cis-pd.data_labels/
 path_labels_real=/home/sjoshi/codes/python/BeatPD/data/BeatPD/real-pd.data_labels/
 
+mkdir xgb_best_results
+msek_path="$(pwd)/xgb_best_results/"
+
 # run grid search
 echo "Starting Gridsearch" 
-python src/gridsearch.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv
+python src/gridsearch.py tremor --features features/cis-pd.training.csv \
+                                --labels ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv \
+                                --pred_path ${msek_path} \
+                                --filename weirdthing
 echo "End of the gridsarch"
 
 #generate submission files
-echo "Generate Submission Files is starting" 
-python src/predict.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv
+# echo "Generate Submission Files is starting" 
+# python src/predict.py tremor features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC3_Tremor_Submission_Template.csv
 
 #python src/predict.py dyskinesia features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC2_Dyskinesia_Submission_Template.csv
 
 #python src/predict.py on_off features/cis-pd.training.csv ${path_labels}/CIS-PD_Training_Data_IDs_Labels.csv features/cis-pd.testing.csv ${path_labels}/CIS-PD_Test_Data_IDs_Labels.csv data/BEAT-PD_SC1_OnOff_Submission_Template.csv
 
-echo "End of generating submission files"
+# echo "End of generating submission files"
 
 
 
