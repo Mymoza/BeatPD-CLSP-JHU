@@ -5,7 +5,7 @@ certifi==2018.8.24
 gast==0.3.2
 grpcio==1.25.0
 h5py==2.10.0
-html5lib==0.9999999
+html5lib==0.999999999
 joblib==0.14.0
 kaldi-io==0.9.3
 Keras==2.1.5
